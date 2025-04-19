@@ -545,8 +545,13 @@ function calculateSpent(ledgerId) {
 export const handlers = [
   /* ===== auth ===== */
   http.post('/auth/google', async ({ request }) => {
-    const { email } = await request.json()   // 假设前端按钮传不同 email
-    const user = users.find(u => u.email === email) || users[0]
+    const { id_token } = await request.json(); // 改成 id_token！！
+
+    console.log('Google ID Token:', id_token); // 打印 id_token
+
+    const user = users[0]; // 使用第一个用户作为示例
+    // const { email } = await request.json()   // 假设前端按钮传不同 email
+    // const user = users.find(u => u.email === email) || users[0]
     return HttpResponse.json({
         access_token: `stub-jwt-${user.id}`,  
       user,
