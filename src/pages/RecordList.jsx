@@ -6,7 +6,7 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import { useLedger } from "../store/ledger";
 
 export default function RecordList() {
-  const { currentId } = useLedger();
+  const { currentId, month } = useLedger();
   const queryClient = useQueryClient();
   const [keyword, setKeyword] = useState("");
 
@@ -15,10 +15,10 @@ export default function RecordList() {
   const [deleteId, setDeleteId] = useState(null);
 
   const { data: records = [] } = useQuery({
-    queryKey: ["records", keyword, currentId],
+    queryKey: ["records", keyword, currentId, month],
     queryFn: () =>
       axios
-        .get(`/ledgers/${currentId}/records`, { params: { keyword } })
+        .get(`/ledgers/${currentId}/records`, { params: { keyword, month } })
         .then((r) => r.data),
   });
 

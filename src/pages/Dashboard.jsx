@@ -8,11 +8,11 @@ import { useLedger } from '../store/ledger'
 // const budget = 1000 // demo，用 ledgers API 真数据时再替换
 
 export default function Dashboard() {
-    const { currentId: ledgerId, budget } = useLedger() 
+    const { currentId: ledgerId, budget, month } = useLedger() 
   // 拉所有记录
   const { data: records = [] } = useQuery({
-    queryKey: ['records-dashboard', ledgerId],
-    queryFn: () => axios.get(`/ledgers/${ledgerId}/records`).then((r) => r.data),
+    queryKey: ['records-dashboard', ledgerId, month],
+    queryFn: () => axios.get(`/ledgers/${ledgerId}/records`, { params: { month } }).then((r) => r.data),
     enabled: !!ledgerId, // 只有在有 ledgerId 时才拉数据
   })
 

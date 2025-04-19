@@ -52,10 +52,28 @@ let records = [
     ledger_id: demoLedgerId,
     amount: 30,
     category: "Groceries",
-    date: "2025-04-15",
+    date: "2025-03-15",
     status: "incomplete",
     description: "",
   },
+    {
+        id: nanoid(),
+        ledger_id: demoLedgerId,
+        amount: 100,
+        category: "Entertainment",
+        date: "2025-02-20",
+        status: "confirmed",
+        description: "Concert",
+    },
+    {
+        id: nanoid(),
+        ledger_id: demoLedgerId,
+        amount: 200,
+        category: "Travel",
+        date: "2025-01-10",
+        status: "confirmed",
+        description: "Flight to Paris",
+    },
 ];
 
 let ledgers = [
@@ -101,16 +119,15 @@ http.post('/categories', async ({ request }) => {
 
   /* ===== records ===== */
   // 获取账本下的所有记录（支持 keyword 筛选）
-  http.get("/ledgers/:id/records", ({ params, request }) => {
-    const url = new URL(request.url);
-    const keyword = url.searchParams.get("keyword") || "";
-    const filtered = records.filter(
-      (r) =>
-        r.ledger_id === params.id &&
-        (r.description || '').toLowerCase().includes((keyword || '').toLowerCase())
-
-    );
-    return HttpResponse.json(filtered);
+  http.get('/ledgers/:id/records', ({ params, request }) => {
+    const url  = new URL(request.url)
+    const month = url.searchParams.get('month') // '2025-05'
+    const data  = records.filter(r => {
+      if (r.ledger_id !== params.id) return false
+      if (!month) return true
+      return r.date.startsWith(month)          // ISO 'YYYY-MM-DD'
+    })
+    return HttpResponse.json(data)
   }),
 
   // 添加记录
@@ -152,10 +169,18 @@ http.post('/categories', async ({ request }) => {
   }),
 
   // 修改账本预算
-  http.patch("/ledgers/:id/budget", async ({ params, request }) => {
-    const { budget } = await request.json();
-    ledgers = ledgers.map((l) => (l._id === params.id ? { ...l, budget } : l));
-    return HttpResponse.json({ ok: true });
+// PATCH /ledgers/:id/budget  结构变更
+/*
+payload: { month:'2025-05', budget:1200 }
+*/
+http.patch('/ledgers/:id/budget', async ({ params, request }) => {
+    const { month, budget } = await request.json()
+    ledgers = ledgers.map(l =>
+      l._id === params.id
+        ? { ...l, budgets: { ...l.budgets, [month]: budget } }
+        : l
+    )
+    return HttpResponse.json({ ok:true })
   }),
 
   // 添加协作者
@@ -210,4 +235,6 @@ http.post('/categories', async ({ request }) => {
       ],
     })
   ),
+
+
 ];

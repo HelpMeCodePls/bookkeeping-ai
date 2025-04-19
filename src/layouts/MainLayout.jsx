@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../store/auth";
 import ChatbotDrawer from "../components/ChatbotDrawer";
 import LedgerSelector from "../components/LedgerSelector";
+import MonthSelector from "../components/MonthSelector"; 
 
 const menu = [
   { path: "/dashboard", label: "Dashboard", icon: <Home size={18} /> },
@@ -74,7 +75,11 @@ export default function MainLayout() {
       <div className="flex-1 flex flex-col">
         {/* header */}
         <header className="h-14 flex items-center justify-between px-6 border-b">
-          <LedgerSelector />
+          {/* 🧩 改这里：左侧 Ledger 和 Month 并排 */}
+          <div className="flex items-center gap-4">
+            <LedgerSelector />
+            <MonthSelector />
+          </div>
           {/* 将来放右上角设置按钮等 */}
         </header>
 
