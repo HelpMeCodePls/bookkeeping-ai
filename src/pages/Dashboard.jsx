@@ -4,77 +4,139 @@ import axios from 'axios'
 import { motion } from 'framer-motion'
 import { useLedger } from '../store/ledger' 
 
-// const ledgerId = 'demoLedger'
-// const budget = 1000 // demo，用 ledgers API 真数据时再替换
-
 export default function Dashboard() {
-    const { currentId: ledgerId, budget, month } = useLedger() 
-  // 拉所有记录
-  const { data: records = [] } = useQuery({
-    queryKey: ['records-dashboard', ledgerId, month],
-    queryFn: () => axios.get(`/ledgers/${ledgerId}/records`, { params: { month } }).then((r) => r.data),
-    enabled: !!ledgerId, // 只有在有 ledgerId 时才拉数据
-  })
+  const { currentId: ledgerId, month: selectedMonth } = useLedger();
+  
+  // 使用 ledger 数据（含 budgets 和 spent）
+  const { data: ledger } = useQuery({
+    queryKey: ['ledgers', ledgerId],
+    queryFn: () => axios.get(`/ledgers/${ledgerId}`).then(r => r.data),
+    enabled: !!ledgerId,
+  });
 
-  const spent = records.reduce((s, r) => s + Number(r.amount || 0), 0)
-  const rest  = budget - spent
+  // 获取所有记录用于分类支出计算
+  const { data: records = [] } = useQuery({
+    queryKey: ['records-dashboard', ledgerId, selectedMonth],
+    queryFn: () => axios.get(`/ledgers/${ledgerId}/records`, { 
+      params: { month: selectedMonth } 
+    }).then(r => r.data),
+    enabled: !!ledgerId,
+  });
+
+  // 从 ledger 中获取预算和支出
+  const currentMonthBudget = ledger?.budgets?.months?.[selectedMonth] ?? ledger?.budgets?.default ?? 0;
+  const currentMonthSpent = ledger?.spent?.[selectedMonth] ?? 0;
+  const rest = currentMonthBudget - currentMonthSpent;
+
+  // 计算分类支出
+  const categorySpending = records
+    .filter(r => r.status === 'confirmed')
+    .reduce((acc, r) => {
+      acc[r.category] = (acc[r.category] || 0) + Number(r.amount || 0);
+      return acc;
+    }, {});
 
   const fadeUp = {
     initial: { opacity: 0, y: 12 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.25 },
-  }
+  };
 
-return (
+  return (
     <motion.div
-        className="p-6 grid grid-cols-3 gap-6"
-        initial={fadeUp.initial}
-        animate={fadeUp.animate}
-        transition={fadeUp.transition}
+      className="p-6 grid gap-6"
+      initial={fadeUp.initial}
+      animate={fadeUp.animate}
+      transition={fadeUp.transition}
     >
+      {/* 顶部三栏卡片 */}
+      <div className="grid grid-cols-3 gap-6">
         {/* 总支出卡片 */}
         <motion.div
-            className="bg-white shadow rounded-xl p-4"
-            initial={fadeUp.initial}
-            animate={fadeUp.animate}
-            transition={fadeUp.transition}
+          className="bg-white shadow rounded-xl p-4"
+          initial={fadeUp.initial}
+          animate={fadeUp.animate}
+          transition={fadeUp.transition}
         >
-            <h3 className="text-gray-500 text-sm">Total Spent</h3>
-            <p className="text-2xl font-semibold mt-1">${spent.toFixed(2)}</p>
+          <h3 className="text-gray-500 text-sm">Total Spent</h3>
+          <p className="text-2xl font-semibold mt-1">${currentMonthSpent.toFixed(2)}</p>
         </motion.div>
 
         {/* 剩余额度 */}
         <motion.div
-            className="bg-white shadow rounded-xl p-4"
-            initial={fadeUp.initial}
-            animate={fadeUp.animate}
-            transition={fadeUp.transition}
+          className="bg-white shadow rounded-xl p-4"
+          initial={fadeUp.initial}
+          animate={fadeUp.animate}
+          transition={fadeUp.transition}
         >
-            <h3 className="text-gray-500 text-sm">Budget Left</h3>
-            <p className={`text-2xl font-semibold mt-1 ${rest < 0 ? 'text-red-600' : ''}`}>
-                ${rest.toFixed(2)}
-            </p>
+          <h3 className="text-gray-500 text-sm">Budget Left</h3>
+          <p className={`text-2xl font-semibold mt-1 ${rest < 0 ? 'text-red-600' : ''}`}>
+            ${rest.toFixed(2)}
+          </p>
         </motion.div>
 
-        {/* 预算条 */}
+        {/* 当月预算 */}
         <motion.div
-            className="col-span-3 bg-white shadow rounded-xl p-4"
-            initial={fadeUp.initial}
-            animate={fadeUp.animate}
-            transition={fadeUp.transition}
+          className="bg-white shadow rounded-xl p-4"
+          initial={fadeUp.initial}
+          animate={fadeUp.animate}
+          transition={fadeUp.transition}
         >
-            <h3 className="text-gray-500 text-sm mb-2">Monthly Budget Progress</h3>
-            <div className="w-full h-4 bg-gray-200 rounded">
-                <div
-                    style={{ width: `${Math.min(spent / budget, 1) * 100}%` }}
-                    className={`h-full rounded ${spent > budget ? 'bg-red-500' : 'bg-blue-600'}`}
-                />
-            </div>
-            {spent > budget && (
-                <p className="mt-2 text-sm text-red-600">
-                    ⚠️ Budget exceeded by ${(spent - budget).toFixed(2)}
-                </p>
-            )}
+          <h3 className="text-gray-500 text-sm">Monthly Budget</h3>
+          <p className="text-2xl font-semibold mt-1">${currentMonthBudget.toFixed(2)}</p>
         </motion.div>
+      </div>
+
+      {/* 总预算进度条 */}
+      <motion.div
+        className="bg-white shadow rounded-xl p-4"
+        initial={fadeUp.initial}
+        animate={fadeUp.animate}
+        transition={fadeUp.transition}
+      >
+        <h3 className="text-gray-500 text-sm mb-2">Monthly Budget Progress</h3>
+        <div className="w-full h-4 bg-gray-200 rounded">
+          <div
+            style={{ width: `${Math.min(currentMonthSpent / currentMonthBudget, 1) * 100}%` }}
+            className={`h-full rounded ${currentMonthSpent > currentMonthBudget ? 'bg-red-500' : 'bg-blue-600'}`}
+          />
+        </div>
+        {currentMonthSpent > currentMonthBudget && (
+          <p className="mt-2 text-sm text-red-600">
+            ⚠️ Budget exceeded by ${(currentMonthSpent - currentMonthBudget).toFixed(2)}
+          </p>
+        )}
+      </motion.div>
+
+      {/* 分类预算进度条 */}
+      <motion.div
+        className="bg-white shadow rounded-xl p-4 space-y-4"
+        initial={fadeUp.initial}
+        animate={fadeUp.animate}
+        transition={fadeUp.transition}
+      >
+        <h3 className="text-gray-500 text-sm">Category Budgets</h3>
+        {ledger?.budgets?.categoryBudgets?.[selectedMonth] && Object.entries(ledger.budgets.categoryBudgets[selectedMonth]).map(([category, budget]) => (
+          <div key={category} className="space-y-1">
+            <div className="flex justify-between text-sm">
+              <span className="font-medium">{category}</span>
+              <span>
+                ${(categorySpending[category] || 0).toFixed(2)} / ${budget.toFixed(2)}
+              </span>
+            </div>
+            <div className="w-full h-2 bg-gray-200 rounded">
+              <div
+                style={{
+                  width: `${Math.min((categorySpending[category] || 0) / budget * 100, 100)}%`
+                }}
+                className={`h-full rounded ${
+                  (categorySpending[category] || 0) > budget ? 'bg-red-500' : 'bg-green-500'
+                }`}
+              />
+            </div>
+          </div>
+        ))}
+      </motion.div>
     </motion.div>
-)}
+  );
+}

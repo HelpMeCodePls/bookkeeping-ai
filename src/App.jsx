@@ -9,6 +9,8 @@ import ChartsPage from './pages/ChartsPage'
 import LedgerManager from './pages/LedgerManager'
 import MainLayout from './layouts/MainLayout'
 import AlertsPage from './pages/AlertsPage'
+import AnalysisPage from './pages/AnalysisPage'
+import BudgetPage from './pages/BudgetPage'
 
 export default function App() {
   const token = useAuthStore((s) => s.token)
@@ -25,6 +27,8 @@ export default function App() {
         <Route path="/charts" element={<ChartsPage />} />
         <Route path="/books" element={<LedgerManager />} />
         <Route path="/alerts" element={<AlertsPage />} />
+        <Route path="/analysis" element={<AnalysisPage />} />
+        <Route path="/budget" element={<BudgetPage />} />
         {/* 404 页面 */}
         <Route path="/404" element={<div>404 Not Found</div>} />
         {/* 重定向到 Dashboard */}

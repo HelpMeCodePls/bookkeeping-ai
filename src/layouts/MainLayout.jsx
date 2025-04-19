@@ -8,6 +8,7 @@ import {
   PieChart,
   Book,
   Bell,
+  PiggyBank
 } from "lucide-react"; // ← 加 Bell
 import axios from "axios"; // ← 缺失的导入
 import { useQuery } from "@tanstack/react-query";
@@ -25,9 +26,11 @@ const menu = [
     label: "Incomplete",
     icon: <AlertTriangle size={18} />,
   },
-  { path: "/charts", label: "Charts", icon: <PieChart size={18} /> },
+//   { path: "/charts", label: "Charts", icon: <PieChart size={18} /> },
   { path: "/books", label: "Ledgers", icon: <Book size={18} /> },
   { path: "/alerts", label: "Alerts", icon: <Bell size={18} /> },
+  { path: "/analysis", label: "Analysis", icon: <PieChart size={18} /> },
+  { path: "/budget", label: "Budget", icon: <PiggyBank size={18} /> },
 ];
 
 export default function MainLayout() {
