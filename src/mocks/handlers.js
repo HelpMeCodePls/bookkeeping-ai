@@ -495,7 +495,8 @@ let notes = [
       ledgerId: 'demoLedger',
       metadata: {
         permission: 'EDITOR'
-      }
+      },
+      user_id: 'user1'
     },
     {
       id: nanoid(),
@@ -504,7 +505,8 @@ let notes = [
       is_read: false,
       created_at: Date.now() - 3600000,
       ledgerId: 'demoLedger',
-      recordId: records[0].id
+      recordId: records[0].id,
+      user_id: 'user1'
     },
     {
       id: nanoid(),
@@ -517,7 +519,8 @@ let notes = [
         category: 'Food',
         amount: 550,
         budget: 500
-      }
+      },
+      user_id: 'user2'
     }
   ];
 
@@ -604,12 +607,14 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
     // 添加新账单成功后，直接加通知
 notes.unshift({
     id: nanoid(),
+    // user_id: demoUserId, [TODO 后期要改成通知所有有权限的人！]
     type: 'record',
     content: `New record "${newRec.description || 'Unnamed'}" added`,
     is_read: false,
     created_at: Date.now(),
     ledgerId: params.id,
-    recordId: newRec.id
+    recordId: newRec.id,
+    // user_id: 
   });
 
   
@@ -806,9 +811,14 @@ http.get("/notifications", ({ request }) => {
 
   // 新增一条通知
   http.post("/notifications", async ({ request }) => {
+    const url = new URL(request.url);
+    const token = url.searchParams.get('token');
+    const myId = token?.replace('stub-jwt-', '') || demoUserId;  // 解析真实id！
+
     const body = await request.json();
     const newNote = {
       id: nanoid(),
+        user_id: myId,  // 这里可以用 token 解析出来的 id
       ...body,
       is_read: false,
       created_at: Date.now(),
@@ -934,6 +944,7 @@ http.get("/notifications", ({ request }) => {
         // 直接创建一条新通知
         notes.unshift({
           id: nanoid(),
+            user_id: user.id, // 对吗？
           type: 'collaboration',
           content: `You were added to ledger "${ledger.name}" as ${permission.toLowerCase()}`,
           is_read: false,
@@ -961,6 +972,7 @@ http.get("/notifications", ({ request }) => {
 
       notes.unshift({
         id: nanoid(),
+        user_id: params.userId, // 对吗？
         type: 'collaboration',
         content: `You were removed from ledger "${ledger.name}"`,
         is_read: false,
