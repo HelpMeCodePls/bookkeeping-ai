@@ -20,6 +20,12 @@ export default function RecordList() {
     split: "" 
   });
 
+  // 添加用户查询
+  const { data: users = [] } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => axios.get('/users').then(r => r.data),
+  });
+
   // 获取记录数据（带筛选）
   const { data: records = [] } = useQuery({
     queryKey: ["records", keyword, currentId, month, filters],
@@ -134,8 +140,13 @@ export default function RecordList() {
                         <div className="font-medium">
                           {r.description || "(No Description)"}
                         </div>
-                        <div className="text-sm text-gray-500 mt-1">
-                          {category?.label || r.category}
+                        <div className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                            <span>{category?.label || r.category}</span>
+                            {r.createdBy && (
+                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+                                {users.find(u => u.id === r.createdBy)?.name || 'Unknown'}
+                            </span>
+                            )}
                         </div>
                       </div>
 

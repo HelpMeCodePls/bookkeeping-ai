@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 
 export default function BudgetPage() {
   const { currentId, month: currentMonth } = useLedger();
-  const qc = useQueryClient();
+  const queryClient = useQueryClient();
 
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const [editMonthBudget, setEditMonthBudget] = useState('');
@@ -27,13 +27,46 @@ const { data: ledger } = useQuery({
     queryFn: () => axios.get('/categories').then(r => r.data),
   });
 
-  
+  // 添加预算检查函数
+const checkBudget = async (month) => {
+    try {
+      const { data: summary } = await axios.get('/charts/summary', {
+        params: { 
+          ledgerId: currentId, 
+          mode: 'month', 
+          selectedDate: month 
+        }
+      });
+      
+      const catBudgets = ledger.budgets?.categoryBudgets?.[month] || {};
+      const defaultCatBudgets = ledger.budgets?.categoryDefaults || {};
+      
+      Object.entries(summary.byCategory).forEach(async ([category, amount]) => {
+        const budget = catBudgets[category] || defaultCatBudgets[category];
+        if (budget && amount > budget) {
+          await axios.post('/notifications', {
+            type: 'budget',
+            content: `Budget exceeded in ${category} (${amount.toFixed(2)} > ${budget.toFixed(2)})`,
+            ledgerId: currentId,
+            metadata: {
+              category,
+              amount,
+              budget
+            }
+          });
+          queryClient.invalidateQueries(['notifications']);
+        }
+      });
+    } catch (error) {
+      console.error('Budget check failed:', error);
+    }
+  };
 
   const save = useMutation({
     mutationFn: (payload) => axios.patch(`/ledgers/${currentId}/budgets`, payload),
     onSuccess: (_, payload) => {
       // 手动更新本地数据，避免重新获取
-      qc.setQueryData(['ledgers', currentId], (oldData) => {
+      queryClient.setQueryData(['ledgers', currentId], (oldData) => {
         if (!oldData) return oldData;
         
         const updatedData = { ...oldData };
@@ -70,8 +103,13 @@ const { data: ledger } = useQuery({
       
       setShowSaved(true);
       setTimeout(() => setShowSaved(false), 2000);
+    // 添加预算检查
+    if (!payload.category) { // 只在月预算变更时检查
+        checkBudget(payload.month || selectedMonth);
+      }
     },
   });
+  
 
   useEffect(() => {
     setEditMonthBudget('');

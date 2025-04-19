@@ -481,14 +481,42 @@ let ledgers = [
     },
   ];
 
+// 更新 notes 数据
 let notes = [
-  {
-    id: nanoid(),
-    content: "Partner added a record",
-    is_read: false,
-    created_at: Date.now(),
-  },
-];
+    {
+      id: nanoid(),
+      type: 'collaboration', // collaboration/record/budget
+      content: "You have been added to ledger 'Family Budget' as editor",
+      is_read: false,
+      created_at: Date.now(),
+      ledgerId: 'demoLedger',
+      metadata: {
+        permission: 'EDITOR'
+      }
+    },
+    {
+      id: nanoid(),
+      type: 'record',
+      content: "Alice modified record 'Grocery shopping' in 'Family Budget'",
+      is_read: false,
+      created_at: Date.now() - 3600000,
+      ledgerId: 'demoLedger',
+      recordId: records[0].id
+    },
+    {
+      id: nanoid(),
+      type: 'budget',
+      content: "Monthly budget exceeded in 'Food' category",
+      is_read: true,
+      created_at: Date.now() - 86400000,
+      ledgerId: 'demoLedger',
+      metadata: {
+        category: 'Food',
+        amount: 550,
+        budget: 500
+      }
+    }
+  ];
 
 
 /* ===== 辅助函数 ===== */

@@ -13,21 +13,43 @@ export default function EditRecordModal({ open, onClose, record = {}, isNew = fa
   const qc = useQueryClient();
   const { currentId: ledgerId } = useLedger();
 
-  const handleSave = async (data) => {
+  const { data: permission } = usePermission(record?.ledger_id);
+
+  const isReadOnly = permission?.permission === 'VIEWER';
+
+const handleSave = async (data) => {
+  try {
     if (onSubmit) {
       await onSubmit(data);
     } else {
       if (isNew) {
         await axios.post(`/ledgers/${ledgerId}/records`, data);
+        // 添加创建记录通知
+        await axios.post('/notifications', {
+          type: 'record',
+          content: `You created a new record: ${data.description || 'No description'}`,
+          ledgerId,
+          recordId: data.id
+        });
       } else {
         await axios.put(`/records/${record.id}`, data);
+        // 添加修改记录通知
+        await axios.post('/notifications', {
+          type: 'record',
+          content: `You updated record: ${data.description || record.description || 'No description'}`,
+          ledgerId,
+          recordId: record.id
+        });
       }
     }
     qc.invalidateQueries(['records']);
     qc.invalidateQueries(['incomplete']);
+    qc.invalidateQueries(['notifications']); // 刷新通知
     onClose();
-  };
-
+  } catch (error) {
+    console.error('Error saving record:', error);
+  }
+};
   React.useEffect(() => {
     reset(record);
   }, [record, reset]);
