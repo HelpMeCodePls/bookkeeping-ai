@@ -543,21 +543,37 @@ function calculateSpent(ledgerId) {
 
 /* ===== handlers 开始 ===== */
 export const handlers = [
+
+// 一下是谷歌登录的 stub 代码，暂时不需要！
   /* ===== auth ===== */
-  http.post('/auth/google', async ({ request }) => {
-    const { id_token } = await request.json(); // 改成 id_token！！
+//   http.post('/auth/google', async ({ request }) => {
+//     const { id_token } = await request.json(); // 改成 id_token！！
 
-    console.log('Google ID Token:', id_token); // 打印 id_token
+//     console.log('Google ID Token:', id_token); // 打印 id_token
 
-    const user = users[0]; // 使用第一个用户作为示例
-    // const { email } = await request.json()   // 假设前端按钮传不同 email
-    // const user = users.find(u => u.email === email) || users[0]
+//     const user = users[0]; // 使用第一个用户作为示例
+//     // const { email } = await request.json()   // 假设前端按钮传不同 email
+//     // const user = users.find(u => u.email === email) || users[0]
+//     return HttpResponse.json({
+//         access_token: `stub-jwt-${user.id}`,  
+//       user,
+//     })
+//   }),
+
+http.post('/auth/login', async ({ request }) => {
+    const { email } = await request.json()
+    const user = users.find(u => u.email === email)
+    
+    if (!user) {
+      return HttpResponse.error('User not found', { status: 404 })
+    }
+  
     return HttpResponse.json({
-        access_token: `stub-jwt-${user.id}`,  
+      access_token: `stub-jwt-${user.id}`,  
       user,
     })
   }),
-
+  
   /* ===== categories ===== */
   http.get("/categories", () => HttpResponse.json(categories)),
   
