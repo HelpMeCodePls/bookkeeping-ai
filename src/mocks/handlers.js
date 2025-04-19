@@ -778,35 +778,34 @@ notes.unshift({
 
 // 获取所有通知，按时间倒序（最新在上）
 http.get("/notifications", ({ request }) => {
-    const url = new URL(request.url)
-    const userId = url.searchParams.get('user_id')
-    const projectId = url.searchParams.get('project_id')
-    const token = url.searchParams.get('token')
+    const url = new URL(request.url);
+    const token = url.searchParams.get('token') || '';
+    const myId = token.replace('stub-jwt-', '') || demoUserId;
   
-    console.log('收到 user_id:', userId, 'project_id:', projectId)
+    const userNotes = notes
+      .filter(n => n.user_id === myId)   // ⭐ 确保只返回自己的notes
+      .sort((a, b) => b.created_at - a.created_at);
   
-    return HttpResponse.json(
-      notes
-        .sort((a, b) => b.created_at - a.created_at)
-    )
+    return new HttpResponse(
+      JSON.stringify(userNotes),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
   }),
+  
   
   // 获取未读通知数量
   http.get("/notifications/unread_count", ({ request }) => {
-    const url = new URL(request.url)
-    const userId = url.searchParams.get('user_id')
-    const projectId = url.searchParams.get('project_id')
-    const token = url.searchParams.get('token')
+    const url = new URL(request.url);
+    const token = url.searchParams.get('token') || '';
+    const myId = token.replace('stub-jwt-', '') || demoUserId;
   
-    console.log('收到 user_id:', userId, 'project_id:', projectId)
+    const count = notes.filter(n => !n.is_read && n.user_id === myId).length;
   
-    // 这里其实可以用 userId 和 projectId 来筛选 notes
-    // 但因为我们 mock 的 notes 没有真正记录 userId 和 projectId
-    // 所以，简单返回所有未读数就可以了
-    return HttpResponse.json({
-      count: notes.filter(n => !n.is_read).length,
-    })
-  }),
+    return new HttpResponse(
+      JSON.stringify({ count }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  }),  
   
 
   // 新增一条通知

@@ -64,60 +64,65 @@ export default function AlertsPage() {
 //     return () => socketService.off('notification', handleNotification)
 //   }, [queryClient])
   
-  // 查询通知（15秒轮询一次）
-  const { data: notifications = [] } = useQuery({
+// 查询通知（15秒轮询一次）
+const { data: notificationsResponse } = useQuery({
     queryKey: ['notifications'],
-    queryFn: () => axios.get('/notifications', { params: { token } }).then(r => r.data),
+    queryFn: async () => {
+      try {
+        const res = await axios.get('/notifications', { params: { token } })
+        // 确保返回数组格式
+        if (Array.isArray(res.data)) {
+          return res.data
+        } else if (Array.isArray(res.data?.data)) {
+          return res.data.data
+        }
+        return [] // 默认返回空数组
+      } catch (e) {
+        console.error('Failed to fetch notifications', e)
+        return []
+      }
+    },
     refetchInterval: 15000,
     enabled: !!token,
   })
-
+  
+  // 确保 notifications 是数组
+  const notifications = Array.isArray(notificationsResponse) ? notificationsResponse : []
+  
   // 查询未读数（30秒轮询一次）
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ['notifications', 'unread'],
     queryFn: async () => {
-        try {
-          const res = await axios.get('/notifications/unread_count', { params: { token } })
-          return res.data?.count ?? 0; // 如果 undefined 就返回 0
-        } catch (e) {
-          console.error('Failed to fetch unread count', e);
-          return 0;
-        }
-      },
+      try {
+        const res = await axios.get('/notifications/unread_count', { params: { token } })
+        // 确保返回数字
+        return Number(res.data?.count) || 0
+      } catch (e) {
+        console.error('Failed to fetch unread count', e)
+        return 0
+      }
+    },
     refetchInterval: 30000,
     enabled: !!token,
-  }) 
-
-//   const { data: notifications = [] } = useQuery({
-//     queryKey: ['notifications'],
-//     queryFn: () => axios.get('/notifications').then(r => r.data)
-//   });
-
-  // 标记为已读
-  const markAsRead = useMutation({
-    mutationFn: (id) => axios.patch(`/notifications/${id}`, null, { params: { token } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['notifications'])
-      queryClient.invalidateQueries(['notifications', 'unread'])
-    }
   })
-
+  
   // 过滤通知
   const filteredNotifications = notifications.filter(n => {
-    if (filter === 'unread') return !n.is_read;
-    if (filter === 'read') return n.is_read;
-    return true;
-  });
+    if (filter === 'unread') return !n.is_read
+    if (filter === 'read') return n.is_read
+    return true // 'all'
+  })
+  
 
-    // 请求通知权限（保留原有功能）
-    const requestNotificationPermission = () => {
-        if (Notification.permission !== 'granted' && 
-            Notification.permission !== 'denied') {
-          Notification.requestPermission().then(permission => {
-            console.log('Notification permission:', permission)
-          })
-        }
-      }
+    // // 请求通知权限（保留原有功能）
+    // const requestNotificationPermission = () => {
+    //     if (Notification.permission !== 'granted' && 
+    //         Notification.permission !== 'denied') {
+    //       Notification.requestPermission().then(permission => {
+    //         console.log('Notification permission:', permission)
+    //       })
+    //     }
+    //   }
     
   // 未读计数
 //   const unreadCount = notifications.filter(n => !n.is_read).length;
