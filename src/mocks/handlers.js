@@ -1022,22 +1022,23 @@ http.get('/ledgers/:id/permission', ({ params, request }) => {
 
     // handlers.js
     http.get('/ledgers', ({ request }) => {
-        const token = new URL(request.url).searchParams.get('token') || ''
-        const myId  = token.replace('stub-jwt-','') || demoUserId
-          return HttpResponse.json(
-                ledgers
-                  .filter(l =>
-                    l.owner === myId || l.collaborators.some(c => c.userId === myId)
-                  )
-                  .map(l => ({
-                    ...l,
-                    collaborators: l.collaborators.map(c => ({
-                      ...c,
-                      name: users.find(u => u.id === c.userId)?.name || c.email,
-                      avatar: users.find(u => u.id === c.userId)?.avatar || '👤'
-                    }))
-                  }))
-              )
+        const url = new URL(request.url);
+        const token = url.searchParams.get('token') || '';
+        const myId = token.replace('stub-jwt-', '') || demoUserId;
+    
+        const userLedgers = ledgers
+          .filter(l => l.owner === myId || l.collaborators.some(c => c.userId === myId))
+          .map(l => ({
+            ...l,
+            collaborators: l.collaborators.map(c => ({
+              ...c,
+              name: users.find(u => u.id === c.userId)?.name || c.email,
+              avatar: users.find(u => u.id === c.userId)?.avatar || '👤',
+            })),
+          }));
+    
+        // 👉这里加保险，不管怎样都返回数组
+        return HttpResponse.json(Array.isArray(userLedgers) ? userLedgers : []);
       }),
 
       http.post('/ledgers', async ({ request }) => {

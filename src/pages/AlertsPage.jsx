@@ -75,7 +75,15 @@ export default function AlertsPage() {
   // 查询未读数（30秒轮询一次）
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ['notifications', 'unread'],
-    queryFn: () => axios.get('/notifications/unread_count', { params: { token } }).then(r => r.data.count),
+    queryFn: async () => {
+        try {
+          const res = await axios.get('/notifications/unread_count', { params: { token } })
+          return res.data?.count ?? 0; // 如果 undefined 就返回 0
+        } catch (e) {
+          console.error('Failed to fetch unread count', e);
+          return 0;
+        }
+      },
     refetchInterval: 30000,
     enabled: !!token,
   }) 

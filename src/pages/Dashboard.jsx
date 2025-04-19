@@ -16,13 +16,33 @@ export default function Dashboard() {
   });
 
   // 获取所有记录用于分类支出计算
-  const { data: records = [] } = useQuery({
+  const { data: recordsResponse = [] } = useQuery({
     queryKey: ['records-dashboard', ledgerId, selectedMonth],
-    queryFn: () => axios.get(`/ledgers/${ledgerId}/records`, { 
-        params: { month: selectedMonth, token } 
-    }).then(r => r.data),
-    enabled: !!ledgerId,
-  });
+    queryFn: async () => {
+      try {
+        const res = await axios.get(`/ledgers/${ledgerId}/records`, { 
+          params: { month: selectedMonth, token } 
+        })
+        // 处理可能的响应格式
+        if (Array.isArray(res.data)) {
+          return res.data
+        } else if (Array.isArray(res.data?.data)) {
+          return res.data.data
+        } else if (Array.isArray(res.data?.records)) {
+          return res.data.records
+        }
+        return []
+      } catch (e) {
+        console.error('Failed to fetch records', e)
+        return []
+      }
+    },
+    enabled: !!ledgerId && !!token,
+  })
+
+    // 确保 records 是数组
+    const records = Array.isArray(recordsResponse) ? recordsResponse : []
+
 
   // 从 ledger 中获取预算和支出
   const currentMonthBudget = ledger?.budgets?.months?.[selectedMonth] ?? ledger?.budgets?.default ?? 0;

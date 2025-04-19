@@ -8,13 +8,34 @@ import { useAuthStore } from '../store/auth'
 export default function LedgerSelector() {
   const { currentId, setId } = useLedger()
   const token = useAuthStore((s) => s.token)
-  const { data: ledgers = [] } = useQuery({
+  // 确保数据始终是数组格式
+  const { data: ledgersResponse = [] } = useQuery({
     queryKey: ['ledgers', token],
-    queryFn : () => axios.get('/ledgers', { params: { token } }).then(r => r.data ?? []),
+    queryFn: async () => {
+      try {
+        const res = await axios.get('/ledgers', { params: { token } })
+        // 处理可能的响应格式
+        if (Array.isArray(res.data)) {
+          return res.data
+        } else if (Array.isArray(res.data?.data)) {
+          return res.data.data
+        } else if (Array.isArray(res.data?.ledgers)) {
+          return res.data.ledgers
+        }
+        return []
+      } catch (e) {
+        console.error('Failed to fetch ledgers', e)
+        return []
+      }
+    },
     enabled: !!token,
   })
-  const current = ledgers.find(l => l._id === currentId) || { name:'Ledger' }
+
+  // 确保 ledgers 是数组
+  const ledgers = Array.isArray(ledgersResponse) ? ledgersResponse : []
+  const current = ledgers.find(l => l._id === currentId) || { name: 'Ledger' }
   const [open, setOpen] = useState(false)
+
 
   return (
     <div className="relative">
