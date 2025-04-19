@@ -5,15 +5,17 @@ dayjs.extend(relativeTime);
 import { useLedger } from '../store/ledger';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
+import { useEffect, useState, useCallback } from 'react'
 
 export default function NotificationItem({ notification }) {
-  const { setId: setLedgerId } = useLedger();
-  const queryClient = useQueryClient();
-
-  const markAsRead = useMutation({
-    mutationFn: () => axios.patch(`/notifications/${notification.id}`),
-    onSuccess: () => queryClient.invalidateQueries(['notifications'])
-  });
+    const { setId: setLedgerId } = useLedger()
+    const queryClient = useQueryClient()
+    const [isHovered, setIsHovered] = useState(false)
+  
+    const markAsRead = useMutation({
+      mutationFn: () => axios.patch(`/notifications/${notification.id}`),
+      onSuccess: () => queryClient.invalidateQueries(['notifications'])
+    })
 
   const handleClick = () => {
     if (!notification.is_read) {
@@ -25,6 +27,19 @@ export default function NotificationItem({ notification }) {
       setLedgerId(notification.ledgerId);
     }
   };
+
+  
+  const handleMarkAsRead = useCallback(() => {
+    markAsRead.mutate()
+  }, [markAsRead])
+  
+  useEffect(() => {
+    let timer
+    if (isHovered && !notification.is_read) {
+      timer = setTimeout(handleMarkAsRead, 2000)
+    }
+    return () => clearTimeout(timer)
+  }, [isHovered, notification.is_read, handleMarkAsRead])
 
   const getIcon = () => {
     switch (notification.type) {

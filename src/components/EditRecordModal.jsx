@@ -7,6 +7,7 @@ import CalculatorPopover from '../components/CalculatorPopover'; // ✅ 已有
 // import CategorySelect from '../components/CategorySelect'; // ✅ 新增导入
 import CategoryPopover from './CategoryPopover';
 import { useLedger } from '../store/ledger'; 
+import  usePermission from '../hooks/usePermission'; // ✅ 新增导入
 
 export default function EditRecordModal({ open, onClose, record = {}, isNew = false, onSubmit }) {
   const { register, handleSubmit, reset, setValue, watch } = useForm({ defaultValues: record });
@@ -16,6 +17,11 @@ export default function EditRecordModal({ open, onClose, record = {}, isNew = fa
   const { data: permission } = usePermission(record?.ledger_id);
 
   const isReadOnly = permission?.permission === 'VIEWER';
+
+  // 在 EditRecordModal 中添加调试
+console.log('Current permission:', permission);
+console.log('Record ledger_id:', record?.ledger_id);
+console.log('Current ledgerId:', ledgerId);
 
 const handleSave = async (data) => {
   try {
@@ -112,9 +118,11 @@ const handleSave = async (data) => {
                 >
                   Cancel
                 </button>
-                <button className="btn-primary" type="submit">
-                  Save
-                </button>
+                {!isReadOnly && (
+                  <button className="btn-primary" type="submit">
+                    Save
+                  </button>
+                )}
               </div>
             </form>
           </motion.div>

@@ -6,10 +6,12 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import FilterDrawer from "../components/FilterDrawer";
 import dayjs from "dayjs";
 import { useLedger } from "../store/ledger";
+import { useAuthStore } from '../store/auth'; // 加上
 
 export default function RecordList() {
   const { currentId, month } = useLedger();
   const queryClient = useQueryClient();
+  const token = useAuthStore(s => s.token);
 
   const [keyword, setKeyword] = useState("");
   const [editRec, setEditRec] = useState(null);
@@ -22,28 +24,32 @@ export default function RecordList() {
 
   // 添加用户查询
   const { data: users = [] } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => axios.get('/users').then(r => r.data),
+    queryKey: ['users', token],
+    queryFn: () => axios.get('/users', { params: { token } }).then(r => r.data),
+    enabled: !!token,
   });
 
   // 获取记录数据（带筛选）
   const { data: records = [] } = useQuery({
-    queryKey: ["records", keyword, currentId, month, filters],
+    queryKey: ["records", keyword, currentId, month, filters, token],
     queryFn: () =>
       axios.get(`/ledgers/${currentId}/records`, {
         params: {
+          token, // ⭐加token
           keyword,
           month,
-          categories: filters.categories.length > 0 ? filters.categories.join(",") : undefined, // 空数组时不发送
-          split: filters.split || undefined // 空字符串时不发送
+          categories: filters.categories.length > 0 ? filters.categories.join(",") : undefined,
+          split: filters.split || undefined
         },
       }).then((r) => r.data),
+    enabled: !!currentId && !!token,
   });
 
   // 获取分类数据
   const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => axios.get('/categories').then(r => r.data),
+    queryKey: ['categories', token],
+    queryFn: () => axios.get('/categories', { params: { token } }).then(r => r.data),
+    enabled: !!token,
   });
 
   // 按日期分组记录
@@ -63,10 +69,11 @@ export default function RecordList() {
   }, [filters.categories, categories]);
 
   const deleteRec = async (id) => {
-    await axios.delete(`/records/${id}`);
-    queryClient.invalidateQueries(["records", keyword, currentId, month, filters]);
+    await axios.delete(`/records/${id}`, { params: { token } });
+    queryClient.invalidateQueries(["records", keyword, currentId, month, filters, token]);
     setDeleteId(null);
   };
+
 
   return (
     <div className="p-6">
@@ -192,12 +199,15 @@ export default function RecordList() {
         })}
   
       {/* 编辑弹窗 */}
-      <EditRecordModal
-        open={!!editRec}
-        record={editRec}
-        isNew={editRec && !editRec.id}
-        onClose={() => setEditRec(null)}
-      />
+<EditRecordModal
+  open={!!editRec}
+  record={{
+    ...editRec,
+    ledger_id: currentId // 确保传递 ledger_id
+  }}
+  isNew={editRec && !editRec.id}
+  onClose={() => setEditRec(null)}
+/>
   
       {/* 删除确认弹窗 */}
       <ConfirmDialog

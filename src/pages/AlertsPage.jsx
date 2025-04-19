@@ -1,10 +1,67 @@
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import NotificationItem from '../components/NotificationItem';
-import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
+import NotificationItem from '../components/NotificationItem'
+import { useState, useEffect } from 'react'
+import socketService from '../utils/socket'
+import { useAuthStore } from '../store/auth'
 
 export default function AlertsPage() {
-  const [filter, setFilter] = useState('all'); // all/unread/read
+    const { user } = useAuthStore()
+    const queryClient = useQueryClient()
+    const [filter, setFilter] = useState('all')
+    const [unreadCount, setUnreadCount] = useState(0)
+  
+    // const { data: notifications = [] } = useQuery({
+    //   queryKey: ['notifications'],
+    //   queryFn: () => axios.get('/notifications').then(r => r.data),
+    //   onSuccess: (data) => {
+    //     setUnreadCount(data.filter(n => !n.is_read).length)
+    //   }
+    // })
+
+  // 初始化 WebSocket
+  useEffect(() => {
+    if (user?.access_token) {
+      socketService.connect(user.access_token)
+      
+      const handleNotification = (data) => {
+        console.log('New notification:', data)
+        queryClient.invalidateQueries(['notifications'])
+        
+        // 显示桌面通知
+        if (Notification.permission === 'granted') {
+          new Notification('New Notification', {
+            body: data.content,
+            icon: '/logo192.png'
+          })
+        }
+      }
+      
+      socketService.on('notification', handleNotification)
+      
+      return () => {
+        socketService.off('notification', handleNotification)
+      }
+    }
+  }, [user, queryClient])
+
+  // 请求通知权限
+  useEffect(() => {
+    if (Notification.permission !== 'granted' && 
+        Notification.permission !== 'denied') {
+      Notification.requestPermission()
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleNotification = () => {
+      console.log('Refreshing notifications...')
+      queryClient.invalidateQueries(['notifications'])
+    }
+    
+    socketService.on('notification', handleNotification)
+    return () => socketService.off('notification', handleNotification)
+  }, [queryClient])
   
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications'],
@@ -19,7 +76,7 @@ export default function AlertsPage() {
   });
 
   // 未读计数
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+//   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
     <div className="p-6 space-y-6">

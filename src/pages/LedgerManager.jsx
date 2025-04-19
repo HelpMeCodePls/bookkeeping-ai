@@ -3,33 +3,47 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useLedger } from '../store/ledger';
 import CollaboratorManager from '../components/CollaboratorManager';
+import { useAuthStore } from '../store/auth'; // ⭐加上这个
+
 
 export default function LedgerManager() {
-  const qc = useQueryClient();
+
+
+const [openCM, setOpenCM] = useState(false);
+
+
   const { currentId, setId } = useLedger();
   const [name, setName] = useState('');
   const [showCollaboratorManager, setShowCollaboratorManager] = useState(null);
-
+  const qc = useQueryClient();
+  const token = useAuthStore((s) => s.token);
   const { data: ledgers = [] } = useQuery({
-    queryKey: ['ledgers'],
-    queryFn: () => axios.get('/ledgers').then((r) => r.data ?? []),
+    queryKey: ['ledgers', token], // 🔵 queryKey也带token，不然不会刷新
+    queryFn: () => axios.get('/ledgers', { params: { token } }).then((r) => r.data ?? []),
+    enabled: !!token, // 🔵 只有有token时才请求
   });
+  
 
   // 获取用户权限
   const { data: permission } = useQuery({
-    queryKey: ['permission', currentId],
+    queryKey: ['permission', currentId, token], // ⭐ queryKey也加token，防止token变化时数据不更新
     queryFn: () => 
-      currentId 
-        ? axios.get(`/ledgers/${currentId}/permission`).then(r => r.data) 
+      currentId && token
+        ? axios.get(`/ledgers/${currentId}/permission`, { params: { token } }).then(r => r.data)
         : Promise.resolve({}),
-    enabled: !!currentId
+        enabled: !!currentId && !!token,
+        retry: 1, 
   });
 
   const create = useMutation({
-    mutationFn: () => axios.post('/ledgers', { name, budget: 1000 }),
-    onSuccess: () => {
-      qc.invalidateQueries(['ledgers']);
+    mutationFn: () => 
+        axios.post('/ledgers', { name, budget: 1000, token }),
+    onSuccess: (newLedger) => {
+      
       setName('');
+      setId(newLedger._id);
+      setTimeout(() => setShowCollaboratorManager(newLedger._id), 0);
+      qc.invalidateQueries(['ledgers']);
     },
   });
 
@@ -98,5 +112,7 @@ export default function LedgerManager() {
         />
       )}
     </div>
+
+    
   );
 }

@@ -3,12 +3,15 @@ import axios from 'axios'
 import { useLedger } from '../store/ledger'
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
+import { useAuthStore } from '../store/auth'
 
 export default function LedgerSelector() {
   const { currentId, setId } = useLedger()
+  const token = useAuthStore((s) => s.token)
   const { data: ledgers = [] } = useQuery({
-    queryKey: ['ledgers'],
-    queryFn : () => axios.get('/ledgers').then(r=>r.data),
+    queryKey: ['ledgers', token],
+    queryFn : () => axios.get('/ledgers', { params: { token } }).then(r => r.data ?? []),
+    enabled: !!token,
   })
   const current = ledgers.find(l => l._id === currentId) || { name:'Ledger' }
   const [open, setOpen] = useState(false)

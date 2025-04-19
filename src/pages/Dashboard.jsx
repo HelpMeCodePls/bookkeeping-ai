@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { motion } from 'framer-motion'
 import { useLedger } from '../store/ledger' 
+import { useAuthStore } from '../store/auth'
 
 export default function Dashboard() {
   const { currentId: ledgerId, month: selectedMonth } = useLedger();
-  
+  const token = useAuthStore((s) => s.token)
   // 使用 ledger 数据（含 budgets 和 spent）
   const { data: ledger } = useQuery({
     queryKey: ['ledgers', ledgerId],
@@ -18,7 +19,7 @@ export default function Dashboard() {
   const { data: records = [] } = useQuery({
     queryKey: ['records-dashboard', ledgerId, selectedMonth],
     queryFn: () => axios.get(`/ledgers/${ledgerId}/records`, { 
-      params: { month: selectedMonth } 
+        params: { month: selectedMonth, token } 
     }).then(r => r.data),
     enabled: !!ledgerId,
   });

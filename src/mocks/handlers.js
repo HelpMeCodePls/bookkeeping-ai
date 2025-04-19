@@ -1,5 +1,8 @@
 import { http, HttpResponse } from "msw";
 import { nanoid } from "nanoid";
+import { mockSocket } from "./browser";
+import { mockWebSocket } from "./browser"; // 引入 mockWebSocket
+
 
 /* ===== demo 数据 ===== */
 const demoLedgerId = "demoLedger";
@@ -11,13 +14,13 @@ let users = [
   {
     id: demoUserId,
     name: "Demo User",
-    email: "demo@example.com",
+    email: "ozijunw@gmail.com",
     avatar: "👤"
   },
   {
     id: "user2",
     name: "Alice Smith",
-    email: "alice@example.com",
+    email: "olivia.zijun.wei@gmail.com",
     avatar: "👩"
   },
   {
@@ -462,7 +465,7 @@ let ledgers = [
     {
       _id: 'demoLedger',
       name: 'Default Ledger',
-      owner: demoUserId, // 添加所有者字段
+      owner: 'user1', // 添加所有者字段
       budgets: { 
         default: 1000,
         months: { '2025-04': 2000 },
@@ -519,6 +522,7 @@ let notes = [
   ];
 
 
+
 /* ===== 辅助函数 ===== */
 function calculateSpent(ledgerId) {
     const monthlySpent = {};
@@ -537,12 +541,14 @@ function calculateSpent(ledgerId) {
 /* ===== handlers 开始 ===== */
 export const handlers = [
   /* ===== auth ===== */
-  http.post("/auth/google", async () =>
-    HttpResponse.json({
-      access_token: "stub-jwt",
-      user: { _id: "1", username: "Demo User" },
+  http.post('/auth/google', async ({ request }) => {
+    const { email } = await request.json()   // 假设前端按钮传不同 email
+    const user = users.find(u => u.email === email) || users[0]
+    return HttpResponse.json({
+        access_token: `stub-jwt-${user.id}`,  
+      user,
     })
-  ),
+  }),
 
   /* ===== categories ===== */
   http.get("/categories", () => HttpResponse.json(categories)),
@@ -645,25 +651,6 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
   ),
 
   /* ===== ledgers ===== */
-  http.get("/ledgers", () => HttpResponse.json(ledgers)),
-
-  http.post("/ledgers", async ({ request }) => {
-    const body = await request.json();
-    const newLedger = { 
-      _id: nanoid(), 
-      ...body, 
-      collaborators: [],
-      budgets: {
-        default: 0,
-        months: {},
-        categoryDefaults: {},
-        categoryBudgets: {}
-      },
-      spent: {}
-    };
-    ledgers.push(newLedger);
-    return HttpResponse.json(newLedger, { status: 201 });
-  }),
 
   http.get('/ledgers/:id', ({ params }) => {
     const ledger = ledgers.find(l => l._id === params.id);
@@ -720,15 +707,15 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
     return HttpResponse.json({ ok: true });
   }),
 
-  http.post("/ledgers/:id/collaborators", async ({ params, request }) => {
-    const { email } = await request.json();
-    ledgers = ledgers.map((l) =>
-      l._id === params.id
-        ? { ...l, collaborators: [...l.collaborators, { email }] }
-        : l
-    );
-    return HttpResponse.json({ ok: true });
-  }),
+//   http.post("/ledgers/:id/collaborators", async ({ params, request }) => {
+//     const { email } = await request.json();
+//     ledgers = ledgers.map((l) =>
+//       l._id === params.id
+//         ? { ...l, collaborators: [...l.collaborators, { email }] }
+//         : l
+//     );
+//     return HttpResponse.json({ ok: true });
+//   }),
 
   /* ===== notifications ===== */
   http.get("/notifications", () => HttpResponse.json(notes)),
@@ -742,6 +729,31 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
       n.id === params.id ? { ...n, is_read: true } : n
     );
     return HttpResponse.json({ ok: true });
+  }),
+
+  // 添加通知
+  http.post('/notifications', async ({ request }) => {
+    const body = await request.json()
+    const newNote = {
+      id: nanoid(),
+      ...body,
+      is_read: false,
+      created_at: Date.now()
+    }
+    notes.unshift(newNote)
+    
+    // 使用 mockSocket 代替 worker
+    mockSocket.emit('notification', newNote)
+    
+    return HttpResponse.json(newNote)
+  }),
+  
+  // 标记通知已读
+  http.patch('/notifications/:id', ({ params }) => {
+    notes = notes.map(n => 
+      n.id === params.id ? { ...n, is_read: true } : n
+    )
+    return HttpResponse.json({ ok: true })
   }),
 
   /* ===== agent chat ===== */
@@ -830,37 +842,49 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
   
     // 添加协作者
     http.post("/ledgers/:id/collaborators", async ({ params, request }) => {
-      const { email, permission = "EDITOR" } = await request.json();
-      const ledger = ledgers.find(l => l._id === params.id);
-      if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
+        const { email, permission = "EDITOR" } = await request.json()
+        const ledger = ledgers.find(l => l._id === params.id)
+        if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 })
+        
+        const user = users.find(u => u.email === email)
+        if (!user) return HttpResponse.error('User not found', { status: 404 })
       
-      const user = users.find(u => u.email === email);
-      if (!user) return HttpResponse.error('User not found', { status: 404 });
+        // 检查是否已经是协作者
+        if (ledger.collaborators.some(c => c.userId === user.id)) {
+          return HttpResponse.error('User is already a collaborator', { status: 400 })
+        }
       
-      // 检查是否已经是协作者
-      if (ledger.collaborators.some(c => c.userId === user.id)) {
-        return HttpResponse.error('User is already a collaborator', { status: 400 });
-      }
+        const newCollaborator = {
+          userId: user.id,
+          email: user.email,
+          permission,
+          joinedAt: new Date().toISOString()
+        }
+        
+        ledger.collaborators.push(newCollaborator)
+        
+        // 创建通知
+        const notification = {
+          id: nanoid(),
+          type: 'collaboration',
+          content: `You have been added to ledger "${ledger.name}" as ${permission.toLowerCase()}`,
+          is_read: false,
+          created_at: Date.now(),
+          ledgerId: ledger._id,
+          metadata: {
+            permission,
+            inviter: demoUserId
+          }
+        }
+        
+        notes.unshift(notification)
+        
+        // 触发 WebSocket 事件
+        mockSocket.emit('notification', notification)
+        mockWebSocket.emit('notification', notification)
       
-      ledger.collaborators.push({
-        userId: user.id,
-        email: user.email,
-        permission,
-        joinedAt: new Date().toISOString()
-      });
-      
-      // 添加通知
-      notes.unshift({
-        id: nanoid(),
-        content: `You have been added to ledger "${ledger.name}" as ${permission.toLowerCase()}`,
-        is_read: false,
-        created_at: Date.now(),
-        type: 'collaboration',
-        ledgerId: ledger._id
-      });
-      
-      return HttpResponse.json({ ok: true });
-    }),
+        return HttpResponse.json(newCollaborator)
+      }),
   
     // 移除协作者
     http.delete("/ledgers/:id/collaborators/:userId", ({ params }) => {
@@ -893,23 +917,69 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
     }),
   
     // 获取用户权限
-    http.get("/ledgers/:id/permission", ({ params }) => {
-      const ledger = ledgers.find(l => l._id === params.id);
-      if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
-      
-      // 如果是所有者
-      if (ledger.owner === demoUserId) {
-        return HttpResponse.json({ permission: "OWNER" });
-      }
-      
-      // 如果是协作者
-      const collaborator = ledger.collaborators.find(c => c.userId === demoUserId);
-      if (collaborator) {
+// 🛠️ handlers.js 追加
+http.get('/ledgers/:id/permission', ({ params, request }) => {
+  const token = new URL(request.url).searchParams.get('token') || '';
+  const myId = token.replace('stub-jwt-', '') || demoUserId;
+  
+  const ledger = ledgers.find(l => l._id === params.id);
+  if (!ledger) {
+    return HttpResponse.error('Ledger not found', { status: 404 });
+  }
+
+  if (ledger.owner === myId) {
+    return HttpResponse.json({ permission: 'OWNER' });
+  }
+  const collaborator = ledger.collaborators.find(c => c.userId === myId);
+    if (collaborator) {
         return HttpResponse.json({ permission: collaborator.permission });
-      }
+    }
+
+  return HttpResponse.json({ permission: 'VIEWER' });
+}),
+
+
+
+    // handlers.js
+    http.get('/ledgers', ({ request }) => {
+        const token = new URL(request.url).searchParams.get('token') || ''
+        const myId  = token.replace('stub-jwt-','') || demoUserId
+          return HttpResponse.json(
+                ledgers
+                  .filter(l =>
+                    l.owner === myId || l.collaborators.some(c => c.userId === myId)
+                  )
+                  .map(l => ({
+                    ...l,
+                    collaborators: l.collaborators.map(c => ({
+                      ...c,
+                      name: users.find(u => u.id === c.userId)?.name || c.email,
+                      avatar: users.find(u => u.id === c.userId)?.avatar || '👤'
+                    }))
+                  }))
+              )
+      }),
+
+      http.post('/ledgers', async ({ request }) => {
+        const { name, budget, token } = await request.json()
+        const owner = (token || '').replace('stub-jwt-','') || demoUserId
+        const newLedger = {
+          _id: nanoid(),
+          name,
+          owner,
+          budgets:{ default:budget, months:{}, categoryDefaults:{}, categoryBudgets:{} },
+          collaborators: [{
+            userId: owner,
+            email: (users.find(u => u.id === owner)?.email) || '', // ⭐ 加上email！
+            permission: 'OWNER',
+            joinedAt: new Date().toISOString()
+          }],
+        }
+        ledgers.push(newLedger)
+        return HttpResponse.json(newLedger, { status:201 })
+      })
       
-      // 无权限
-      return HttpResponse.error('No permission', { status: 403 });
-    }),
+      
   
 ];
+

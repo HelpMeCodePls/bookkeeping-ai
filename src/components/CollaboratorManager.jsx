@@ -2,41 +2,40 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useState } from 'react';
 import ConfirmDialog from './ConfirmDialog';
+import { useAuthStore } from '../store/auth';
 
 export default function CollaboratorManager({ ledgerId, open, onClose }) {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState('');
   const [permission, setPermission] = useState('EDITOR');
   const [userToRemove, setUserToRemove] = useState(null);
+  const token = useAuthStore(s => s.token);
 
   // 获取协作者列表
   const { data: collaborators = [] } = useQuery({
-    queryKey: ['collaborators', ledgerId],
-    queryFn: () => axios.get(`/ledgers/${ledgerId}/collaborators`).then(r => r.data),
-    enabled: open
+    queryKey: ['collaborators', ledgerId, token],
+    queryFn: () => axios.get(`/ledgers/${ledgerId}/collaborators`, { params: { token } }).then(r => r.data),
+    enabled: open && !!token,
   });
 
   // 获取用户基本信息
   const { data: users = [] } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => axios.get('/users').then(r => r.data),
-    enabled: open
+    queryKey: ['users', token],
+    queryFn: () => axios.get('/users', { params: { token } }).then(r => r.data),
+    enabled: open && !!token,
   });
 
   // 添加协作者
   const addCollaborator = useMutation({
-    mutationFn: (data) => axios.post(`/ledgers/${ledgerId}/collaborators`, data),
+    mutationFn: (data) => axios.post(`/ledgers/${ledgerId}/collaborators`, data, { params: { token } }),
     onSuccess: async (data) => {
-      // 添加协作通知
       await axios.post('/notifications', {
         type: 'collaboration',
         content: `You added ${data.email} as ${data.permission.toLowerCase()}`,
         ledgerId,
-        metadata: {
-          permission: data.permission
-        }
-      });
-      queryClient.invalidateQueries(['collaborators', ledgerId]);
+        metadata: { permission: data.permission },
+      }, { params: { token } });
+      queryClient.invalidateQueries(['collaborators', ledgerId, token]);
       queryClient.invalidateQueries(['notifications']);
       setEmail('');
     }
@@ -44,9 +43,9 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
 
   // 移除协作者
   const removeCollaborator = useMutation({
-    mutationFn: (userId) => axios.delete(`/ledgers/${ledgerId}/collaborators/${userId}`),
+    mutationFn: (userId) => axios.delete(`/ledgers/${ledgerId}/collaborators/${userId}`, { params: { token } }),
     onSuccess: () => {
-      queryClient.invalidateQueries(['collaborators', ledgerId]);
+      queryClient.invalidateQueries(['collaborators', ledgerId, token]);
       setUserToRemove(null);
     }
   });
@@ -54,8 +53,8 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
   // 更新权限
   const updatePermission = useMutation({
     mutationFn: ({ userId, permission }) => 
-      axios.patch(`/ledgers/${ledgerId}/collaborators/${userId}`, { permission }),
-    onSuccess: () => queryClient.invalidateQueries(['collaborators', ledgerId])
+      axios.patch(`/ledgers/${ledgerId}/collaborators/${userId}`, { permission }, { params: { token } }),
+    onSuccess: () => queryClient.invalidateQueries(['collaborators', ledgerId, token])
   });
 
   const handleSubmit = (e) => {

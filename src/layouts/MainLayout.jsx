@@ -16,6 +16,9 @@ import { useAuthStore } from "../store/auth";
 import ChatbotDrawer from "../components/ChatbotDrawer";
 import LedgerSelector from "../components/LedgerSelector";
 import MonthSelector from "../components/MonthSelector"; 
+import ConnectionIndicator from "../components/ConnectionIndicator"; // ← 新增导入
+import socketService from "../utils/socket";
+import { useEffect } from "react"; // ← 新增导入
 
 const menu = [
   { path: "/dashboard", label: "Dashboard", icon: <Home size={18} /> },
@@ -34,7 +37,29 @@ const menu = [
 ];
 
 export default function MainLayout() {
-  const loc = useLocation();
+    const { token } = useAuthStore()
+
+    useEffect(() => {
+        if (token) {
+          console.log('Connecting WebSocket with token:', token)
+          socketService.connect(token)
+          
+          socketService.on('connect', () => {
+            console.log('WebSocket connected!')
+          })
+          
+          socketService.on('notification', (data) => {
+            console.log('Received notification:', data)
+          })
+        }
+        
+        return () => {
+          console.log('Cleaning up WebSocket...')
+          socketService.disconnect()
+        }
+      }, [token])
+
+    const loc = useLocation();
   const logout = useAuthStore((s) => s.logout);
 
   // 轮询未读数
@@ -83,7 +108,9 @@ export default function MainLayout() {
             <LedgerSelector />
             <MonthSelector />
           </div>
-          {/* 将来放右上角设置按钮等 */}
+          <div className="flex items-center gap-4">
+             <ConnectionIndicator />
+          </div>
         </header>
 
         {/* 主内容 */}
