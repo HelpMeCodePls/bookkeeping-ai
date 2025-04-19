@@ -4,6 +4,30 @@ import { nanoid } from "nanoid";
 /* ===== demo 数据 ===== */
 const demoLedgerId = "demoLedger";
 
+/* ===== demo 数据 ===== */
+const demoUserId = "user1";
+
+let users = [
+  {
+    id: demoUserId,
+    name: "Demo User",
+    email: "demo@example.com",
+    avatar: "👤"
+  },
+  {
+    id: "user2",
+    name: "Alice Smith",
+    email: "alice@example.com",
+    avatar: "👩"
+  },
+  {
+    id: "user3",
+    name: "Bob Johnson",
+    email: "bob@example.com",
+    avatar: "👨"
+  }
+];
+
 let categories = [
     { key: "food", label: "Food", icon: "🍔" },
     { key: "transport", label: "Transport", icon: "🚗" },
@@ -33,280 +57,404 @@ let records = [
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 12.3,
-        category: "Food",
+        category: "food",
         date: "2025-04-17",
         status: "confirmed",
         description: "Latte",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 20.5,
-        category: "Food",
+        category: "food",
         date: "2025-04-17",
         status: "confirmed",
         description: "Pizza",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 15.75,
-        category: "Transport",
+        category: "transport",
         date: "2025-04-20",
         status: "confirmed",
         description: "Taxi",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 50,
-        category: "Entertainment",
+        category: "entertainment",
         date: "2025-04-23",
         status: "Incomplete",
         description: "Movie",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 100,
-        category: "Travel",
+        category: "travel",
         date: "2025-04-21",
         status: "confirmed",
         description: "Hotel",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 200,
-        category: "Groceries",
+        category: "groceries",
         date: "2025-04-22",
         status: "confirmed",
         description: "",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 75.5,
-        category: "Food",
+        category: "food",
         date: "2025-04-23",
         status: "confirmed",
         description: "",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 45,
-        category: "Transport",
+        category: "transport",
         date: "2025-04-16",
         status: "confirmed",
         description: "Uber",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 30,
-        category: "Groceries",
+        category: "groceries",
         date: "2025-03-15",
         status: "incomplete",
         description: "",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 100,
-        category: "Entertainment",
+        category: "entertainment",
         date: "2025-03-02",
         status: "confirmed",
         description: "Concert",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 200,
-        category: "Travel",
+        category: "travel",
         date: "2025-01-10",
         status: "confirmed",
         description: "Flight to Paris",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 60,
-        category: "Health",
+        category: "health",
         date: "2024-12-15",
         status: "confirmed",
         description: "Doctor visit",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 150,
-        category: "Home",
+        category: "home",
         date: "2024-11-10",
         status: "confirmed",
         description: "Furniture",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 80,
-        category: "Sports",
+        category: "sports",
         date: "2024-10-05",
         status: "confirmed",
         description: "Gym membership",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 40,
-        category: "Music",
+        category: "music",
         date: "2024-09-25",
         status: "confirmed",
         description: "Guitar strings",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 25,
-        category: "Drinks",
+        category: "drinks",
         date: "2024-08-20",
         status: "confirmed",
         description: "Cocktails",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 300,
-        category: "Electronics",
+        category: "electronics",
         date: "2024-07-15",
         status: "confirmed",
         description: "Headphones",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 500,
-        category: "Car",
+        category: "car",
         date: "2024-06-10",
         status: "confirmed",
         description: "Car repair",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 20,
-        category: "Charity",
+        category: "charity",
         date: "2024-05-05",
         status: "confirmed",
         description: "Donation",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 90,
-        category: "Education",
+        category: "education",
         date: "2024-04-01",
         status: "confirmed",
         description: "Online course",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 35,
-        category: "Beauty",
+        category: "beauty",
         date: "2024-03-15",
         status: "confirmed",
         description: "Haircut",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 120,
-        category: "Insurance",
+        category: "insurance",
         date: "2024-02-10",
         status: "confirmed",
         description: "Car insurance",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 250,
-        category: "Travel",
+        category: "travel",
         date: "2024-01-05",
         status: "confirmed",
         description: "Train tickets",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 15,
-        category: "Food",
+        category: "food",
         date: "2023-12-20",
         status: "confirmed",
         description: "Burger",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 70,
-        category: "Transport",
+        category: "transport",
         date: "2023-11-15",
         status: "confirmed",
         description: "Bus pass",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 45,
-        category: "Groceries",
+        category: "groceries",
         date: "2023-10-10",
         status: "confirmed",
         description: "Weekly groceries",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 110,
-        category: "Entertainment",
+        category: "entertainment",
         date: "2023-09-05",
         status: "confirmed",
         description: "Theater tickets",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 220,
-        category: "Travel",
+        category: "travel",
         date: "2023-08-01",
         status: "confirmed",
         description: "Weekend getaway",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 35,
-        category: "Food",
+        category: "food",
         date: "2023-07-20",
         status: "confirmed",
         description: "Dinner",
+        createdBy: "user2",
+        updatedBy: "user2",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 55,
-        category: "Transport",
+        category: "transport",
         date: "2023-06-15",
         status: "confirmed",
         description: "Taxi ride",
+        createdBy: "user3",
+        updatedBy: "user3",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
     {
         id: nanoid(),
         ledger_id: demoLedgerId,
         amount: 75,
-        category: "Groceries",
+        category: "groceries",
         date: "2023-05-10",
         status: "confirmed",
         description: "Monthly groceries",
+        createdBy: "user1",
+        updatedBy: "user1",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     },
 ];
 
@@ -314,14 +462,22 @@ let ledgers = [
     {
       _id: 'demoLedger',
       name: 'Default Ledger',
+      owner: demoUserId, // 添加所有者字段
       budgets: { 
         default: 1000,
         months: { '2025-04': 2000 },
         categoryDefaults: {},
         categoryBudgets: { '2025-04': { 'Food': 500, 'Transport': 300 } }
       },
-      spent: calculateSpent('demoLedger'), // 初始化时计算 spent
-      collaborators: []
+      spent: calculateSpent('demoLedger'),
+      collaborators: [
+        {
+          userId: demoUserId,
+          email: "demo@example.com",
+          permission: "OWNER", // OWNER/EDITOR/VIEWER
+          joinedAt: new Date().toISOString()
+        }
+      ]
     },
   ];
 
@@ -374,16 +530,17 @@ export const handlers = [
   }),
 
   /* ===== records ===== */
-  http.get('/ledgers/:id/records', ({ params, request }) => {
+// 在 handlers.js 中修改 GET /ledgers/:id/records 处理器
+http.get('/ledgers/:id/records', ({ params, request }) => {
     const url = new URL(request.url);
     const month = url.searchParams.get('month');
-    const cats = (url.searchParams.get('categories')||'').split(',').filter(Boolean);
+    const cats = (url.searchParams.get('categories') || '').split(',').filter(Boolean);
     const split = url.searchParams.get('split');
-
+  
     const data = records.filter(r => {
       if (r.ledger_id !== params.id) return false;
       if (month && !r.date.startsWith(month)) return false;
-      if (cats.length && !cats.includes(r.category)) return false;
+      if (cats.length > 0 && !cats.includes(r.category)) return false; // 修复这里
       if (split && !(r.split||[]).some(s=>s.email===split)) return false;
       return true;
     });
@@ -392,8 +549,16 @@ export const handlers = [
 
   http.post("/ledgers/:id/records", async ({ params, request }) => {
     const body = await request.json();
-    const newRec = { ...body, id: nanoid(), ledger_id: params.id };
-    records.unshift(newRec);
+    const newRec = { 
+      ...body, 
+      id: nanoid(), 
+      ledger_id: params.id,
+      createdBy: demoUserId,
+      updatedBy: demoUserId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    records.unshift(newRec); 
     
     // 更新相关账本的 spent 数据
     const ledger = ledgers.find(l => l._id === params.id);
@@ -407,7 +572,16 @@ export const handlers = [
 
   http.put("/records/:id", async ({ params, request }) => {
     const body = await request.json();
-    records = records.map((r) => (r.id === params.id ? { ...r, ...body } : r));
+    records = records.map((r) => 
+      r.id === params.id 
+        ? { 
+            ...r, 
+            ...body, 
+            updatedBy: demoUserId,
+            updatedAt: new Date().toISOString()
+          } 
+        : r
+    );
     
     // 更新相关账本的 spent 数据
     const record = records.find(r => r.id === params.id);
@@ -599,4 +773,115 @@ export const handlers = [
 
     return HttpResponse.json({ byCategory, daily });
   }),
+
+    /* ===== 用户相关 ===== */
+    http.get("/users", () => HttpResponse.json(users)),
+
+    http.get("/users/me", () => 
+      HttpResponse.json(users.find(u => u.id === demoUserId))
+    ),
+  
+    /* ===== 协作相关 ===== */
+    // 获取账本协作者列表
+    http.get("/ledgers/:id/collaborators", ({ params }) => {
+      const ledger = ledgers.find(l => l._id === params.id);
+      if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
+      
+      // 合并协作者信息
+      const collaborators = ledger.collaborators.map(c => {
+        const user = users.find(u => u.id === c.userId);
+        return {
+          ...c,
+          name: user?.name || c.email,
+          avatar: user?.avatar || '👤'
+        };
+      });
+      
+      return HttpResponse.json(collaborators);
+    }),
+  
+    // 添加协作者
+    http.post("/ledgers/:id/collaborators", async ({ params, request }) => {
+      const { email, permission = "EDITOR" } = await request.json();
+      const ledger = ledgers.find(l => l._id === params.id);
+      if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
+      
+      const user = users.find(u => u.email === email);
+      if (!user) return HttpResponse.error('User not found', { status: 404 });
+      
+      // 检查是否已经是协作者
+      if (ledger.collaborators.some(c => c.userId === user.id)) {
+        return HttpResponse.error('User is already a collaborator', { status: 400 });
+      }
+      
+      ledger.collaborators.push({
+        userId: user.id,
+        email: user.email,
+        permission,
+        joinedAt: new Date().toISOString()
+      });
+      
+      // 添加通知
+      notes.unshift({
+        id: nanoid(),
+        content: `You have been added to ledger "${ledger.name}" as ${permission.toLowerCase()}`,
+        is_read: false,
+        created_at: Date.now(),
+        type: 'collaboration',
+        ledgerId: ledger._id
+      });
+      
+      return HttpResponse.json({ ok: true });
+    }),
+  
+    // 移除协作者
+    http.delete("/ledgers/:id/collaborators/:userId", ({ params }) => {
+      const ledger = ledgers.find(l => l._id === params.id);
+      if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
+      
+      // 不能移除所有者
+      if (ledger.owner === params.userId) {
+        return HttpResponse.error('Cannot remove owner', { status: 400 });
+      }
+      
+      const index = ledger.collaborators.findIndex(c => c.userId === params.userId);
+      if (index === -1) return HttpResponse.error('Collaborator not found', { status: 404 });
+      
+      ledger.collaborators.splice(index, 1);
+      return HttpResponse.json({ ok: true });
+    }),
+  
+    // 更新协作者权限
+    http.patch("/ledgers/:id/collaborators/:userId", async ({ params, request }) => {
+      const { permission } = await request.json();
+      const ledger = ledgers.find(l => l._id === params.id);
+      if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
+      
+      const collaborator = ledger.collaborators.find(c => c.userId === params.userId);
+      if (!collaborator) return HttpResponse.error('Collaborator not found', { status: 404 });
+      
+      collaborator.permission = permission;
+      return HttpResponse.json({ ok: true });
+    }),
+  
+    // 获取用户权限
+    http.get("/ledgers/:id/permission", ({ params }) => {
+      const ledger = ledgers.find(l => l._id === params.id);
+      if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
+      
+      // 如果是所有者
+      if (ledger.owner === demoUserId) {
+        return HttpResponse.json({ permission: "OWNER" });
+      }
+      
+      // 如果是协作者
+      const collaborator = ledger.collaborators.find(c => c.userId === demoUserId);
+      if (collaborator) {
+        return HttpResponse.json({ permission: collaborator.permission });
+      }
+      
+      // 无权限
+      return HttpResponse.error('No permission', { status: 403 });
+    }),
+  
 ];

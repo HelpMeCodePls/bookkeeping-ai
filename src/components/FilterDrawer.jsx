@@ -2,70 +2,157 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X } from 'lucide-react'
+import { X, Check, ChevronDown, ChevronUp } from 'lucide-react'
 
-export default function FilterDrawer({ open, onClose, filters, setFilters }) {
-  const { data: cats = [] } = useQuery({
+export default function FilterDrawer({ 
+  open, 
+  onClose, 
+  filters, 
+  setFilters,
+  categories: propCategories 
+}) {
+  // 使用传入的 categories 或从 API 获取
+  const { data: fetchedCategories = [] } = useQuery({
     queryKey: ['categories'],
-    queryFn : () => axios.get('/categories').then(r=>r.data),
-  })
-  const toggleCat = (key) =>
+    queryFn: () => axios.get('/categories').then(r=>r.data),
+    enabled: !propCategories // 如果没有传入 categories 才获取
+  });
+  
+  const cats = propCategories || fetchedCategories;
+  const [expandedSection, setExpandedSection] = useState('categories');
+  
+  const toggleCat = (key) => {
     setFilters(prev => {
-      const set = new Set(prev.categories)
-      set.has(key) ? set.delete(key) : set.add(key)
-      return { ...prev, categories: Array.from(set) }
-    })
+      const set = new Set(prev.categories);
+      set.has(key) ? set.delete(key) : set.add(key);
+      return { ...prev, categories: Array.from(set) };
+    });
+  };
+
+  const toggleAllCategories = (selectAll) => {
+    setFilters(prev => ({
+      ...prev,
+      categories: selectAll ? cats.map(c => c.key) : []
+    }));
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSection(prev => prev === section ? null : section);
+  };
 
   return (
     <AnimatePresence>
       {open && (
         <motion.aside
-          initial={{ x:'100%' }} animate={{ x:0 }} exit={{ x:'100%' }}
-          transition={{ type:'tween', duration:0.25 }}
-          className="fixed top-0 right-0 w-72 h-full bg-card dark:bg-gray-800 border-l flex flex-col z-50"
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'tween', duration: 0.25 }}
+          className="fixed top-0 right-0 w-80 h-full bg-card dark:bg-gray-800 border-l flex flex-col z-50 shadow-xl"
         >
-          <header className="p-4 flex justify-between items-center border-b">
-            <h3 className="font-semibold">Filters</h3>
-            <button onClick={onClose}><X size={20}/></button>
+          <header className="p-4 flex justify-between items-center border-b dark:border-gray-700">
+            <h3 className="font-semibold text-lg">Filters</h3>
+            <button 
+              onClick={onClose}
+              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <X size={20} />
+            </button>
           </header>
 
-          <div className="p-4 flex-1 overflow-y-auto space-y-6">
-            {/* category */}
-            <div>
-              <h4 className="mb-2 font-medium">Category</h4>
-              <div className="flex flex-wrap gap-2">
-                {cats.map(c => (
-                  <button
-                    key={c.key}
-                    onClick={()=>toggleCat(c.key)}
-                    className={`px-2 py-1 rounded-md border text-sm
-                      ${filters.categories.includes(c.key)
-                        ? 'bg-brand/10 border-brand text-brand'
-                        : 'border-gray-300 dark:border-gray-600'}`}
-                  >
-                    {c.icon} {c.label}
-                  </button>
-                ))}
-              </div>
+          <div className="flex-1 overflow-y-auto">
+            {/* Categories Section */}
+            <div className="border-b dark:border-gray-700">
+              <button
+                className="w-full p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700"
+                onClick={() => toggleSection('categories')}
+              >
+                <div className="flex items-center">
+                  <span className="font-medium">Categories</span>
+                  {filters.categories.length > 0 && (
+                    <span className="ml-2 text-xs bg-brand/10 text-brand rounded-full px-2 py-1">
+                      {filters.categories.length} selected
+                    </span>
+                  )}
+                </div>
+                {expandedSection === 'categories' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </button>
+              
+              {expandedSection === 'categories' && (
+                <div className="px-4 pb-4 space-y-3">
+                  <div className="flex justify-between mb-2">
+                    <button
+                      onClick={() => toggleAllCategories(true)}
+                      className="text-xs text-brand hover:underline"
+                    >
+                      Select all
+                    </button>
+                    <button
+                      onClick={() => toggleAllCategories(false)}
+                      className="text-xs text-gray-500 hover:underline"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    {cats.map(c => (
+                      <button
+                        key={c.key}
+                        onClick={() => toggleCat(c.key)}
+                        className={`flex items-center p-2 rounded-md border text-sm transition-colors
+                          ${filters.categories.includes(c.key)
+                            ? 'bg-brand/10 border-brand text-brand'
+                            : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                      >
+                        {filters.categories.includes(c.key) && (
+                          <Check size={16} className="mr-1" />
+                        )}
+                        <span className="mr-1">{c.icon}</span>
+                        <span className="truncate">{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* split member */}
-            <div>
-              <h4 className="mb-2 font-medium">Split With</h4>
-              <input
-                className="input w-full"
-                placeholder="Teammate email"
-                value={filters.split}
-                onChange={e=>setFilters({ ...filters, split:e.target.value })}
-              />
+            {/* Split With Section */}
+            <div className="border-b dark:border-gray-700">
+              <button
+                className="w-full p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700"
+                onClick={() => toggleSection('split')}
+              >
+                <span className="font-medium">Split With</span>
+                {expandedSection === 'split' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </button>
+              
+              {expandedSection === 'split' && (
+                <div className="px-4 pb-4">
+                  <input
+                    className="input w-full"
+                    placeholder="Teammate email"
+                    value={filters.split}
+                    onChange={e => setFilters({ ...filters, split: e.target.value })}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
-          <footer className="p-4 border-t flex justify-end">
-            <button className="btn-ghost mr-2" onClick={()=>setFilters({ categories:[], split:'' })}>
-              Clear
+          <footer className="p-4 border-t dark:border-gray-700 flex justify-between">
+            <button 
+              className="btn-ghost"
+              onClick={() => setFilters({ categories: [], split: '' })}
+            >
+              Reset All
             </button>
-            <button className="btn-primary" onClick={onClose}>Apply</button>
+            <button 
+              className="btn-primary"
+              onClick={onClose}
+            >
+              Apply Filters
+            </button>
           </footer>
         </motion.aside>
       )}

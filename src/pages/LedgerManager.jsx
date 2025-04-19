@@ -5,8 +5,7 @@ import { useLedger } from '../store/ledger';
 
 export default function LedgerManager() {
   const qc = useQueryClient();
-  const { currentId, setId, budget, setBudget, month } = useLedger();
-
+  const { currentId, setId } = useLedger(); // 只用 currentId, setId
   const [name, setName] = useState('');
 
   const { data: ledgers = [] } = useQuery({
@@ -22,13 +21,6 @@ export default function LedgerManager() {
     },
   });
 
-  const updateBudget = useMutation({
-    mutationFn: () => axios.patch(`/ledgers/${currentId}/budget`, { month, budget }),
-    onSuccess: () => {
-      qc.invalidateQueries(['ledgers']);
-    },
-  });
-
   const list = Array.isArray(ledgers) ? ledgers : [];
 
   return (
@@ -41,35 +33,12 @@ export default function LedgerManager() {
           <div
             key={l._id}
             className={`border shadow rounded-lg p-4 cursor-pointer hover:shadow-lg transition ${currentId === l._id ? 'border-blue-500' : ''}`}
-            onClick={() => { setId(l._id); setBudget(l.budget); }}
+            onClick={() => setId(l._id)}
           >
             <h3 className="text-lg font-semibold mb-2">{l.name}</h3>
-            <p className="text-sm text-gray-500">Budget: ${l.budget || 0}</p>
           </div>
         ))}
       </div>
-
-      {/* 编辑预算 */}
-      {currentId && (
-        <div className="bg-white shadow rounded-lg p-4 mt-8">
-          <h3 className="text-blue-600 font-semibold mb-4">Edit Budget for this Ledger</h3>
-          <div className="flex items-center space-x-2">
-            <input
-              className="border px-2 py-1 w-32"
-              type="number"
-              value={budget}
-              onChange={(e) => setBudget(e.target.value)}
-            />
-            <button
-              className="bg-blue-600 text-white px-4 py-1 rounded"
-              onClick={() => updateBudget.mutate()}
-            >
-              Save
-            </button>
-          </div>
-          <p className="text-xs text-gray-400 mt-2">* Current Month: {month}</p>
-        </div>
-      )}
 
       {/* 新增账本 */}
       <div className="bg-white shadow rounded-lg p-4 mt-8">
