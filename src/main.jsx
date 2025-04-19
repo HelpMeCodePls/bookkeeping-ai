@@ -8,7 +8,7 @@ import './index.css'
 
 if (import.meta.env.DEV) {
   const { worker } = await import('./mocks/browser')
-  await worker.start()
+  // await worker.start()
 }
 
 // ⚠️ 换成你的 Google Client ID

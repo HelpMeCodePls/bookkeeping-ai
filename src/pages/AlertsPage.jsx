@@ -1,15 +1,16 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import NotificationItem from '../components/NotificationItem'
-import { useState, useEffect } from 'react'
-import socketService from '../utils/socket'
+import { useState } from 'react'
+// import socketService from '../utils/socket'
 import { useAuthStore } from '../store/auth'
 
+
 export default function AlertsPage() {
-    const { user } = useAuthStore()
+    const { token } = useAuthStore()
     const queryClient = useQueryClient()
     const [filter, setFilter] = useState('all')
-    const [unreadCount, setUnreadCount] = useState(0)
+    // const [unreadCount, setUnreadCount] = useState(0)
   
     // const { data: notifications = [] } = useQuery({
     //   queryKey: ['notifications'],
@@ -19,54 +20,79 @@ export default function AlertsPage() {
     //   }
     // })
 
-  // 初始化 WebSocket
-  useEffect(() => {
-    if (user?.access_token) {
-      socketService.connect(user.access_token)
+//   // 初始化 WebSocket
+//   useEffect(() => {
+//     if (user?.access_token) {
+//       socketService.connect(user.access_token)
       
-      const handleNotification = (data) => {
-        console.log('New notification:', data)
-        queryClient.invalidateQueries(['notifications'])
+//       const handleNotification = (data) => {
+//         console.log('New notification:', data)
+//         queryClient.invalidateQueries(['notifications'])
         
-        // 显示桌面通知
-        if (Notification.permission === 'granted') {
-          new Notification('New Notification', {
-            body: data.content,
-            icon: '/logo192.png'
-          })
-        }
-      }
+//         // 显示桌面通知
+//         if (Notification.permission === 'granted') {
+//           new Notification('New Notification', {
+//             body: data.content,
+//             icon: '/logo192.png'
+//           })
+//         }
+//       }
       
-      socketService.on('notification', handleNotification)
+//       socketService.on('notification', handleNotification)
       
-      return () => {
-        socketService.off('notification', handleNotification)
-      }
-    }
-  }, [user, queryClient])
+//       return () => {
+//         socketService.off('notification', handleNotification)
+//       }
+//     }
+//   }, [user, queryClient])
 
-  // 请求通知权限
-  useEffect(() => {
-    if (Notification.permission !== 'granted' && 
-        Notification.permission !== 'denied') {
-      Notification.requestPermission()
-    }
-  }, [])
+//   // 请求通知权限
+//   useEffect(() => {
+//     if (Notification.permission !== 'granted' && 
+//         Notification.permission !== 'denied') {
+//       Notification.requestPermission()
+//     }
+//   }, [])
 
-  useEffect(() => {
-    const handleNotification = () => {
-      console.log('Refreshing notifications...')
-      queryClient.invalidateQueries(['notifications'])
-    }
+//   useEffect(() => {
+//     const handleNotification = () => {
+//       console.log('Refreshing notifications...')
+//       queryClient.invalidateQueries(['notifications'])
+//     }
     
-    socketService.on('notification', handleNotification)
-    return () => socketService.off('notification', handleNotification)
-  }, [queryClient])
+//     socketService.on('notification', handleNotification)
+//     return () => socketService.off('notification', handleNotification)
+//   }, [queryClient])
   
+  // 查询通知（15秒轮询一次）
   const { data: notifications = [] } = useQuery({
     queryKey: ['notifications'],
-    queryFn: () => axios.get('/notifications').then(r => r.data)
-  });
+    queryFn: () => axios.get('/notifications', { params: { token } }).then(r => r.data),
+    refetchInterval: 15000,
+    enabled: !!token,
+  })
+
+  // 查询未读数（30秒轮询一次）
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['notifications', 'unread'],
+    queryFn: () => axios.get('/notifications/unread_count', { params: { token } }).then(r => r.data.count),
+    refetchInterval: 30000,
+    enabled: !!token,
+  }) 
+
+//   const { data: notifications = [] } = useQuery({
+//     queryKey: ['notifications'],
+//     queryFn: () => axios.get('/notifications').then(r => r.data)
+//   });
+
+  // 标记为已读
+  const markAsRead = useMutation({
+    mutationFn: (id) => axios.patch(`/notifications/${id}`, null, { params: { token } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['notifications'])
+      queryClient.invalidateQueries(['notifications', 'unread'])
+    }
+  })
 
   // 过滤通知
   const filteredNotifications = notifications.filter(n => {
@@ -75,6 +101,16 @@ export default function AlertsPage() {
     return true;
   });
 
+    // 请求通知权限（保留原有功能）
+    const requestNotificationPermission = () => {
+        if (Notification.permission !== 'granted' && 
+            Notification.permission !== 'denied') {
+          Notification.requestPermission().then(permission => {
+            console.log('Notification permission:', permission)
+          })
+        }
+      }
+    
   // 未读计数
 //   const unreadCount = notifications.filter(n => !n.is_read).length;
 

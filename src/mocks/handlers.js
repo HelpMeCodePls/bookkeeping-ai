@@ -1,7 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { nanoid } from "nanoid";
-import { mockSocket } from "./browser";
-import { mockWebSocket } from "./browser"; // 引入 mockWebSocket
+// import { mockSocket } from "./browser";
+// import { mockWebSocket } from "./browser"; // 引入 mockWebSocket
 
 
 /* ===== demo 数据 ===== */
@@ -601,6 +601,18 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
       ledger.spent = monthlySpent;
     }
     
+    // 添加新账单成功后，直接加通知
+notes.unshift({
+    id: nanoid(),
+    type: 'record',
+    content: `New record "${newRec.description || 'Unnamed'}" added`,
+    is_read: false,
+    created_at: Date.now(),
+    ledgerId: params.id,
+    recordId: newRec.id
+  });
+
+  
     return HttpResponse.json(newRec, { status: 201 });
   }),
 
@@ -717,13 +729,95 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
 //     return HttpResponse.json({ ok: true });
 //   }),
 
+
+
   /* ===== notifications ===== */
-  http.get("/notifications", () => HttpResponse.json(notes)),
 
-  http.get("/notifications/unread_count", () =>
-    HttpResponse.json({ count: notes.filter((n) => !n.is_read).length })
-  ),
+//   http.get("/notifications", () => HttpResponse.json(notes)),
 
+//   http.get("/notifications/unread_count", () =>
+//     HttpResponse.json({ count: notes.filter((n) => !n.is_read).length })
+//   ),
+
+//   http.patch("/notifications/:id", ({ params }) => {
+//     notes = notes.map((n) =>
+//       n.id === params.id ? { ...n, is_read: true } : n
+//     );
+//     return HttpResponse.json({ ok: true });
+//   }),
+
+//   // 添加通知
+//   http.post('/notifications', async ({ request }) => {
+//     const body = await request.json()
+//     const newNote = {
+//       id: nanoid(),
+//       ...body,
+//       is_read: false,
+//       created_at: Date.now()
+//     }
+//     notes.unshift(newNote)
+    
+//     // 使用 mockSocket 代替 worker
+//     mockSocket.emit('notification', newNote)
+    
+//     return HttpResponse.json(newNote)
+//   }),
+  
+//   // 标记通知已读
+//   http.patch('/notifications/:id', ({ params }) => {
+//     notes = notes.map(n => 
+//       n.id === params.id ? { ...n, is_read: true } : n
+//     )
+//     return HttpResponse.json({ ok: true })
+//   }),
+
+// 获取所有通知，按时间倒序（最新在上）
+http.get("/notifications", ({ request }) => {
+    const url = new URL(request.url)
+    const userId = url.searchParams.get('user_id')
+    const projectId = url.searchParams.get('project_id')
+    const token = url.searchParams.get('token')
+  
+    console.log('收到 user_id:', userId, 'project_id:', projectId)
+  
+    return HttpResponse.json(
+      notes
+        .sort((a, b) => b.created_at - a.created_at)
+    )
+  }),
+  
+  // 获取未读通知数量
+  http.get("/notifications/unread_count", ({ request }) => {
+    const url = new URL(request.url)
+    const userId = url.searchParams.get('user_id')
+    const projectId = url.searchParams.get('project_id')
+    const token = url.searchParams.get('token')
+  
+    console.log('收到 user_id:', userId, 'project_id:', projectId)
+  
+    // 这里其实可以用 userId 和 projectId 来筛选 notes
+    // 但因为我们 mock 的 notes 没有真正记录 userId 和 projectId
+    // 所以，简单返回所有未读数就可以了
+    return HttpResponse.json({
+      count: notes.filter(n => !n.is_read).length,
+    })
+  }),
+  
+
+  // 新增一条通知
+  http.post("/notifications", async ({ request }) => {
+    const body = await request.json();
+    const newNote = {
+      id: nanoid(),
+      ...body,
+      is_read: false,
+      created_at: Date.now(),
+    };
+    notes.unshift(newNote);
+    return HttpResponse.json(newNote);
+  }),
+  
+  // 标记通知为已读
   http.patch("/notifications/:id", ({ params }) => {
     notes = notes.map((n) =>
       n.id === params.id ? { ...n, is_read: true } : n
@@ -731,30 +825,6 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
     return HttpResponse.json({ ok: true });
   }),
 
-  // 添加通知
-  http.post('/notifications', async ({ request }) => {
-    const body = await request.json()
-    const newNote = {
-      id: nanoid(),
-      ...body,
-      is_read: false,
-      created_at: Date.now()
-    }
-    notes.unshift(newNote)
-    
-    // 使用 mockSocket 代替 worker
-    mockSocket.emit('notification', newNote)
-    
-    return HttpResponse.json(newNote)
-  }),
-  
-  // 标记通知已读
-  http.patch('/notifications/:id', ({ params }) => {
-    notes = notes.map(n => 
-      n.id === params.id ? { ...n, is_read: true } : n
-    )
-    return HttpResponse.json({ ok: true })
-  }),
 
   /* ===== agent chat ===== */
   http.post("/agent/chat", async ({ request }) => {
@@ -842,16 +912,15 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
   
     // 添加协作者
     http.post("/ledgers/:id/collaborators", async ({ params, request }) => {
-        const { email, permission = "EDITOR" } = await request.json()
-        const ledger = ledgers.find(l => l._id === params.id)
-        if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 })
-        
-        const user = users.find(u => u.email === email)
-        if (!user) return HttpResponse.error('User not found', { status: 404 })
+        const { email, permission = "EDITOR" } = await request.json();
+        const ledger = ledgers.find(l => l._id === params.id);
+        if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
       
-        // 检查是否已经是协作者
+        const user = users.find(u => u.email === email);
+        if (!user) return HttpResponse.error('User not found', { status: 404 });
+      
         if (ledger.collaborators.some(c => c.userId === user.id)) {
-          return HttpResponse.error('User is already a collaborator', { status: 400 })
+          return HttpResponse.error('User already collaborator', { status: 400 });
         }
       
         const newCollaborator = {
@@ -859,31 +928,20 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
           email: user.email,
           permission,
           joinedAt: new Date().toISOString()
-        }
-        
-        ledger.collaborators.push(newCollaborator)
-        
-        // 创建通知
-        const notification = {
+        };
+        ledger.collaborators.push(newCollaborator);
+      
+        // 直接创建一条新通知
+        notes.unshift({
           id: nanoid(),
           type: 'collaboration',
-          content: `You have been added to ledger "${ledger.name}" as ${permission.toLowerCase()}`,
+          content: `You were added to ledger "${ledger.name}" as ${permission.toLowerCase()}`,
           is_read: false,
           created_at: Date.now(),
-          ledgerId: ledger._id,
-          metadata: {
-            permission,
-            inviter: demoUserId
-          }
-        }
-        
-        notes.unshift(notification)
-        
-        // 触发 WebSocket 事件
-        mockSocket.emit('notification', notification)
-        mockWebSocket.emit('notification', notification)
+          ledgerId: params.id
+        });
       
-        return HttpResponse.json(newCollaborator)
+        return HttpResponse.json(newCollaborator);
       }),
   
     // 移除协作者
@@ -900,6 +958,16 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
       if (index === -1) return HttpResponse.error('Collaborator not found', { status: 404 });
       
       ledger.collaborators.splice(index, 1);
+
+      notes.unshift({
+        id: nanoid(),
+        type: 'collaboration',
+        content: `You were removed from ledger "${ledger.name}"`,
+        is_read: false,
+        created_at: Date.now(),
+        ledgerId: params.id
+      });
+      
       return HttpResponse.json({ ok: true });
     }),
   

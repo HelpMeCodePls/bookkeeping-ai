@@ -9,16 +9,16 @@ import {
   Book,
   Bell,
   PiggyBank
-} from "lucide-react"; // ← 加 Bell
-import axios from "axios"; // ← 缺失的导入
+} from "lucide-react"; 
+import axios from "axios"; 
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../store/auth";
 import ChatbotDrawer from "../components/ChatbotDrawer";
 import LedgerSelector from "../components/LedgerSelector";
 import MonthSelector from "../components/MonthSelector"; 
-import ConnectionIndicator from "../components/ConnectionIndicator"; // ← 新增导入
-import socketService from "../utils/socket";
-import { useEffect } from "react"; // ← 新增导入
+import ConnectionIndicator from "../components/ConnectionIndicator"; 
+// import socketService from "../utils/socket";
+// import { useEffect } from "react"; 
 
 const menu = [
   { path: "/dashboard", label: "Dashboard", icon: <Home size={18} /> },
@@ -38,35 +38,41 @@ const menu = [
 
 export default function MainLayout() {
     const { token } = useAuthStore()
-
-    useEffect(() => {
-        if (token) {
-          console.log('Connecting WebSocket with token:', token)
-          socketService.connect(token)
-          
-          socketService.on('connect', () => {
-            console.log('WebSocket connected!')
-          })
-          
-          socketService.on('notification', (data) => {
-            console.log('Received notification:', data)
-          })
-        }
-        
-        return () => {
-          console.log('Cleaning up WebSocket...')
-          socketService.disconnect()
-        }
-      }, [token])
-
     const loc = useLocation();
-  const logout = useAuthStore((s) => s.logout);
+    const logout = useAuthStore((s) => s.logout);
+    // useEffect(() => {
+    //     if (token) {
+    //       console.log('Connecting WebSocket with token:', token)
+    //       socketService.connect(token)
+          
+    //       socketService.on('connect', () => {
+    //         console.log('WebSocket connected!')
+    //       })
+          
+    //       socketService.on('notification', (data) => {
+    //         console.log('Received notification:', data)
+    //       })
+    //     }
+        
+    //     return () => {
+    //       console.log('Cleaning up WebSocket...')
+    //       socketService.disconnect()
+    //     }
+    //   }, [token])
+
 
   // 轮询未读数
-  const { data: notif = { count: 0 } } = useQuery({
-    queryKey: ["unread"],
-    queryFn: () => axios.get("/notifications/unread_count").then((r) => r.data),
-    refetchInterval: 10_000,
+//   const { data: notif = { count: 0 } } = useQuery({
+//     queryKey: ["unread"],
+//     queryFn: () => axios.get("/notifications/unread_count").then((r) => r.data),
+//     refetchInterval: 10_000,
+//   });
+
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['notifications', 'unread'],
+    queryFn: () => axios.get('/notifications/unread_count', { params: { token } }).then(r => r.data.count),
+    refetchInterval: 60000,
+    enabled: !!token
   });
 
   return (
@@ -82,14 +88,11 @@ export default function MainLayout() {
                 active ? "bg-gray-200 font-medium" : ""
               }`}
             >
-              {/* 图标 */}
               {icon}
-              {/* 标签文字 */}
               {label}
-              {/* 红点 */}
-              {label === "Alerts" && notif.count > 0 && (
+              {label === "Alerts" && unreadCount > 0 && (
                 <span className="absolute -top-1 left-4 inline-flex items-center justify-center w-4 h-4 text-[10px] rounded-full bg-red-600 text-white">
-                  {notif.count}
+                  {unreadCount}
                 </span>
               )}
             </Link>
