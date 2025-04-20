@@ -34,7 +34,7 @@ export default function App() {
         {/* 404 页面 */}
         <Route path="/404" element={<div>404 Not Found</div>} />
         {/* 重定向到 Dashboard */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/chatbot" replace />} />
       </Route>
     </Routes>
   );
