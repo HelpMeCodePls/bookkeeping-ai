@@ -12,15 +12,15 @@ No real backend or database is required for this version.
 
 ```bash
 git clone https://github.com/your-repo/expense-assistant.git
-cd expense-assistant
+cd expense-assistant```
 
 ### 2. Install dependencies
 
-``` npm install
+``` npm install```
 
 ### 3. Start local development server
 
-```npm run dev
+```npm run dev```
 
 ### 4. Then open http://localhost:5173 in your browser.
 
