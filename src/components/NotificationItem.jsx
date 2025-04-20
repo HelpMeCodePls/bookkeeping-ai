@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLedger } from '../store/ledger';
-import axios from 'axios';
-import { useEffect, useState, useCallback } from 'react';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLedger } from "../store/ledger";
+import axios from "axios";
+import { useEffect, useState, useCallback } from "react";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
@@ -14,7 +14,7 @@ export default function NotificationItem({ notification }) {
 
   const markAsRead = useMutation({
     mutationFn: () => axios.patch(`/notifications/${notification.id}`),
-    onSuccess: () => queryClient.invalidateQueries(['notifications']),
+    onSuccess: () => queryClient.invalidateQueries(["notifications"]),
   });
 
   const handleMarkAsRead = useCallback(() => {
@@ -40,21 +40,21 @@ export default function NotificationItem({ notification }) {
 
   const getIcon = () => {
     switch (notification.type) {
-      case 'collaboration':
-        return '👥';
-      case 'record':
-        return '✏️';
-      case 'budget':
-        return '💰';
+      case "collaboration":
+        return "👥";
+      case "record":
+        return "✏️";
+      case "budget":
+        return "💰";
       default:
-        return '🔔';
+        return "🔔";
     }
   };
 
   return (
     <div
       className={`border p-4 rounded-lg cursor-pointer transition-colors ${
-        notification.is_read ? 'bg-gray-50' : 'bg-blue-50 border-blue-200'
+        notification.is_read ? "bg-gray-50" : "bg-blue-50 border-blue-200"
       }`}
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}

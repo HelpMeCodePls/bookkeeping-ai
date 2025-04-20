@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { useLedger } from '../store/ledger'
 
 export default function FilterDrawer({ 
   open, 
@@ -18,6 +19,14 @@ export default function FilterDrawer({
     enabled: !propCategories // 如果没有传入 categories 才获取
   });
   
+  const { currentId: ledgerId } = useLedger();
+
+   const { data: collaborators = [] } = useQuery({
+       queryKey: ['collaborators', ledgerId],
+       queryFn: () => axios.get(`/ledgers/${ledgerId}/collaborators`).then(r => r.data),
+       enabled: open && !!ledgerId
+     });
+
   const cats = propCategories || fetchedCategories;
   const [expandedSection, setExpandedSection] = useState('categories');
   
@@ -116,28 +125,40 @@ export default function FilterDrawer({
                 </div>
               )}
             </div>
+{/* Collaborators Section */}
+<div className="border-b dark:border-gray-700">
+  <button
+    className="w-full p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700"
+    onClick={() => toggleSection('collaborators')}
+  >
+    <span className="font-medium">Collaborators</span>
+    {expandedSection === 'collaborators' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+  </button>
+  
+  {expandedSection === 'collaborators' && (
+    <div className="px-4 pb-4 space-y-2">
+      <div className="grid grid-cols-2 gap-2">
+        {collaborators.map(c => (
+          <button
+            key={c.userId}
+            onClick={() => setFilters(prev => ({
+              ...prev,
+              collaborator: prev.collaborator === c.userId ? '' : c.userId
+            }))}
+            className={`flex items-center p-2 rounded-md border text-sm transition-colors
+              ${filters.collaborator === c.userId
+                ? 'bg-brand/10 border-brand text-brand'
+                : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+          >
+            <span className="mr-2">{c.avatar}</span>
+            <span className="truncate">{c.name || c.email}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
 
-            {/* Split With Section */}
-            <div className="border-b dark:border-gray-700">
-              <button
-                className="w-full p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700"
-                onClick={() => toggleSection('split')}
-              >
-                <span className="font-medium">Split With</span>
-                {expandedSection === 'split' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-              </button>
-              
-              {expandedSection === 'split' && (
-                <div className="px-4 pb-4">
-                  <input
-                    className="input w-full"
-                    placeholder="Teammate email"
-                    value={filters.split}
-                    onChange={e => setFilters({ ...filters, split: e.target.value })}
-                  />
-                </div>
-              )}
-            </div>
           </div>
 
           <footer className="p-4 border-t dark:border-gray-700 flex justify-between">

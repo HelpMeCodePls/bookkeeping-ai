@@ -5,7 +5,7 @@
 @layer base {
   body {
     @apply bg-bg text-gray-900 dark:bg-gray-900 dark:text-gray-100;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
   }
 }
 
@@ -39,4 +39,26 @@
            dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100
            dark:focus:ring-brand/70;
   }
+}
+
+/* 添加一些工具类 */
+.avatar-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  font-size: 12px;
+}
+
+.split-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 12px;
+  background-color: #e6f7ff;
+  font-size: 12px;
+  gap: 4px;
 }

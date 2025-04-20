@@ -1,21 +1,22 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuthStore } from './store/auth'
-import LoginPage from './pages/LoginPage'
-import Dashboard from './pages/Dashboard'
-import RecordList from './pages/RecordList'
-import AddRecord from './pages/AddRecord'
-import IncompleteList from './pages/IncompleteList'
-import ChartsPage from './pages/ChartsPage'
-import LedgerManager from './pages/LedgerManager'
-import MainLayout from './layouts/MainLayout'
-import AlertsPage from './pages/AlertsPage'
-import AnalysisPage from './pages/AnalysisPage'
-import BudgetPage from './pages/BudgetPage'
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuthStore } from "./store/auth";
+import LoginPage from "./pages/LoginPage";
+import Dashboard from "./pages/Dashboard";
+import RecordList from "./pages/RecordList";
+import AddRecord from "./pages/AddRecord";
+import IncompleteList from "./pages/IncompleteList";
+import ChartsPage from "./pages/ChartsPage";
+import LedgerManager from "./pages/LedgerManager";
+import MainLayout from "./layouts/MainLayout";
+import AlertsPage from "./pages/AlertsPage";
+import AnalysisPage from "./pages/AnalysisPage";
+import BudgetPage from "./pages/BudgetPage";
+import Chatbot from "./pages/Chatbot";
 
 export default function App() {
-  const token = useAuthStore((s) => s.token)
+  const token = useAuthStore((s) => s.token);
 
-  if (!token) return <LoginPage />
+  if (!token) return <LoginPage />;
 
   return (
     <Routes>
@@ -29,11 +30,12 @@ export default function App() {
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/budget" element={<BudgetPage />} />
+        <Route path="/chatbot" element={<Chatbot />} />
         {/* 404 页面 */}
         <Route path="/404" element={<div>404 Not Found</div>} />
         {/* 重定向到 Dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
     </Routes>
-  )
+  );
 }

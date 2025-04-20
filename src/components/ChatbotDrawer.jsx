@@ -1,25 +1,25 @@
-import { useState } from 'react'
-import axios from 'axios'
-import { motion, AnimatePresence } from 'framer-motion'
-import { MessageCircle, X } from 'lucide-react'
+import { useState } from "react";
+import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageCircle, X } from "lucide-react";
 
 export default function ChatbotDrawer() {
-  const [open, setOpen] = useState(false)
-  const [msg, setMsg] = useState('')
-  const [history, setHistory] = useState([])
+  const [open, setOpen] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [history, setHistory] = useState([]);
 
   const send = async () => {
-    if (!msg.trim()) return
+    if (!msg.trim()) return;
     // 追加用户消息
-    setHistory((h) => [...h, { role: 'user', content: msg }])
-    setMsg('')
+    setHistory((h) => [...h, { role: "user", content: msg }]);
+    setMsg("");
     try {
-      const { data } = await axios.post('/agent/chat', { message: msg })
-      setHistory((h) => [...h, { role: 'bot', content: data.reply }])
+      const { data } = await axios.post("/agent/chat", { message: msg });
+      setHistory((h) => [...h, { role: "bot", content: data.reply }]);
     } catch {
-      setHistory((h) => [...h, { role: 'bot', content: 'Error: Api failed' }])
+      setHistory((h) => [...h, { role: "bot", content: "Error: Api failed" }]);
     }
-  }
+  };
 
   return (
     <>
@@ -37,10 +37,10 @@ export default function ChatbotDrawer() {
       <AnimatePresence>
         {open && (
           <motion.aside
-            initial={{ x: '100%' }}
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.25 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "tween", duration: 0.25 }}
             className="fixed top-0 right-0 w-80 max-w-full h-full bg-card dark:bg-gray-800 border-l flex flex-col z-50"
           >
             {/* Header */}
@@ -57,9 +57,9 @@ export default function ChatbotDrawer() {
                 <div
                   key={i}
                   className={`rounded-xl px-3 py-2 max-w-[75%] ${
-                    m.role === 'user'
-                      ? 'ml-auto bg-brand text-white'
-                      : 'bg-gray-200 dark:bg-gray-700'
+                    m.role === "user"
+                      ? "ml-auto bg-brand text-white"
+                      : "bg-gray-200 dark:bg-gray-700"
                   }`}
                 >
                   {m.content}
@@ -75,7 +75,7 @@ export default function ChatbotDrawer() {
                 placeholder="Type a message…"
                 value={msg}
                 onChange={(e) => setMsg(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && send()}
+                onKeyDown={(e) => e.key === "Enter" && send()}
               />
               <button onClick={send} className="btn-primary">
                 Send
@@ -85,5 +85,5 @@ export default function ChatbotDrawer() {
         )}
       </AnimatePresence>
     </>
-  )
+  );
 }

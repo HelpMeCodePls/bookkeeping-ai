@@ -1,4 +1,25 @@
-// // src/components/ConnectionIndicator.jsx
+// src/components/ConnectionIndicator.jsx
+
+import { useAuthStore } from '../store/auth';
+
+export default function ConnectionIndicator() {
+  const user = useAuthStore(s => s.user);
+
+  if (!user) return null; // 如果没登录用户，啥都不显示
+
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      {/* 头像 */}
+      <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-lg">
+        {user.avatar || '👤'}
+      </div>
+
+      {/* 名字 */}
+      <span className="font-medium">{user.name || 'Unknown'}</span>
+    </div>
+  )
+}
+
 // import { useEffect, useState } from 'react'
 // import socketService from '../utils/socket'
 
@@ -61,11 +82,13 @@
 
 
 // src/components/ConnectionIndicator.jsx
-export default function ConnectionIndicator() {
-    return (
-      <div className="flex items-center gap-2 text-sm">
-        <div className="w-3 h-3 rounded-full bg-green-500" />
-        <span>Online</span>
-      </div>
-    )
-  }
+// export default function ConnectionIndicator() {
+//     return (
+//       <div className="flex items-center gap-2 text-sm">
+//         <div className="w-3 h-3 rounded-full bg-green-500" />
+//         <span>Online</span>
+//       </div>
+//     )
+//   }
+
+

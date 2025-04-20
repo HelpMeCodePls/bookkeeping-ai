@@ -8,7 +8,7 @@ import { nanoid } from "nanoid";
 const demoLedgerId = "demoLedger";
 
 /* ===== demo 数据 ===== */
-const demoUserId = "user1";
+const demoUserId = "user3";
 
 let users = [
     {
@@ -32,13 +32,13 @@ let users = [
     {
         id: "user4",
         name: "Antonio",
-        email: "charlie@example.com",
+        email: "antonio@outlook.com",
         avatar: "🐟"
     },
     {
         id: "user5",
         name: "David",
-        email: "diana@outlook.com",
+        email: "david@outlook.com",
         avatar: "🐻"
     },
     {
@@ -85,7 +85,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 50, amount: 6.15 }]
     },
     {
         id: nanoid(),
@@ -98,7 +99,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 10.25 }]
     },
     {
         id: nanoid(),
@@ -111,7 +113,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 7.88 }]
     },
     {
         id: nanoid(),
@@ -124,7 +127,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 25 }]
     },
     {
         id: nanoid(),
@@ -137,7 +141,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 50 }]
     },
     {
         id: nanoid(),
@@ -150,7 +155,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 100 }]
     },
     {
         id: nanoid(),
@@ -163,7 +169,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 37.75 }]
     },
     {
         id: nanoid(),
@@ -176,7 +183,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 22.5 }]
     },
     {
         id: nanoid(),
@@ -189,7 +197,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 15 }]
     },
     {
         id: nanoid(),
@@ -202,7 +211,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 50 }]
     },
     {
         id: nanoid(),
@@ -215,7 +225,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 100 }]
     },
     {
         id: nanoid(),
@@ -228,7 +239,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 30 }]
     },
     {
         id: nanoid(),
@@ -241,7 +253,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 75 }]
     },
     {
         id: nanoid(),
@@ -254,7 +267,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 40 }]
     },
     {
         id: nanoid(),
@@ -267,7 +281,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 20 }]
     },
     {
         id: nanoid(),
@@ -280,7 +295,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 12.5 }]
     },
     {
         id: nanoid(),
@@ -293,7 +309,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 150 }]
     },
     {
         id: nanoid(),
@@ -306,7 +323,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 250 }]
     },
     {
         id: nanoid(),
@@ -319,7 +337,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 10 }]
     },
     {
         id: nanoid(),
@@ -332,7 +351,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 45 }]
     },
     {
         id: nanoid(),
@@ -345,7 +365,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 17.5 }]
     },
     {
         id: nanoid(),
@@ -358,7 +379,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 60 }]
     },
     {
         id: nanoid(),
@@ -371,7 +393,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 125 }]
     },
     {
         id: nanoid(),
@@ -384,7 +407,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 7.5 }]
     },
     {
         id: nanoid(),
@@ -397,7 +421,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 35 }]
     },
     {
         id: nanoid(),
@@ -410,7 +435,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 22.5 }]
     },
     {
         id: nanoid(),
@@ -423,7 +449,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 55 }]
     },
     {
         id: nanoid(),
@@ -436,7 +463,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 110 }]
     },
     {
         id: nanoid(),
@@ -449,7 +477,8 @@ let records = [
         createdBy: "user2",
         updatedBy: "user2",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 17.5 }]
     },
     {
         id: nanoid(),
@@ -462,7 +491,8 @@ let records = [
         createdBy: "user3",
         updatedBy: "user3",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 27.5 }]
     },
     {
         id: nanoid(),
@@ -475,7 +505,8 @@ let records = [
         createdBy: "user1",
         updatedBy: "user1",
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        split: [{ user_id: "user4", ratio: 0.5, amount: 37.5 }]
     },
 ];
 
@@ -483,7 +514,7 @@ let ledgers = [
     {
       _id: 'demoLedger',
       name: 'Default Ledger',
-      owner: 'user1', // 添加所有者字段
+      owner: 'user3', // 添加所有者字段
       budgets: { 
         default: 1000,
         months: { '2025-04': 2000 },
@@ -493,11 +524,17 @@ let ledgers = [
       spent: calculateSpent('demoLedger'),
       collaborators: [
         {
-          userId: demoUserId,
-          email: "demo@example.com",
+          userId: "user3",
+          email: "olivia@outlook.com",
           permission: "OWNER", // OWNER/EDITOR/VIEWER
           joinedAt: new Date().toISOString()
-        }
+        },
+        {
+          userId: "user4",
+          email: "charlie@example.com",
+            permission: "EDITOR",
+            joinedAt: new Date().toISOString()
+        },
       ]
     },
   ];
@@ -514,7 +551,7 @@ let notes = [
       metadata: {
         permission: 'EDITOR'
       },
-      user_id: 'user1'
+      user_id: 'user3'
     },
     {
       id: nanoid(),
@@ -524,7 +561,7 @@ let notes = [
       created_at: Date.now() - 3600000,
       ledgerId: 'demoLedger',
       recordId: records[0].id,
-      user_id: 'user1'
+      user_id: 'user3'
     },
     {
       id: nanoid(),
@@ -538,7 +575,7 @@ let notes = [
         amount: 550,
         budget: 500
       },
-      user_id: 'user2'
+      user_id: 'user6'
     }
   ];
 
@@ -638,29 +675,39 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
     const month = url.searchParams.get('month');
     const cats = (url.searchParams.get('categories') || '').split(',').filter(Boolean);
     const split = url.searchParams.get('split');
-  
+    const collaborator = url.searchParams.get('collaborator');
+    
     const data = records.filter(r => {
-      if (r.ledger_id !== params.id) return false;
-      if (month && !r.date.startsWith(month)) return false;
-      if (cats.length > 0 && !cats.includes(r.category)) return false; // 修复这里
-      if (split && !(r.split||[]).some(s=>s.email===split)) return false;
-      return true;
-    });
+        if (r.ledger_id !== params.id) return false;
+        if (month && (!r.date || !r.date.startsWith(month))) return false;
+        if (cats.length > 0 && (!r.category || !cats.includes(r.category.toLowerCase()))) return false;
+        if (split && !(r.split || []).some(s => s.user_id === split)) return false;
+        if (collaborator && r.createdBy !== collaborator) return false;
+        return true;
+      });
+      
     return HttpResponse.json(data);
   }),
 
   http.post("/ledgers/:id/records", async ({ params, request }) => {
     const body = await request.json();
+    const currentUserId = body.user_id || demoUserId; // 使用当前用户 ID 或默认用户 ID
     const newRec = { 
       ...body, 
       id: nanoid(), 
       ledger_id: params.id,
-      createdBy: demoUserId,
-      updatedBy: demoUserId,
+      createdBy: currentUserId,
+      updatedBy: currentUserId,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+          // 确保 split 金额正确
+    split: (body.split || []).map(s => ({
+        ...s,
+        amount: Number(s.amount) || 0
+      }))
     };
     records.unshift(newRec); 
+    
     
     // 更新相关账本的 spent 数据
     const ledger = ledgers.find(l => l._id === params.id);
@@ -670,21 +717,34 @@ http.get('/ledgers/:id/records', ({ params, request }) => {
     }
     
     // 添加新账单成功后，直接加通知
-notes.unshift({
-    id: nanoid(),
-    // user_id: demoUserId, [TODO 后期要改成通知所有有权限的人！]
-    type: 'record',
-    content: `New record "${newRec.description || 'Unnamed'}" added`,
-    is_read: false,
-    created_at: Date.now(),
-    ledgerId: params.id,
-    recordId: newRec.id,
-    // user_id: 
+// notes.unshift({
+//     id: nanoid(),
+//     // user_id: demoUserId, [TODO 后期要改成通知所有有权限的人！]
+//     // user_id: currentUserId,
+//     type: 'record',
+//     content: `New record "${newRec.description || 'Unnamed'}" added`,
+//     is_read: false,
+//     created_at: Date.now(),
+//     ledgerId: params.id,
+//     recordId: newRec.id,
+//     // user_id: 
+//   });
+ledger.collaborators.forEach(collaborator => {
+    notes.unshift({
+      id: nanoid(),
+      type: 'record',
+      content: `New record "${newRec.description || 'Unnamed'}" added`,
+      is_read: false,
+      created_at: Date.now(),
+      ledgerId: params.id,
+      recordId: newRec.id,
+      user_id: collaborator.userId  // 🔥 这里，通知是针对某个用户的
+    });
   });
 
   
-    return HttpResponse.json(newRec, { status: 201 });
-  }),
+  return HttpResponse.json(records.filter(r => r.ledger_id === params.id), { status: 201 });
+}),
 
   http.put("/records/:id", async ({ params, request }) => {
     const body = await request.json();
@@ -922,42 +982,42 @@ http.get("/notifications", ({ request }) => {
     const ledgerId = url.searchParams.get('ledgerId');
     const mode = url.searchParams.get('mode');
     const selectedDate = url.searchParams.get('selectedDate');
-
+  
     let filtered = records.filter(r => r.ledger_id === ledgerId);
-    
+  
     if (mode !== 'all' && selectedDate) {
-      if (mode === 'month') {
-        filtered = filtered.filter(r => r.date.startsWith(selectedDate));
-      } else if (mode === 'year') {
-        filtered = filtered.filter(r => r.date.startsWith(selectedDate));
-      } else if (mode === 'week') {
+      if ((mode === 'month' || mode === 'year') && selectedDate.length >= 7) {
+        // month 或 year，比如 2025-04
+        filtered = filtered.filter(r => r.date?.startsWith(selectedDate));
+      } else if (mode === 'week' && selectedDate.includes('~')) {
+        // week 是日期范围
         const [start, end] = selectedDate.split('~').map(s => s.trim());
         const startDate = new Date(start);
         const endDate = new Date(end);
-
+  
         filtered = filtered.filter(r => {
           const recDate = new Date(r.date);
           return recDate >= startDate && recDate <= endDate;
         });
       }
     }
-
+  
     const byCategory = {};
     for (const r of filtered) {
       if (!byCategory[r.category]) byCategory[r.category] = 0;
       byCategory[r.category] += Number(r.amount || 0);
     }
-
+  
     const dailyMap = {};
     for (const r of filtered) {
       if (!dailyMap[r.date]) dailyMap[r.date] = 0;
       dailyMap[r.date] += Number(r.amount || 0);
     }
     const daily = Object.entries(dailyMap).sort((a, b) => a[0].localeCompare(b[0]));
-
+  
     return HttpResponse.json({ byCategory, daily });
   }),
-
+  
     /* ===== 用户相关 ===== */
     http.get("/users", () => HttpResponse.json(users)),
 
