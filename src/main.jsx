@@ -6,32 +6,30 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import './index.css'
 
-// ⚡ 用一个函数包住 Mock 初始化
-async function enableMocks() {
+// 创建查询客户端
+const queryClient = new QueryClient()
+
+// 启动应用的函数
+async function startApp() {
+  // 只在开发环境或明确启用 mock 时加载 mocks
   if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_MOCK === 'true') {
     const { worker } = await import('./mocks/browser');
     await worker.start({
-      onUnhandledRequest: 'bypass', // 可选，看你的设置
+      onUnhandledRequest: 'bypass',
     });
   }
-}
 
-// ⚡ 启动 Mock（不阻塞 React 渲染）
-enableMocks();
-
-// ⚠️ 换成你的 Google Client ID
-// const GOOGLE_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
-
-const queryClient = new QueryClient()
-
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    {/* <GoogleOAuthProvider clientId={GOOGLE_ID}> */}
+  // 渲染应用
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <App />
         </BrowserRouter>
       </QueryClientProvider>
-    {/* </GoogleOAuthProvider> */}
-  </React.StrictMode>,
-)
+    </React.StrictMode>
+  );
+}
+
+// 启动应用
+startApp().catch(console.error);
