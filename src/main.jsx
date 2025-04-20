@@ -6,15 +6,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import './index.css'
 
-async function setupMocks() {
+// ⚡ 用一个函数包住 Mock 初始化
+async function enableMocks() {
   if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_MOCK === 'true') {
     const { worker } = await import('./mocks/browser');
-    await worker.start();
+    await worker.start({
+      onUnhandledRequest: 'bypass', // 可选，看你的设置
+    });
   }
 }
 
-setupMocks();
-
+// ⚡ 启动 Mock（不阻塞 React 渲染）
+enableMocks();
 
 // ⚠️ 换成你的 Google Client ID
 // const GOOGLE_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
