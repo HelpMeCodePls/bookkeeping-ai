@@ -31,7 +31,8 @@ npm run dev
 ### 4. Then open http://localhost:5173 in your browser.
 
 
-📦 Tech Stack
+## 📦 Tech Stack
+
 Vite + React 18
 
 React Router
@@ -48,7 +49,7 @@ Mock Service Worker (MSW) (mock API)
 
 Nanoid (ID generation)
 
-📄 Notes for Mock Setup
+## 📄 Notes for Mock Setup
 Mock data is stored in /src/mocks/mockData.js.
 
 Mock API handlers are located under /src/mocks/handlers/.
@@ -57,7 +58,7 @@ Mock Service Worker is initialized automatically when running locally (no extra 
 
 No backend server is involved in this version.
 
-🛡 If Encountering Issues
+## 🛡 If Encountering Issues
 Make sure you are running in a local environment (localhost:5173).
 
 If page is blank or errors appear:
@@ -68,7 +69,7 @@ Stop and re-run npm run dev
 
 Mock worker (browser.js) only activates in development mode.
 
-⚡ Common Commands
+## ⚡ Common Commands
 
 Command	Purpose
 npm run dev	Start local development
