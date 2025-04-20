@@ -1,44 +1,120 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/auth'
-import axios from 'axios'
+import { motion } from 'framer-motion'
+import { User, Loader2 } from 'lucide-react'
+
+// 固定4个可选用户
+const tempUsers = [
+  {
+    id: "user3",
+    name: "Olivia",
+    email: "olivia@outlook.com",
+    avatar: "🐢"
+},
+{
+    id: "user4",
+    name: "Antonio",
+    email: "charlie@example.com",
+    avatar: "🐟"
+},
+{
+    id: "user5",
+    name: "David",
+    email: "diana@outlook.com",
+    avatar: "🐻"
+},
+{
+    id: "user6",
+    name: "Chenchen",
+    email: "chenchen@outlook.com",
+    avatar: "🦝"
+} 
+]
+
+// 动画配置
+const fadeUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.3 }
+}
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const setAuth = useAuthStore((s) => s.setAuth)
 
-  const handleLogin = async (e) => {
-    e.preventDefault()
+  const handleUserSelect = async (user) => {
+    setSelectedUser(user)
+    setIsLoading(true)
+
     try {
-      const { data } = await axios.post('/auth/login', { email })
-      setAuth({ token: data.access_token, user: data.user })
+      // 直接模拟登录，不用 axios 了！
+      const fakeToken = `stub-jwt-${user.id}`
+      setAuth({ 
+        token: fakeToken,
+        user
+      })
       navigate('/dashboard')
     } catch (err) {
-      console.error(err)
-      alert('Login failed. Please check your email.')
+      console.error('登录错误:', err)
+      alert('登录失败')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="h-screen flex items-center justify-center">
-      <form onSubmit={handleLogin} className="space-y-4">
-        <h2 className="text-2xl font-bold text-center">Login</h2>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border px-4 py-2 rounded w-72"
-          required
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded w-full"
-        >
-          Login
-        </button>
-      </form>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <motion.div 
+        className="sm:mx-auto sm:w-full sm:max-w-md"
+        initial={fadeUp.initial}
+        animate={fadeUp.animate}
+        transition={fadeUp.transition}
+      >
+        <div className="flex justify-center">
+          <User className="h-12 w-12 text-blue-600" />
+        </div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          选择用户
+        </h2>
+      </motion.div>
+
+      <motion.div
+        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
+        initial={fadeUp.initial}
+        animate={fadeUp.animate}
+        transition={fadeUp.transition}
+      >
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <div className="space-y-4">
+            {tempUsers.map((user) => (
+              <motion.button
+                key={user.id}
+                onClick={() => handleUserSelect(user)}
+                className={`w-full flex items-center p-4 border rounded-lg ${
+                  selectedUser?.id === user.id ? 'bg-blue-50 border-blue-500' : 'border-gray-200'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span className="text-2xl mr-4">{user.avatar}</span>
+                <div>
+                  <p className="font-medium">{user.name}</p>
+                  <p className="text-sm text-gray-500">{user.email}</p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+
+          {isLoading && (
+            <div className="mt-4 flex justify-center">
+              <Loader2 className="h-5 w-5 animate-spin" />
+            </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   )
 }

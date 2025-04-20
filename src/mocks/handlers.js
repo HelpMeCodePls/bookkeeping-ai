@@ -11,24 +11,42 @@ const demoLedgerId = "demoLedger";
 const demoUserId = "user1";
 
 let users = [
-  {
-    id: demoUserId,
-    name: "Demo User",
-    email: "ozijunw@gmail.com",
-    avatar: "👤"
-  },
-  {
-    id: "user2",
-    name: "Alice Smith",
-    email: "olivia.zijun.wei@gmail.com",
-    avatar: "👩"
-  },
-  {
-    id: "user3",
-    name: "Bob Johnson",
-    email: "bob@example.com",
-    avatar: "👨"
-  }
+    {
+        id: "user1",
+        name: "Demo User",
+        email: "ozijunw@gmail.com",
+        avatar: "👤"
+    },
+    {
+        id: "user2",
+        name: "Alice Smith",
+        email: "olivia.zijun.wei@gmail.com",
+        avatar: "👩"
+    },
+    {
+        id: "user3",
+        name: "Olivia",
+        email: "olivia@outlook.com",
+        avatar: "🐢"
+    },
+    {
+        id: "user4",
+        name: "Antonio",
+        email: "charlie@example.com",
+        avatar: "🐟"
+    },
+    {
+        id: "user5",
+        name: "David",
+        email: "diana@outlook.com",
+        avatar: "🐻"
+    },
+    {
+        id: "user6",
+        name: "Chenchen",
+        email: "chenchen@outlook.com",
+        avatar: "🦝"
+    }
 ];
 
 let categories = [
@@ -560,19 +578,45 @@ export const handlers = [
 //     })
 //   }),
 
-http.post('/auth/login', async ({ request }) => {
+
+  
+  // 保持原有登录接口不变
+  http.post('/auth/login', async ({ request }) => {
     const { email } = await request.json()
     const user = users.find(u => u.email === email)
     
     if (!user) {
-      return HttpResponse.error('User not found', { status: 404 })
+      return HttpResponse.json(
+        { message: 'User not found' },
+        { status: 404 }
+      )
     }
   
     return HttpResponse.json({
-      access_token: `stub-jwt-${user.id}`,  
-      user,
+      access_token: `stub-jwt-${user.id}`,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar
+        // 不返回敏感字段
+      }
     })
   }),
+
+// http.post('/auth/login', async ({ request }) => {
+//     const { email } = await request.json()
+//     const user = users.find(u => u.email === email)
+    
+//     if (!user) {
+//       return HttpResponse.error('User not found', { status: 404 })
+//     }
+  
+//     return HttpResponse.json({
+//       access_token: `stub-jwt-${user.id}`,  
+//       user,
+//     })
+//   }),
   
   /* ===== categories ===== */
   http.get("/categories", () => HttpResponse.json(categories)),
