@@ -6,10 +6,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import './index.css'
 
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_MOCK === 'true') {
   const { worker } = await import('./mocks/browser')
-  await worker.start()
+  await worker.start({
+    onUnhandledRequest: 'bypass', // 避免mock不到时报错
+  })
 }
+
 
 // ⚠️ 换成你的 Google Client ID
 // const GOOGLE_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
