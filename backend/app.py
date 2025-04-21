@@ -29,11 +29,11 @@ def chat():
 
     try:
         async def run():
-            # 使用 async for 获取 invoke 的完整输出
-            final_response = ""
+            full_response = ""
+            # ✅ 使用 async for 正确读取 invoke 的异步输出
             async for chunk in Customer_Service_Agent.invoke(message, args):
-                final_response += str(chunk)
-            return final_response
+                full_response += str(chunk)
+            return full_response
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
