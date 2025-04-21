@@ -1,0 +1,74 @@
+import os
+from dotenv import load_dotenv
+import asyncio
+from semantic_kernel.agents import ChatCompletionAgent
+from semantic_kernel.connectors.ai.open_ai import  OpenAIChatCompletion,OpenAIChatPromptExecutionSettings
+from semantic_kernel.functions.kernel_function_decorator import kernel_function
+from semantic_kernel.functions import kernel_function,KernelArguments
+from typing import Annotated
+from pydantic import BaseModel
+import pandas as pd
+
+# Load the .env file
+load_dotenv()  
+model_id_agent1 = os.getenv("OPENAI_CHAT_MODEL3")
+model_id_agent2 = os.getenv("OPENAI_CHAT_MODEL4")
+api_key = os.getenv("OPENAI_API_KEY")
+
+
+#settings 
+thread = None
+settings = OpenAIChatPromptExecutionSettings()
+
+
+#this is the analyst agent that will use tools as plugin and handle all the issues like cost summary tables, give recommendations on savings, and analyse the data as Customer sercvice agent requested
+Analyst_Agent = ChatCompletionAgent(
+        service=OpenAIChatCompletion(ai_model_id=model_id_agent2, api_key=api_key),
+        name="Analyst_Agent",
+        instructions= "You are an invisible backend analyst.. Evaluate user requests using appropriate tools. "\
+            "Always begin with: '[Analyst_Agent activated]'. "\
+            "If you can use plugins to get the data you need and complete the task."\
+            "You are not allowed to use any other plugins or tools which not in the plugins that provided to you. "
+            "If the request is not solvable with plugins, reply with: '[Forwarding back to Customer_Service_Agent]'."
+            "Otherwise, provide the completed analysis directly as part of your response.",
+        plugins=[], # 所有function放在这里
+        arguments=KernelArguments(settings)
+    )
+
+Database_Agent = ChatCompletionAgent(
+    service=OpenAIChatCompletion(ai_model_id=model_id_agent2, api_key=api_key),
+    name="Database_Agent",
+    instructions=(
+        "You are a backend data retrieval agent. "
+        "You do NOT interact with the user directly. "
+        "Only the Customer_Service_Agent can talk to the user. "
+        "If a request lacks information (e.g., merchant name, date, category), ask the Customer_Service_Agent to gather the missing info. "
+        "Be concise, and return data or ask only for clarification needed to complete the task."
+    ),
+    plugins=[]
+)
+
+# This is the main agent that commnunicate with user
+Customer_Service_Agent = ChatCompletionAgent(
+    service=OpenAIChatCompletion(ai_model_id=model_id_agent1, api_key=api_key),
+    name="Customer_Service_Agent",
+    instructions=(
+        "You are the only agent who talks to the user. "
+        "You use internal agents to fulfill requests: \n"
+        "- Use **Analyst_Agent** for any task that involves analysis, summaries, trends, total spending calculations, charts, or recommendations. \n"
+        "- Use **Database_Agent** only for direct fact-based retrieval, such as 'what restaurants did I go to', 'when did I visit Starbucks', or 'how many times did I shop at Walmart'.\n\n"
+        "If a request lacks information (like merchant or date), ask Database_Agent to clarify — then ask the user. "
+        "Always integrate responses and present them in your own voice. Do not reveal internal agents."
+    ),
+    plugins=[Analyst_Agent, Database_Agent]
+)
+
+# Customer_Service_Agent = ChatCompletionAgent(
+#         service=OpenAIChatCompletion(ai_model_id=model_id_agent1, api_key=api_key),
+#         name="Customer_Service_Agent",
+#         instructions="You are a customer service assistant. Handle general inquiries. "\
+#         "If the user asks for specific calculations like food spending, forward the request to Analyst_Agent and wait for a result. "\
+#         "Prefix this with '[Forwarding to Analyst_Agent]'. After receiving the result, prefix it with '[Response from Analyst_Agent]' "\
+#         "and respond fully. After every response, ask the user if they have another question." ,
+#         plugins=[Analyst_Agent, Database_Agent],  # Add the Analyst_Agent as a plugin
+#     )
