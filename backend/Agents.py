@@ -63,6 +63,11 @@ Customer_Service_Agent = ChatCompletionAgent(
     plugins=[Analyst_Agent, Database_Agent]
 )
 
+__all__ = [
+    "Customer_Service_Agent",
+    "Analyst_Agent",
+    "Database_Agent"
+]
 # Customer_Service_Agent = ChatCompletionAgent(
 #         service=OpenAIChatCompletion(ai_model_id=model_id_agent1, api_key=api_key),
 #         name="Customer_Service_Agent",
