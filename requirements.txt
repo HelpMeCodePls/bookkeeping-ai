@@ -1,0 +1,14 @@
+# 核心库
+openai
+pandas
+python-dotenv
+pydantic
+
+# Microsoft Semantic Kernel（AI Agent 用的库）
+semantic-kernel
+
+# 异步支持（虽然 Python 原生支持 asyncio，但某些场景可能需要）
+aiohttp
+
+# 类型注解和开发支持
+typing-extensions
