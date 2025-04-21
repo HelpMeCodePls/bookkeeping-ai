@@ -5,6 +5,7 @@ from backend.Agents import Customer_Service_Agent  # 你定义的智能体
 from backend.Agents import Analyst_Agent, Database_Agent #for  future Debug
 from semantic_kernel.functions import KernelArguments
 from flask_cors import CORS
+import asyncio
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
@@ -12,6 +13,7 @@ CORS(app)
 @app.route("/")  # ✅ 默认首页跳转到你的chatbot
 def chatbot_home():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'test_chat.html')
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -22,12 +24,14 @@ def chat():
     if not message:
         return jsonify({"response": "请输入有效信息。"})
 
-    args = KernelArguments({
-        "user_id": user_id
-    })
+    args = KernelArguments({"user_id": user_id})
 
     try:
-        result = Customer_Service_Agent.invoke(message, args)
+        # 正确调用异步智能体，并获取结果
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = loop.run_until_complete(Customer_Service_Agent.invoke(message, args))
+
         return jsonify({"response": result})
     except Exception as e:
         return jsonify({"response": f"[系统错误]: {str(e)}"})
