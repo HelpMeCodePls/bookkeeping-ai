@@ -10,6 +10,10 @@ import asyncio
 app = Flask(__name__, static_folder='static')
 CORS(app)
 
+@app.route("/ping")
+def ping():
+    return "pong", 200
+
 @app.route("/")  # ✅ 默认首页跳转到你的chatbot
 def chatbot_home():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'test_chat.html')
