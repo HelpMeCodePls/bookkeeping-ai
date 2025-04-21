@@ -77,7 +77,7 @@ class CustomerServiceAgent(ChatCompletionAgent):
                 "If a request lacks information (like merchant or date), ask Database_Agent to clarify — then ask the user. "
                 "Always integrate responses and present them in your own voice. Do not reveal internal agents."
             ),
-            plugins=[self.analyst_agent, self.database_agent]
+            plugins=[self.analyst_agent, self.database_agent],
             arguments=KernelArguments(settings)
         )
     @property
