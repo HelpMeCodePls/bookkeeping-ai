@@ -18,6 +18,8 @@ def chatbot_home():
 @app.route("/chat", methods=["POST"])
 def chat():
     from backend.Agents import Customer_Service_Agent
+    from semantic_kernel import KernelArguments  # ✅ 修正 import 路径
+
     data = request.get_json()
     message = data.get("message")
     user_id = data.get("user_id", "test_user")
@@ -25,12 +27,15 @@ def chat():
     if not message:
         return jsonify({"response": "请输入有效信息。"})
 
-    args = KernelArguments({"user_id": user_id})
+    args = KernelArguments({
+        "message": message,
+        "user_id": user_id
+    })
 
     try:
         async def run():
             full_response = ""
-            async for chunk in Customer_Service_Agent.invoke(message, arguments=args):  # ✅ 正确调用
+            async for chunk in Customer_Service_Agent.invoke(arguments=args):  # ✅ 正确写法
                 full_response += str(chunk)
             return full_response
 
