@@ -5,6 +5,7 @@ python-dotenv
 pydantic
 gunicorn
 flask
+flask-cors
 
 # Microsoft Semantic Kernel（AI Agent 用的库）
 semantic-kernel
