@@ -30,8 +30,13 @@ def chat():
         # 正确调用异步智能体，并获取结果
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        result = loop.run_until_complete(Customer_Service_Agent.invoke(message, args))
 
-        return jsonify({"response": result})
+        async def run_agent():
+            result = await Customer_Service_Agent.invoke(message, args)
+            return result
+
+        response_text = loop.run_until_complete(run_agent())
+        return jsonify({"response": response_text})
+
     except Exception as e:
         return jsonify({"response": f"[系统错误]: {str(e)}"})

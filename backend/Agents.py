@@ -18,7 +18,11 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 #settings 
 thread = None
-settings = OpenAIChatPromptExecutionSettings()
+settings = OpenAIChatPromptExecutionSettings(
+    tool_choice="auto",     # 允许 agent 自动选择插件（tool）
+    temperature=0.5,
+    max_tokens=1024
+)
 
 
 #this is the analyst agent that will use tools as plugin and handle all the issues like cost summary tables, give recommendations on savings, and analyse the data as Customer sercvice agent requested
