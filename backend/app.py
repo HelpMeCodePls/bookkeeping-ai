@@ -30,8 +30,7 @@ def chat():
     try:
         async def run():
             full_response = ""
-            # ✅ 使用 async for 正确读取 invoke 的异步输出
-            async for chunk in Customer_Service_Agent.invoke(message, args):
+            async for chunk in Customer_Service_Agent.invoke(message, arguments=args):  # ✅ 正确调用
                 full_response += str(chunk)
             return full_response
 
