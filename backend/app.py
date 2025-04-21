@@ -17,6 +17,7 @@ def chatbot_home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
+    from backend.agents import Customer_Service_Agent
     data = request.get_json()
     message = data.get("message")
     user_id = data.get("user_id", "test_user")
@@ -27,15 +28,17 @@ def chat():
     args = KernelArguments({"user_id": user_id})
 
     try:
-        # 正确调用异步智能体，并获取结果
+        async def run():
+            # 使用 async for 获取 invoke 的完整输出
+            final_response = ""
+            async for chunk in Customer_Service_Agent.invoke(message, args):
+                final_response += str(chunk)
+            return final_response
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+        response_text = loop.run_until_complete(run())
 
-        async def run_agent():
-            result = await Customer_Service_Agent.invoke(message, args)
-            return result
-
-        response_text = loop.run_until_complete(run_agent())
         return jsonify({"response": response_text})
 
     except Exception as e:
