@@ -17,7 +17,7 @@ def chatbot_home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    from backend.agents import Customer_Service_Agent
+    from backend.Agents import Customer_Service_Agent
     data = request.get_json()
     message = data.get("message")
     user_id = data.get("user_id", "test_user")
