@@ -3,6 +3,8 @@ openai
 pandas
 python-dotenv
 pydantic
+gunicorn
+flask
 
 # Microsoft Semantic Kernel（AI Agent 用的库）
 semantic-kernel
