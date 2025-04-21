@@ -6,7 +6,6 @@ from semantic_kernel.connectors.ai.open_ai import  OpenAIChatCompletion,OpenAICh
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.functions import kernel_function,KernelArguments
 from typing import Annotated
-from pydantic import BaseModel
 import pandas as pd
 
 load_dotenv()
@@ -79,8 +78,15 @@ class CustomerServiceAgent(ChatCompletionAgent):
                 "Always integrate responses and present them in your own voice. Do not reveal internal agents."
             ),
             plugins=[self.analyst_agent, self.database_agent]
+            arguments=KernelArguments(settings)
         )
+    @property
+    def _analyst_agent(self):
+        return AnalystAgent()
 
+    @property
+    def _database_agent(self):
+        return DatabaseAgent()
 
 # ✅ 实例化
 Customer_Service_Agent = CustomerServiceAgent()
