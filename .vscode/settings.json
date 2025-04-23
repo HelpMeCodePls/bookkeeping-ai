@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.cwd": "${workspaceFolder}/backend",
+    "python.analysis.extraPaths": ["./backend"],
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.defaultInterpreterPath": "python"
+  }
