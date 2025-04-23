@@ -10,10 +10,6 @@ from semantic_kernel.kernel import Kernel
 from typing import Annotated
 import pandas as pdS
 
-import os
-print("🔍 当前工作目录：", os.getcwd())
-import sys
-print("🔍 sys.path 列表：", sys.path)
 
 # 通用设置（可复用）
 settings = OpenAIChatPromptExecutionSettings(
