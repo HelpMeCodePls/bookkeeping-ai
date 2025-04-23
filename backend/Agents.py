@@ -6,10 +6,9 @@ from semantic_kernel.connectors.ai.open_ai import  OpenAIChatCompletion,OpenAICh
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.functions import kernel_function,KernelArguments
 from semantic_kernel.kernel import Kernel
-from functions import LedgerService, RecordService, NotificationService, DatabaseClient
-from plugin_loader import load_all_plugins  # 从你刚才写的 plugin_loader.py 引入
+#from functions import LedgerService, RecordService, NotificationService, DatabaseClient
 from typing import Annotated
-import pandas as pd
+import pandas as pdS
 
 
 
@@ -25,6 +24,8 @@ load_dotenv()  # Load the .env file
 model_id_agent1 = os.getenv("OPENAI_CHAT_MODEL3")
 model_id_agent2 = os.getenv("OPENAI_CHAT_MODEL4")
 api_key = os.getenv("OPENAI_API_KEY")
+
+print("model_id_agent1:", model_id_agent1)
 thread = None
 
 #this is the analyst agent that will use tools as plugin and handle all the issues like cost summary tables, give recommendations on savings, and analyse the data as Customer sercvice agent requested
@@ -76,12 +77,9 @@ __all__ = [
     "Database_Agent"
 ]
 
-# Customer_Service_Agent = ChatCompletionAgent(
-#         service=OpenAIChatCompletion(ai_model_id=model_id_agent1, api_key=api_key),
-#         name="Customer_Service_Agent",
-#         instructions="You are a customer service assistant. Handle general inquiries. "\
-#         "If the user asks for specific calculations like food spending, forward the request to Analyst_Agent and wait for a result. "\
-#         "Prefix this with '[Forwarding to Analyst_Agent]'. After receiving the result, prefix it with '[Response from Analyst_Agent]' "\
-#         "and respond fully. After every response, ask the user if they have another question." ,
-#         plugins=[Analyst_Agent, Database_Agent],  # Add the Analyst_Agent as a plugin
-#     )
+async def main():
+
+    response = await Customer_Service_Agent.get_response(messages="Hello")
+    print(response.content)
+
+asyncio.run(main()) 
