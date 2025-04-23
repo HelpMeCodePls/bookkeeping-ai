@@ -1,5 +1,5 @@
 # plugin_loader.py
-from semantic_kernel.plugin_importer.import_functions import import_functions_from_object
+from semantic_kernel import import_functions_from_object
 from functions import LedgerService, RecordService, NotificationService, DatabaseClient
 
 def load_all_plugins(kernel):
