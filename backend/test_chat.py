@@ -1,6 +1,6 @@
 # test_chat.py
 import asyncio
-from agent import Customer_Service_Agent
+from Agents import Customer_Service_Agent
 
 async def test_conversation():
     print("\n🧪 [TEST] Starting test conversation with Customer_Service_Agent...")

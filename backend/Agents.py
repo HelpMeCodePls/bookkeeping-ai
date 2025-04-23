@@ -6,11 +6,12 @@ from semantic_kernel.connectors.ai.open_ai import  OpenAIChatCompletion,OpenAICh
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.functions import kernel_function,KernelArguments
 from semantic_kernel.kernel import Kernel
+from functions import LedgerService, RecordService, NotificationService, DatabaseClient
 from plugin_loader import load_all_plugins  # 从你刚才写的 plugin_loader.py 引入
 from typing import Annotated
 import pandas as pd
 
-load_dotenv()
+
 
 # 通用设置（可复用）
 settings = OpenAIChatPromptExecutionSettings(
@@ -18,6 +19,7 @@ settings = OpenAIChatPromptExecutionSettings(
     temperature=0.5,
     max_tokens=1024
 )
+
 # 读取环境变量
 load_dotenv()  # Load the .env file
 model_id_agent1 = os.getenv("OPENAI_CHAT_MODEL3")
@@ -35,7 +37,7 @@ Analyst_Agent = ChatCompletionAgent(
             "You are not allowed to use any other plugins or tools which not in the plugins that provided to you. "
             "If the request is not solvable with plugins, reply with: '[Forwarding back to Customer_Service_Agent]'."
             "Otherwise, provide the completed analysis directly as part of your response.",
-        plugins=[], # 所有function放在这里
+        plugins=[LedgerService(),NotificationService()], # 所有function放在这里
         arguments=KernelArguments(settings)
     )
 
@@ -49,7 +51,7 @@ Database_Agent = ChatCompletionAgent(
         "If a request lacks information (e.g., merchant name, date, category), ask the Customer_Service_Agent to gather the missing info. "
         "Be concise, and return data or ask only for clarification needed to complete the task."
     ),
-    plugins=[]
+    plugins=[RecordService(),NotificationService()], # 所有function放在这里
 )
 
 # This is the main agent that commnunicate with user
@@ -67,11 +69,13 @@ Customer_Service_Agent = ChatCompletionAgent(
     plugins=[Analyst_Agent, Database_Agent]
 )
 
+
 __all__ = [
     "Customer_Service_Agent",
     "Analyst_Agent",
     "Database_Agent"
 ]
+
 # Customer_Service_Agent = ChatCompletionAgent(
 #         service=OpenAIChatCompletion(ai_model_id=model_id_agent1, api_key=api_key),
 #         name="Customer_Service_Agent",
