@@ -5,6 +5,8 @@ from semantic_kernel.agents import ChatCompletionAgent
 from semantic_kernel.connectors.ai.open_ai import  OpenAIChatCompletion,OpenAIChatPromptExecutionSettings
 from semantic_kernel.functions.kernel_function_decorator import kernel_function
 from semantic_kernel.functions import kernel_function,KernelArguments
+from semantic_kernel.kernel import Kernel
+from plugin_loader import load_all_plugins  # 从你刚才写的 plugin_loader.py 引入
 from typing import Annotated
 import pandas as pd
 
