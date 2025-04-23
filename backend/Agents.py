@@ -37,7 +37,8 @@ Analyst_Agent = ChatCompletionAgent(
             "You are not allowed to use any other plugins or tools which not in the plugins that provided to you. "
             "If the request is not solvable with plugins, reply with: '[Forwarding back to Customer_Service_Agent]'."
             "Otherwise, provide the completed analysis directly as part of your response.",
-        plugins=[LedgerService(),NotificationService()], # 所有function放在这里
+        #plugins=[LedgerService(),NotificationService()], # 所有function放在这里
+        plugins=[], 
         arguments=KernelArguments(settings)
     )
 
@@ -51,7 +52,8 @@ Database_Agent = ChatCompletionAgent(
         "If a request lacks information (e.g., merchant name, date, category), ask the Customer_Service_Agent to gather the missing info. "
         "Be concise, and return data or ask only for clarification needed to complete the task."
     ),
-    plugins=[RecordService(),NotificationService()], # 所有function放在这里
+    plugins=[], 
+    #plugins=[RecordService(),NotificationService()], # 所有function放在这里
 )
 
 # This is the main agent that commnunicate with user
