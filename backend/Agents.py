@@ -8,9 +8,8 @@ from semantic_kernel.functions import kernel_function,KernelArguments
 from semantic_kernel.kernel import Kernel
 from semantic_kernel.filters import FunctionInvocationContext
 from semantic_kernel.agents import ChatHistoryAgentThread
-from functions import LedgerService, RecordService, NotificationService, DatabaseClient
+from backend.functions import LedgerService, RecordService, NotificationService, DatabaseClient
 from typing import Annotated
-# import pandas as pdS
 
 # ============ ENV SETUP ============
 load_dotenv()
