@@ -19,6 +19,7 @@ import ChatbotDrawer from "../components/ChatbotDrawer";
 import LedgerSelector from "../components/LedgerSelector";
 import MonthSelector from "../components/MonthSelector";
 import ConnectionIndicator from "../components/ConnectionIndicator";
+import ChatbotWidget from "../components/ChatbotWidget";
 // import socketService from "../utils/socket";
 // import { useEffect } from "react";
 
@@ -144,6 +145,7 @@ export default function MainLayout() {
       </div>
 
       {/* <ChatbotDrawer /> */}
+      <ChatbotWidget />
     </div>
   );
 }
