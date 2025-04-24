@@ -109,7 +109,7 @@ class RecordService:
 
     @kernel_function(description="Retrieves all records for a specific ledger.")
     def get_by_ledger(self, ledger_id: Annotated[str, "ID of the ledger that this record belongs to"]) -> Annotated[Dict[str, Any], "Record data."]:
-        return self.col.find({"ledger_id": ledger_id}).tolist() or {}
+        return self.col.find({"ledger_id": ledger_id}).to_list() or {}
 
     @kernel_function(description="Write the necessary arguments provided by user prompt and the record id, and leave the rest as default values.")
     def update(self, record_id: Annotated[str, "ID of the record"], 
