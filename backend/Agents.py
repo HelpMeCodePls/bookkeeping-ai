@@ -10,7 +10,7 @@ from semantic_kernel.filters import FunctionInvocationContext
 from semantic_kernel.agents import ChatHistoryAgentThread
 from functions import LedgerService, RecordService, NotificationService, DatabaseClient
 from typing import Annotated
-import pandas as pdS
+# import pandas as pdS
 
 # ============ ENV SETUP ============
 load_dotenv()
@@ -73,12 +73,16 @@ Database_Agent = ChatCompletionAgent(
         "You are a backend data retrieval agent. "
         "You do NOT interact with the user directly. "
         "Only the Customer_Service_Agent can talk to the user. "
-        "If a request lacks information (e.g., merchant name, date, category), ask the Customer_Service_Agent to gather the missing info. "
+        # "If a request lacks information (e.g., merchant name, date, category), ask the Customer_Service_Agent to gather the missing info. "
         "If the request is not solvable with plugins, reply with: '[Forwarding back to Customer_Service_Agent]'."
+        "When an argument is missing, please fill it with the most reasonable value. e.g. if category is missing, and user says 'I bought a jacket', you can fill the category with 'clothing'."
+        "If you added any information in the argument that is not provided by the user, please fill the 'is_AI_generated' field with boolean True."
+        "When replying with ledgers' information, please make sure to include the _id field in the response."
+        "Handle anything about record service, such as creating, updating, deleting records. "
         "Be concise, and return data or ask only for clarification needed to complete the task."
     ),
     #plugins=[]
-    plugins=[RecordService(),NotificationService()], # 所有function放在这里
+    plugins=[LedgerService(), RecordService(),NotificationService()], # 所有function放在这里
 )
 
 # ============ MAIN AGENT ============
@@ -88,10 +92,11 @@ Customer_Service_Agent = ChatCompletionAgent(
     kernel=kernel,
     name="Customer_Service_Agent",
     instructions=(
+        "You are a bookkeeping assistant.  "
         "You are the only agent who talks to the user. "
-        "You use internal agents to fulfill requests: \n"
-        "- Use **Analyst_Agent** for any task that involves analysis, summaries, trends, total spending calculations, charts, or recommendations. \n"
-        "- Use **Database_Agent** only for direct fact-based retrieval, such as 'what restaurants did I go to', 'when did I visit Starbucks', or 'how many times did I shop at Walmart'.\n\n"
+        "When a user querys, you should try to invoke kernel functions. "
+        "- Use **Analyst_Agent** for any task that involves analysis, summaries, trends, total spending calculations, charts, or recommendations."
+        "- Forward data extraction, transformation and load requests to the Database_Agent, such as 'what restaurants did I go to', 'when did I visit Starbucks', or 'how many times did I shop at Walmart'."
         "If a request lacks information (like merchant or date), ask Database_Agent to clarify — then ask the user. "
         "Always integrate responses and present them in your own voice. Do not reveal internal agents."
     ),
@@ -108,7 +113,7 @@ __all__ = [
 
 async def main():
 
-    response = await Customer_Service_Agent.get_response(messages="Can you help me to analyze how much I spent in total last month?")
+    response = await Customer_Service_Agent.get_response(messages="Show me all the purchases in ledger with id 97e8f621-a6a1-4882-ad22-d5adfca27ac9")
     print(str(response.content))
     #print type(response.content)
     print(type(str(response.content)))
