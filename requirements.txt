@@ -6,6 +6,7 @@ pydantic
 gunicorn
 flask
 flask-cors
+pymongo
 
 # Microsoft Semantic Kernel（AI Agent 用的库）
 semantic-kernel
