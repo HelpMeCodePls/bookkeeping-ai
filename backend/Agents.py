@@ -42,10 +42,15 @@ settings = OpenAIChatPromptExecutionSettings(
 )
 
 # ============ MOCK PLUGIN ============
-class MockPlugin:
-    @kernel_function(name="echo", description="Echo input message")
-    def echo(self, message: str) -> str:
-        return f"你说了：{message}"
+class TaskRouter:
+    @kernel_function(name="classify_task", description="Classify user request into general, record, or ledger task")
+    def classify(self, message: str) -> str:
+        if "analysis" in message or "calculate" in message or "sum" in message:
+            return "ledger"
+        elif "record" in message or "delete" in message or "add" in message:
+            return "record"
+        else:
+            return "general"
 
 
 # ============ SUB AGENTS ============
@@ -54,12 +59,14 @@ Analyst_Agent = ChatCompletionAgent(
         service=AzureChatCompletion(),
         kernel=kernel,
         name="Analyst_Agent",
-        instructions= "You are an invisible backend analyst.. Evaluate user requests using appropriate tools. "\
-            "Always begin with: '[Analyst_Agent activated]'. "\
-            "If you can use plugins to get the data you need and complete the task."\
-            "You are not allowed to use any other plugins or tools which not in the plugins that provided to you. "
-            "If the request is not solvable with plugins, reply with: '[Forwarding back to Customer_Service_Agent]'."
-            "Otherwise, provide the completed analysis directly as part of your response.",
+        instructions= ("You are the Analyst Agent responsible for processing analytical tasks.\n"
+        "You DO NOT interact directly with the user.\n"
+        "Your tasks include calculating budgets, generating summaries, identifying trends,\n"
+        "and providing insights or recommendations based on the user's financial records.\n"
+        "Use only the tools (plugins) provided to you.\n"
+        "Always begin your output with '[Analyst_Agent activated]'.\n"
+        "If the task cannot be completed, return '[Forwarding back to Customer_Service_Agent]'."
+        ),
         plugins=[LedgerService(),NotificationService()], # 所有function放在这里
         #plugins=[]
     )
@@ -100,7 +107,7 @@ Customer_Service_Agent = ChatCompletionAgent(
         "Always integrate responses and present them in your own voice. Do not reveal internal agents."
     ),
     #plugins=[],
-    plugins=[Analyst_Agent, Database_Agent]
+    plugins=[TaskRouter(),Analyst_Agent, Database_Agent]
 )
 
 
