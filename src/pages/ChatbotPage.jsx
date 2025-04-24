@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Send, Sparkles, Bot, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function Chatbot() {
+export default function ChatbotPage() {
   const [msg, setMsg] = useState('');
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
