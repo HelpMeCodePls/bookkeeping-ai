@@ -17,7 +17,7 @@ cd expense-assistant
 ```
 
 ### 2. Install dependencies
-
+ 
 ```
 npm install
 ```
