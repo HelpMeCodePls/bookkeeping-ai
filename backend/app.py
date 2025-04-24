@@ -1,53 +1,47 @@
 from flask import Flask, request, jsonify, send_from_directory
-import os
-from dotenv import load_dotenv
-from backend.Agents import Customer_Service_Agent  # 你定义的智能体
-from backend.Agents import Analyst_Agent, Database_Agent #for  future Debug
-from semantic_kernel.functions import KernelArguments
+import os, asyncio
 from flask_cors import CORS
-import asyncio
-
-app = Flask(__name__, static_folder='static')
+from backend.Agents import Customer_Service_Agent  # 你的主智能体
+from semantic_kernel.agents import ChatHistoryAgentThread
+thread: ChatHistoryAgentThread = ChatHistoryAgentThread()
+# ==== Flask 初始化 ====
+app = Flask(__name__, static_folder="static")
 CORS(app)
 
+# ==== 首页：加载聊天前端页面 ====
+@app.route("/")
+def home():
+    return send_from_directory(os.path.join(app.root_path, 'static'), "test_chat.html")
+
+# ==== 健康检查 ====
 @app.route("/ping")
 def ping():
     return "pong", 200
 
-@app.route("/")  # ✅ 默认首页跳转到你的chatbot
-def chatbot_home():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'test_chat.html')
-
-
+# ==== 主聊天接口（使用 get_response） ====
 @app.route("/chat", methods=["POST"])
 def chat():
-    from backend.Agents import Customer_Service_Agent
-    from semantic_kernel import KernelArguments  # ✅ 修正 import 路径
-
     data = request.get_json()
-    message = data.get("message")
+    message = data.get("message", "")
     user_id = data.get("user_id", "test_user")
 
-    if not message:
-        return jsonify({"response": "请输入有效信息。"})
-
-    args = KernelArguments({
-        "message": message,
-        "user_id": user_id
-    })
+    print(f"[CHAT] 来自 {user_id} 的消息: {message}")
 
     try:
         async def run():
-            full_response = ""
-            async for chunk in Customer_Service_Agent.invoke(arguments=args):  # ✅ 正确写法
-                full_response += str(chunk)
-            return full_response
+            response = await Customer_Service_Agent.get_response(messages=message,thread=thread )
+            print(f"[RESPONSE] {response.content}")
+            return str(response.content)  # ⚠️ 必须转成字符串，不能直接 jsonify 对象
 
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        response_text = loop.run_until_complete(run())
-
-        return jsonify({"response": response_text})
+        result = asyncio.run(run())
+        return jsonify({"response": result})
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({"response": f"[系统错误]: {str(e)}"})
+
+# ==== 启动服务（支持 Render 端口配置） ====
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
