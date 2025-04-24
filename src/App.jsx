@@ -11,7 +11,7 @@ import MainLayout from "./layouts/MainLayout";
 import AlertsPage from "./pages/AlertsPage";
 import AnalysisPage from "./pages/AnalysisPage";
 import BudgetPage from "./pages/BudgetPage";
-import Chatbot from "./pages/Chatbot";
+import ChatbotPage from "./pages/ChatbotPage";
 
 export default function App() {
   const token = useAuthStore((s) => s.token);
@@ -30,7 +30,7 @@ export default function App() {
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/budget" element={<BudgetPage />} />
-        <Route path="/chatbot" element={<Chatbot />} />
+        <Route path="/chatbot" element={<ChatbotPage />} />
         {/* 404 页面 */}
         <Route path="/404" element={<div>404 Not Found</div>} />
         {/* 重定向到 Dashboard */}
