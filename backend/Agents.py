@@ -8,7 +8,7 @@ from semantic_kernel.functions import kernel_function,KernelArguments
 from semantic_kernel.kernel import Kernel
 from semantic_kernel.filters import FunctionInvocationContext
 from semantic_kernel.agents import ChatHistoryAgentThread
-#from functions import LedgerService, RecordService, NotificationService, DatabaseClient
+from functions import LedgerService, RecordService, NotificationService, DatabaseClient
 from typing import Annotated
 import pandas as pdS
 
@@ -32,9 +32,6 @@ async def function_invocation_filter(context: FunctionInvocationContext, next):
     print(f"    Response from agent [{context.function.name}]: {context.result.value}")
 
 
-# Create and configure the kernel.
-kernel = Kernel()
-
 # The filter is used for demonstration purposes to show the function invocation.
 kernel.add_filter("function_invocation", function_invocation_filter)
 
@@ -56,6 +53,7 @@ class MockPlugin:
 #this is the analyst agent that will use tools as plugin and handle all the issues like cost summary tables, give recommendations on savings, and analyse the data as Customer sercvice agent requested
 Analyst_Agent = ChatCompletionAgent(
         service=AzureChatCompletion(),
+        kernel=kernel,
         name="Analyst_Agent",
         instructions= "You are an invisible backend analyst.. Evaluate user requests using appropriate tools. "\
             "Always begin with: '[Analyst_Agent activated]'. "\
@@ -63,12 +61,13 @@ Analyst_Agent = ChatCompletionAgent(
             "You are not allowed to use any other plugins or tools which not in the plugins that provided to you. "
             "If the request is not solvable with plugins, reply with: '[Forwarding back to Customer_Service_Agent]'."
             "Otherwise, provide the completed analysis directly as part of your response.",
-        #plugins=[LedgerService(),NotificationService()], # 所有function放在这里
-        plugins=[]
+        plugins=[LedgerService(),NotificationService()], # 所有function放在这里
+        #plugins=[]
     )
 
 Database_Agent = ChatCompletionAgent(
     service=AzureChatCompletion(),
+    kernel=kernel,
     name="Database_Agent",
     instructions=(
         "You are a backend data retrieval agent. "
@@ -78,8 +77,8 @@ Database_Agent = ChatCompletionAgent(
         "If the request is not solvable with plugins, reply with: '[Forwarding back to Customer_Service_Agent]'."
         "Be concise, and return data or ask only for clarification needed to complete the task."
     ),
-    plugins=[]
-    #plugins=[RecordService(),NotificationService()], # 所有function放在这里
+    #plugins=[]
+    plugins=[RecordService(),NotificationService()], # 所有function放在这里
 )
 
 # ============ MAIN AGENT ============
@@ -96,8 +95,8 @@ Customer_Service_Agent = ChatCompletionAgent(
         "If a request lacks information (like merchant or date), ask Database_Agent to clarify — then ask the user. "
         "Always integrate responses and present them in your own voice. Do not reveal internal agents."
     ),
-    plugins=[]
-    #plugins=[Analyst_Agent, Database_Agent]
+    #plugins=[],
+    plugins=[Analyst_Agent, Database_Agent]
 )
 
 
@@ -107,11 +106,11 @@ __all__ = [
     "Database_Agent"
 ]
 
-# async def main():
+async def main():
 
-#     response = await Customer_Service_Agent.get_response(messages="Can you help me to analyze how much I spent in total last month?")
-#     print(str(response.content))
-#     #print type(response.content)
-#     print(type(str(response.content)))
+    response = await Customer_Service_Agent.get_response(messages="Can you help me to analyze how much I spent in total last month?")
+    print(str(response.content))
+    #print type(response.content)
+    print(type(str(response.content)))
 
-# asyncio.run(main()) 
+asyncio.run(main()) 
