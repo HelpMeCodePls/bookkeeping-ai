@@ -1,18 +1,37 @@
-# 核心库
-openai
-pandas
-python-dotenv
-pydantic
-gunicorn
+# 核心依赖
 flask
 flask-cors
+gunicorn
+
+# MongoDB 数据库
 pymongo
 
-# Microsoft Semantic Kernel（AI Agent 用的库）
+# AI & Semantic Kernel
 semantic-kernel
 
-# 异步支持（虽然 Python 原生支持 asyncio，但某些场景可能需要）
+# OpenAI API
+openai
+
+# 数据处理
+pandas
+
+# 环境变量支持
+python-dotenv
+
+# 类型支持
+pydantic
+typing-extensions
+
+# 异步支持
 aiohttp
 
-# 类型注解和开发支持
-typing-extensions
+# 文本处理（OCR后期也会需要）
+fuzzywuzzy
+python-Levenshtein
+
+# 其他辅助库
+nest-asyncio
+jinja2
+
+# 渲染 JSON / 安全
+defusedxml
