@@ -410,20 +410,44 @@ class NotificationService:
         result = self.col.update_one({"user_id": user_id, "_id": notification_id}, {"$set": {"is_read": True}})
         return {"ok":True} if result.matched_count else {"ok":False}
     
-#  edit by antonio: 🛠 获取用户相关代码
 class UserService:
-    def __init__(self, db_client=DatabaseClient()):
+    def __init__(self, db_client = DatabaseClient()):
         self.col = db_client.db['users']
 
-    @kernel_function(description="Get all users.")
-    def get_all_users(self) -> Annotated[List[Dict[str, Any]], "List of users"]:
-        users = list(self.col.find({}))
-        return users or []
-
-    @kernel_function(description="Get current user by ID.")
-    def get_user_by_id(self, user_id: Annotated[str, "User ID"]) -> Annotated[Dict[str, Any], "User info"]:
-        user = self.col.find_one({"id": user_id})
-        return user or {}
+    @kernel_function(description="Creates a new user.")
+    def create(self, name: str, email: str) -> Annotated[str, "User ID"]:
+        user_data = {
+            "_id": str(uuid.uuid4()),  # Generate a new UUID for the user ID
+            "name": name,
+            "email": email,
+            "avatar": None
+        }
+        self.col.insert_one(user_data)
+        
+        return user_data["_id"]  # Return the ID of the created user
+    
+    @kernel_function(description="Retrieves a user by their ID.")
+    def get(self, user_id: Annotated[str, "ID of the user"]) -> Annotated[Dict[str, Any], "User data."]:
+        print(f"[LOG] Retrieving user with ID: {user_id}")
+        return self.col.find_one({"_id": user_id}) or {}
+    
+    @kernel_function(description="Retrieves a user by their name.")
+    def get_by_name(self, name: Annotated[str, "Name of the user"]) -> Annotated[Dict[str, Any], "User data."]:
+        print(f"[LOG] Retrieving user with name: {name}")
+        # Normalize the name for matching
+        normalized_name = normalize_entry(name)
+        # Get all names from the database
+        reference_names = self.col.distinct("name")
+        # Find the best match
+        matched_name = similar_match(normalized_name, reference_names)
+        print(f"[LOG] Matched name: {matched_name}")
+        return self.col.find_one({"name": matched_name}) or {}
+    
+    @kernel_function(description="Retrieves All users.")
+    def get_all(self) -> Annotated[List[Dict[str, Any]], "List of users."]:
+        print("[LOG] Retrieving all users...")
+        all_users = self.col.find({}).to_list()
+        return all_users or {}
         
 class ChartPlugin:
     @kernel_function(description="Get chart summary by ledgerId, mode, selectedDate")

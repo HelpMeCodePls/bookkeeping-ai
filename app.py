@@ -537,11 +537,12 @@ def add_category():
         return jsonify({"error": "新增分类 Error", "details": str(e)}), 500
 
 # ==== 👤 User APIs ==== 
+
 #【GET 获取所有用户】
 @app.route("/users", methods=["GET"])
 def get_users():
     try:
-        users = user_service.get_all_users()
+        users = user_service.get_all()  # ✅ 改成 get_all()
         return jsonify(users), 200
 
     except Exception as e:
@@ -558,7 +559,7 @@ def get_myself():
             return jsonify({"error": "Missing token"}), 400
 
         user_id = token.replace("stub-jwt-", "")
-        user = user_service.get_user_by_id(user_id)
+        user = user_service.get(user_id)  # ✅ 改成 get()
 
         if not user:
             return jsonify({"error": "User not found"}), 404
@@ -569,7 +570,29 @@ def get_myself():
         import traceback
         traceback.print_exc()
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+    
+# 【GET 模糊搜索用户】根据名字
+@app.route("/users/search", methods=["GET"])
+def search_user_by_name():
+    try:
+        # 1. 取 query 参数
+        name = request.args.get("name", "")
+        if not name:
+            return jsonify({"error": "Missing name parameter"}), 400
 
+        # 2. 调用 user_service 搜索
+        user = user_service.get_by_name(name)
+
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        return jsonify(user), 200
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+    
 # ==== 📈 Charts APIs (支出图表模块) ====
 
 from backend.functions import ChartPlugin  # ✅ 确保引入
