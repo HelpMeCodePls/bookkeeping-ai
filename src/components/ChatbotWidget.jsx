@@ -4,12 +4,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { sendMessageToAI, sendImageToOCR } from "../api/aiHandler";
 import { useChatStore } from "../store/chatStore";
+import { useAuthStore } from "../store/auth";
 
 export default function ChatbotWidget() {
   const navigate = useNavigate();
   const location = useLocation();
   const messagesEndRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const userId = useAuthStore((s) => s.userId);
 
   const {
     msg,
@@ -34,7 +36,7 @@ export default function ChatbotWidget() {
     setLoading(true);
 
     try {
-      const aiReply = await sendMessageToAI(text);
+      const aiReply = await sendMessageToAI(text, userId);
       addMessage({ role: "bot", content: aiReply });
     } catch {
       addMessage({ role: "bot", content: "Sorry, I encountered an error. Please try again later." });
