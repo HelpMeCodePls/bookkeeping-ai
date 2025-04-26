@@ -80,7 +80,24 @@ class LedgerService:
             "spent": float(spent),
             "collaborators": []  # Initialize with an empty list of collaborators
         }
-        self.col.insert_one(ledger_data)
+        try:
+            result = self.col.insert_one(ledger_data)
+            print("[LOG] Ledger created, sending notification...")
+            # Send notification to the user
+            notification_service = NotificationService()
+            notification_service.create(
+                _id = str(uuid.uuid4()),  # Generate a new UUID for the notification ID
+                user_id=None,
+                ledger_id=result.inserted_id,
+                record_id=None,
+                is_read=False,
+                message=f"New Ledger created: {normalize_entry(name)}",
+                created_at=datetime.now()
+            )
+        except Exception as e:
+            print("[ERROR] Failed to create Ledger:", e)
+            return None
+        
         
         return ledger_data["_id"]  # Return the ID of the created ledger
     
@@ -238,6 +255,18 @@ class RecordService:
             "is_AI_generated": is_AI_generated,
             "createdBy": createdBy
         })
+            print("[LOG] Record created, sending notification...")
+            # Send notification to the user
+            notification_service = NotificationService()
+            notification_service.create(
+                _id = str(uuid.uuid4()),  # Generate a new UUID for the notification ID
+                user_id=createdBy,
+                ledger_id=ledger_id,
+                record_id=result.inserted_id,
+                is_read=False,
+                message=f"New record created: {description}",
+                created_at=datetime.now()
+            )
         except Exception as e:
             print("[ERROR] Failed to create record:", e)
             return None
