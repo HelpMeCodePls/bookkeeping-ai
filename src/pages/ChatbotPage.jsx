@@ -50,32 +50,54 @@ export default function ChatbotPage() {
   };
 
   const handleUpload = async (e) => {
+    console.log('1. Upload triggered'); // 调试点1
     const file = e.target.files[0];
-    if (!file) return;
-
-    // 添加文件类型验证
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+    
+    console.log('2. File selected:', file.name, file.type); // 调试点2
+  
     if (!file.type.match('image.*')) {
+      console.log('3. Invalid file type:', file.type); // 调试点3
       addMessage({ 
         role: 'bot', 
         content: '❌ Please upload an image file (JPEG, PNG, etc.)' 
       });
       return;
     }
-
+  
     const reader = new FileReader();
-    reader.onload = async () => {
-      const base64Image = reader.result.split(',')[1];
+    
+    reader.onloadstart = () => console.log('4. Reading file started'); // 调试点4
+    reader.onerror = (error) => console.error('Reader error:', error); // 错误处理
+    
+    reader.onload = async (event) => {
+      console.log('5. File read complete'); // 调试点5
+      const base64Image = event.target.result.split(',')[1];
+      console.log('6. Image converted to base64 (first 10 chars):', base64Image.substring(0, 10)); // 调试点6
+      
       addMessage({ role: 'user', content: '[Uploaded a receipt for OCR]' });
       setLoading(true);
+      
       try {
+        console.log('7. Sending to OCR API'); // 调试点7
         const result = await sendImageToOCR(base64Image);
-        addMessage({ role: 'bot', content: `🧾 OCR Result:\n${result}` });
-      } catch {
-        addMessage({ role: 'bot', content: 'OCR failed. Please try again.' });
+        console.log('8. OCR response:', result); // 调试点8
+        
+        addMessage({ role: 'bot', content: result });
+      } catch (error) {
+        console.error('9. OCR Error:', error); // 调试点9
+        addMessage({ 
+          role: 'bot', 
+          content: 'Failed to process receipt. Please try again.' 
+        });
       } finally {
         setLoading(false);
       }
     };
+    
     reader.readAsDataURL(file);
   };
 
@@ -165,35 +187,36 @@ export default function ChatbotPage() {
     disabled={isLoading}
   />
   
-  {/* 上传按钮 */}
-  <div className="relative group">
-    <label className={
-      `w-12 h-12 flex items-center justify-center rounded-full cursor-pointer transition-all
-      ${isLoading ? 'bg-gray-300 text-gray-500' : 'bg-brand/10 text-brand hover:bg-brand/20'}`
-    }>
-      <div className="relative">
-        <Upload size={20} strokeWidth={2} />
-        <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-xs border border-gray-200">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
-            <path d="M21 15l-3.5-3.5L12 18" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </div>
+{/* 上传按钮 - 修改后的版本 */}
+<div className="relative group">
+  <label htmlFor="receipt-upload" className={
+    `w-12 h-12 flex items-center justify-center rounded-full cursor-pointer transition-all
+    ${isLoading ? 'bg-gray-300 text-gray-500' : 'bg-brand/10 text-brand hover:bg-brand/20'}`
+  }>
+    <div className="relative">
+      <Upload size={20} strokeWidth={2} />
+      <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-xs border border-gray-200">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+          <path d="M21 15l-3.5-3.5L12 18" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
       </div>
-      <input 
-        type="file" 
-        accept="image/*" 
-        onChange={handleUpload} 
-        className="hidden" 
-        disabled={isLoading}
-      />
-    </label>
-    <div className="absolute -top-11 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-md">
-      Upload receipt (Image only)
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-b-0 border-t-4 border-solid border-l-transparent border-r-transparent border-t-gray-800"></div>
     </div>
-  </div>
+  </label>
+  <input 
+    id="receipt-upload"
+    type="file" 
+    accept="image/*" 
+    onChange={handleUpload} 
+    className="hidden" 
+    disabled={isLoading}
+    onClick={(e) => {
+      e.stopPropagation(); // 防止事件冒泡
+      console.log('Input clicked!'); // 调试点击事件
+    }}
+  />
+</div>
 
   {/* 新增的语音输入按钮 */}
   <div className="relative group">
