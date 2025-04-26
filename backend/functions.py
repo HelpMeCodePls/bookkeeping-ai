@@ -4,8 +4,26 @@ from typing import Annotated, Dict, Any, List
 from datetime import datetime
 from semantic_kernel.functions import kernel_function
 import uuid
+import re
+from fuzzywuzzy import process
 from backend.datatypes import *
 from bson import ObjectId  # add by antonio: 🛠 for ObjectId support
+
+def similar_match(entry, reference_names, threshold=80):
+    match, score = process.extractOne(entry, reference_names)
+    if score >= threshold:
+        return match
+    else:
+        return entry  # or None if no match is good enoughf
+    
+def normalize_entry(name: str) -> str:
+    # Normalize the entry to lowercase and strip whitespace
+    name = name.lower().strip()
+    name = re.sub(r"[^\w\s]", "", name)   # remove punctuation
+    name = re.sub(r"\s+", "_", name)      # spaces to underscores
+    name = re.sub(r"_+", "_", name)       # collapse multiple underscores
+    return name
+
 
 # --- DATABASE CLIENT ---
 class DatabaseClient:
@@ -35,7 +53,7 @@ class LedgerService:
         # print("TAKING LEDGER DATA: ****************\n",name, owner, budgets, spent)
         ledger_data = {
             "_id": str(uuid.uuid4()),  # Generate a new UUID for the ledger ID
-            "name": name,
+            "name": normalize_entry(name),
             "owner": owner,
             "budgets": float(budgets),
             "spent": float(spent),
@@ -44,6 +62,25 @@ class LedgerService:
         self.col.insert_one(ledger_data)
         
         return ledger_data["_id"]  # Return the ID of the created ledger
+    
+    @kernel_function(description="Searches for ledgers based on a single field and its value.")
+    def search_ledger_by_field(
+        self,
+        field_name: Annotated[str, "Name of the field to search by. The only acceptable names are 'owner', 'name', '_id', 'budgets', and 'spent'."],
+        field_value: Annotated[str, "Value to search for in the specified field."]
+    ) -> Annotated[List[Dict[str, Any]], "List of matching ledgers."]:
+        print(f"[LOG] Searching ledgers where {field_name} = {field_value}")
+        # Optional: Validate allowed fields
+        allowed_fields = {"_id", "name", "owner"}
+        if field_name not in allowed_fields:
+            print(f"[ERROR] Invalid field name '{field_name}'. Allowed fields: {allowed_fields}")
+            return []
+        
+        if field_name in ["name", "owner"]:
+            reference_values = self.col.distinct(field_name)
+        matched_value = similar_match(field_value, reference_values)
+        print(f"[LOG] Matched value: {matched_value}")
+        return self.col.find({field_name: matched_value}).to_list()
 
     @kernel_function(description="Retrieves a ledger by its ID.")
     def get(self, ledger_id: Annotated[str, "ID of the ledger"]) -> Annotated[Dict[str, Any], "Ledger data."]:
@@ -107,7 +144,7 @@ class RecordService:
 
     @kernel_function(description="Creates a new record in a ledger.")
     def create(self, 
-            ledger_id: Annotated[str, "Ledger ID that this record belongs to"], 
+            ledger_id: Annotated[str, "Ledger ID that this record belongs to. If not provided, this ID must be a valid uuid ledger ID retrieved from the ledger service."], 
             amount: Annotated[float, "Amount of money spent on this record"], 
             merchant: Annotated[str, "The merchant or service provider for this record"],
             category: Annotated[CategoryEnum, "The category of purpose that this moneyh is spent for"],
@@ -124,7 +161,7 @@ class RecordService:
             "_id": str(uuid.uuid4()),  # Generate a new UUID for the record ID
             "ledger_id": ledger_id,
             "amount": amount,
-            "merchant": merchant,
+            "merchant": normalize_entry(merchant),
             "category": category,
             "date": datetime.strptime(date, "%Y-%m-%d"),
             "status": status,
@@ -136,7 +173,28 @@ class RecordService:
             print("[ERROR] Failed to create record:", e)
             return None
         return result.inserted_id
-
+    
+    @kernel_function(description="Searches for records based on a single field and its value.")
+    def search_records_by_field(
+        self,
+        field_name: Annotated[str, "Name of the field to search by. The only acceptable names are 'ledger_id', 'amount', 'merchant', 'category', 'date', 'status', 'description', and 'createdBy'."],
+        field_value: Annotated[str, "Value to search for in the specified field."]
+    ) -> Annotated[List[Dict[str, Any]], "List of matching records."]:
+        print(f"[LOG] Searching records where {field_name} = {field_value}")
+        
+        # Optional: Validate allowed fields
+        allowed_fields = {"ledger_id", "amount", "merchant", "category", "date", "status", "description", "createdBy"}
+        if field_name not in allowed_fields:
+            print(f"[ERROR] Invalid field name '{field_name}'. Allowed fields: {allowed_fields}")
+            return []
+        
+        if field_name in ["merchant", "category", "description", "createdBy"]:
+            reference_values = self.col.distinct(field_name)
+            matched_value = similar_match(field_value, reference_values)
+            print(f"[LOG] Matched value: {matched_value}")
+        
+        return self.col.find({field_name: matched_value}).to_list()
+    
     @kernel_function(description="Retrieves all records for a specific ledger.")
     def get_by_ledger(self, ledger_id: Annotated[str, "ID of the ledger that this record belongs to"]) -> Annotated[Dict[str, Any], "Record data."]:
         return self.col.find({"ledger_id": ledger_id}).to_list() or {}
@@ -163,12 +221,16 @@ class RecordService:
                 "date": date,
                 "status": status,
                 "description": description,
+                "is_AI_generated": is_AI_generated,
                 "createdBy": createdBy
             }.items() if v is not None
         }
 
         result = self.col.update_one({"id": record_id}, {"$set": update_data})
         return {"ok":True} if result.matched_count else {"ok":False}
+    
+    def get_unfinished_records(self, ledger_id: str) -> List[Dict[str, Any]]:
+        return self.col.find({"ledger_id": ledger_id, "status": StatusEnum.incomplete}).to_list() or []
 
     @kernel_function(description="Deletes a record by its ID.")
     def delete(self, record_id: Annotated[str, "ID of the record to delete"]) -> Annotated[str, "Confirmation message."]:
@@ -219,3 +281,42 @@ class NotificationService:
     def set_read(self, user_id: Annotated[str, "User ID"], notification_id: Annotated[str, "Notification ID"]):
         result = self.col.update_one({"user_id": user_id, "_id": notification_id}, {"$set": {"is_read": True}})
         return {"ok":True} if result.matched_count else {"ok":False}
+    
+class UserService:
+    def __init__(self, db_client = DatabaseClient()):
+        self.col = db_client.db['users']
+
+    @kernel_function(description="Creates a new user.")
+    def create(self, name: str, email: str) -> Annotated[str, "User ID"]:
+        user_data = {
+            "_id": str(uuid.uuid4()),  # Generate a new UUID for the user ID
+            "name": name,
+            "email": email,
+            "avatar": None
+        }
+        self.col.insert_one(user_data)
+        
+        return user_data["_id"]  # Return the ID of the created user
+    
+    @kernel_function(description="Retrieves a user by their ID.")
+    def get(self, user_id: Annotated[str, "ID of the user"]) -> Annotated[Dict[str, Any], "User data."]:
+        print(f"[LOG] Retrieving user with ID: {user_id}")
+        return self.col.find_one({"_id": user_id}) or {}
+    
+    @kernel_function(description="Retrieves a user by their name.")
+    def get_by_name(self, name: Annotated[str, "Name of the user"]) -> Annotated[Dict[str, Any], "User data."]:
+        print(f"[LOG] Retrieving user with name: {name}")
+        # Normalize the name for matching
+        normalized_name = normalize_entry(name)
+        # Get all names from the database
+        reference_names = self.col.distinct("name")
+        # Find the best match
+        matched_name = similar_match(normalized_name, reference_names)
+        print(f"[LOG] Matched name: {matched_name}")
+        return self.col.find_one({"name": matched_name}) or {}
+    
+    @kernel_function(description="Retrieves All users.")
+    def get_all(self) -> Annotated[List[Dict[str, Any]], "List of users."]:
+        print("[LOG] Retrieving all users...")
+        all_users = self.col.find({}).to_list()
+        return all_users or {}
