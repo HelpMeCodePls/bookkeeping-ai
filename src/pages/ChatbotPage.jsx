@@ -52,8 +52,7 @@ export default function ChatbotPage() {
   const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    // 添加文件类型验证
+    
     if (!file.type.match('image.*')) {
       addMessage({ 
         role: 'bot', 
@@ -61,17 +60,25 @@ export default function ChatbotPage() {
       });
       return;
     }
-
+  
     const reader = new FileReader();
     reader.onload = async () => {
       const base64Image = reader.result.split(',')[1];
       addMessage({ role: 'user', content: '[Uploaded a receipt for OCR]' });
       setLoading(true);
+      
       try {
         const result = await sendImageToOCR(base64Image);
-        addMessage({ role: 'bot', content: `🧾 OCR Result:\n${result}` });
-      } catch {
-        addMessage({ role: 'bot', content: 'OCR failed. Please try again.' });
+        if (result.includes('error') || result.includes('fail')) {
+          throw new Error(result);
+        }
+        addMessage({ role: 'bot', content: result });
+      } catch (error) {
+        console.error('OCR Error:', error);
+        addMessage({ 
+          role: 'bot', 
+          content: 'Failed to process receipt. Please ensure the image is clear and try again.' 
+        });
       } finally {
         setLoading(false);
       }
