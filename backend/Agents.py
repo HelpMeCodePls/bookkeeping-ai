@@ -8,7 +8,7 @@ from semantic_kernel.functions import kernel_function,KernelArguments
 from semantic_kernel.kernel import Kernel
 from semantic_kernel.filters import FunctionInvocationContext
 from semantic_kernel.agents import ChatHistoryAgentThread
-from backend.functions import LedgerService, RecordService, NotificationService, DatabaseClient, ChartPlugin
+from backend.functions import LedgerService, RecordService, NotificationService, UserService, ChartPlugin
 from typing import Annotated
 
 
@@ -84,7 +84,8 @@ Database_Agent = ChatCompletionAgent(
         "If the request is not solvable with plugins, reply with: '[Forwarding back to Customer_Service_Agent]'."
         "When an argument is missing, please fill it with the most reasonable value. e.g. if category is missing, and user says 'I bought a jacket', you can fill the category with 'clothing'."
         "If you added any information in the argument that is not provided by the user, please fill the 'is_AI_generated' field with boolean True."
-        "When replying with ledgers' information, please make sure to include the _id field in the response."
+        "When replying with ledgers or records information, please make sure to include the _id field in the response."
+        "If the user tries to search by name"
         "Handle anything about record service, such as creating, updating, deleting records. "
         "Be concise, and return data or ask only for clarification needed to complete the task."
     ),
@@ -105,6 +106,8 @@ Customer_Service_Agent = ChatCompletionAgent(
         "- Use **Analyst_Agent** for any task that involves analysis, summaries, trends, total spending calculations, charts, or recommendations."
         "- Forward data extraction, transformation and load requests to the Database_Agent, such as 'what restaurants did I go to', 'when did I visit Starbucks', or 'how many times did I shop at Walmart'."
         "If a request lacks information (like merchant or date), ask Database_Agent to clarify — then ask the user. "
+        "If the user name is not provided, please use 'user123' as the default name."
+        "if the ledger name is not provided, please use 'Monthly budget' as the default ledger name."
         "Always integrate responses and present them in your own voice. Do not reveal internal agents."
     ),
     #plugins=[],
