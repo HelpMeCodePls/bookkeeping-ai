@@ -4,6 +4,12 @@ from flask_cors import CORS
 from backend.Agents import Customer_Service_Agent  # 你的主智能体
 from backend.functions import LedgerService, RecordService, NotificationService, UserService, ChartPlugin  
 from semantic_kernel.agents import ChatHistoryAgentThread
+import base64
+from io import BytesIO
+from PIL import Image
+import easyocr
+import cv2
+import numpy as np
 
 
 # ==== Flask 初始化 ====
@@ -40,6 +46,50 @@ def chat():
     user_id = data.get("user_id", "test_user")
 
     print(f"[CHAT] 来自 {user_id} 的消息: {message}")
+
+    try:
+        async def run():
+            response = await Customer_Service_Agent.get_response(messages=message,thread=thread )
+            print(f"[RESPONSE] {response.content}")
+            return str(response.content)  # ⚠️ 必须转成字符串，不能直接 jsonify 对象
+
+        result = asyncio.run(run())
+        return jsonify({"response": result})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"response": f"[系统错误]: {str(e)}"})
+    
+# ==== OCR接口（图片识别） ====
+@app.route('/ocr', methods=['POST'])
+def ocr():
+    data = request.get_json()
+    image_data = data['image']
+
+    # Remove header 'data:image/jpeg;base64,'
+    header, encoded = image_data.split(",", 1)
+    image_bytes = base64.b64decode(encoded)
+
+    # Open image with PIL
+    image = Image.open(BytesIO(image_bytes))
+
+    if image.mode != 'RGB':
+        image = image.convert('RGB')
+    image_np = np.array(image)
+
+    # use easyocr to read text from the image
+    reader = easyocr.Reader(['en'])  # or your desired languages
+    results = reader.readtext(image_np)
+    message = "You will be given contents of a receipt. " \
+    "Please extract the following information from the receipt: " \
+    "1. Total amount spent (in dollars) " \
+    "2. Merchant name " \
+    "3. Date of transaction " \
+    "Then pass it to database agent to store the data. " \
+    "If the receipt is not valid, please reply with: '[Invalid receipt]'. " \
+    "Here is the receipt content: "
+    message = message + "\n" + str(results)
 
     try:
         async def run():
