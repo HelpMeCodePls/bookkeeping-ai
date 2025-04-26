@@ -1,18 +1,18 @@
 # 核心库
-openai
-pandas
-python-dotenv
-pydantic
-gunicorn
-flask
-flask-cors
-pymongo
+openai>=1.0.0
+pandas>=1.5.0
+python-dotenv>=1.0.0
+pydantic>=1.10.0
+gunicorn>=21.2.0
+flask>=2.2.0
+flask-cors>=3.1.0
+pymongo>=4.0.0
 
-# Microsoft Semantic Kernel（AI Agent 用的库）
-semantic-kernel
+# Microsoft Semantic Kernel
+semantic-kernel==1.28.1
 
-# 异步支持（虽然 Python 原生支持 asyncio，但某些场景可能需要）
-aiohttp
+# 异步支持
+aiohttp>=3.8.0
 
-# 类型注解和开发支持
-typing-extensions
+# 类型注解（兼容旧版本 Python、Semantic Kernel 内部有用到）
+typing-extensions>=4.4.0
