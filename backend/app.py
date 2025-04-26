@@ -7,7 +7,7 @@ from semantic_kernel.agents import ChatHistoryAgentThread
 
 
 # ==== Flask 初始化 ====
-app = Flask(__name__, static_folder="static")
+app = Flask(__name__, static_folder="frontend_build", static_url_path="")
 CORS(app)
 
 # 初始化必要对象
@@ -19,9 +19,13 @@ chart_plugin = ChartPlugin()
 thread: ChatHistoryAgentThread = ChatHistoryAgentThread()
 
 # ==== 首页：加载聊天前端页面 ====
-@app.route("/")
-def home():
-    return send_from_directory(os.path.join(app.root_path, 'static'), "test_chat.html")
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_frontend(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, "index.html")
 
 # ==== 健康检查 ====
 @app.route("/ping")
