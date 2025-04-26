@@ -95,7 +95,7 @@ class LedgerService:
                 created_at=datetime.now()
             )
         except Exception as e:
-            print("[ERROR] Failed to create record:", e)
+            print("[ERROR] Failed to create Ledger:", e)
             return None
         
         
