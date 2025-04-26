@@ -7,22 +7,40 @@ import uuid
 from backend.datatypes import *
 from bson import ObjectId  # add by antonio: 🛠 for ObjectId support
 from typing import Optional # add by antonio: 🛠 for Optional type
+import os
 
 # --- DATABASE CLIENT ---
+# class DatabaseClient:
+#     def __init__(self, uri: str = "mongodb+srv://ldvdzhang:Zsk011006@cluster0.ltnlqvq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", db_name: str = "bookkeeping_db"):
+
+#         # Create a new client and connect to the server
+#         client = MongoClient(uri)
+
+#         # Send a ping to confirm a successful connection
+#         try:
+#             client.admin.command('ping')
+#             print("Pinged your deployment. You successfully connected to MongoDB!")
+#             self.client = client
+#             self.db = client[db_name]
+#         except Exception as e:
+#             print(e)
+#             print("Could not connect to MongoDB. Please check your connection string and try again.")
+# 把你的 functions.py 中 Mongo URI 改成读取环境变量的形式，这样部署时更安全、也更灵活。
 class DatabaseClient:
-    def __init__(self, uri: str = "mongodb+srv://ldvdzhang:Zsk011006@cluster0.ltnlqvq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", db_name: str = "bookkeeping_db"):
+    def __init__(self, uri: str = None, db_name: str = "bookkeeping_db"):
+        # 从环境变量中获取 URI，如果没传参数就用它
+        uri = uri or os.environ.get("MONGO_URI")
+        if not uri:
+            raise ValueError("Mongo URI is missing. Please set the MONGO_URI environment variable.")
 
-        # Create a new client and connect to the server
         client = MongoClient(uri)
-
-        # Send a ping to confirm a successful connection
         try:
             client.admin.command('ping')
-            print("Pinged your deployment. You successfully connected to MongoDB!")
+            print("✅ Connected to MongoDB!")
             self.client = client
             self.db = client[db_name]
         except Exception as e:
-            print(e)
+            print("❌ MongoDB connection failed:", e)
 
 
 # --- LEDGER OPERATIONS ---
