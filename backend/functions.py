@@ -5,6 +5,7 @@ from datetime import datetime
 from semantic_kernel.functions import kernel_function
 import uuid
 from backend.datatypes import *
+from bson import ObjectId  # add by antonio: 🛠 for ObjectId support
 
 # --- DATABASE CLIENT ---
 class DatabaseClient:
@@ -69,7 +70,36 @@ class LedgerService:
         result = self.col.delete_one({"_id": ledger_id})
         return f"Ledger {ledger_id} deleted." if result.deleted_count else f"Ledger {ledger_id} not found."
 
+    #edit by antonio: 🛠 获取当前用户对账本的权限
+    @kernel_function(description="Retrieves permission of a user on a ledger.")
+    def get_permission(self, ledger_id: str, user_id: str) -> Dict[str, str]:
+        ledger = self.db['ledgers'].find_one({"_id": ledger_id})
+        if not ledger:
+            return {"permission": "VIEWER"}  # 没找到就默认最低权限
+        if ledger.get("owner") == user_id:
+            return {"permission": "OWNER"}
+        # 可加协作者判断，这里暂时默认 viewer
+        return {"permission": "VIEWER"}
+    
+# edit by Antonio: 🛠 更新账本的支出
+@kernel_function(description="Updates the spent field of a ledger by recalculating from records.")
+def update_spent(self, ledger_id: Annotated[str, "ID of the ledger to update the spent"]):
+    from backend.functions import RecordService  # 避免循环导入
+    record_service = RecordService()
 
+    # 获取账本下所有记录
+    records = record_service.get_by_ledger(ledger_id) or []
+
+    # 计算总支出，确保 amount 是数字
+    total_spent = sum(float(record.get("amount", 0)) for record in records if isinstance(record.get("amount", 0), (int, float)))
+
+    # 更新到 ledger
+    result = self.col.update_one({"_id": ledger_id}, {"$set": {"spent": total_spent}})
+
+    return {
+        "ok": bool(result.matched_count),
+        "new_spent": total_spent
+    }
 # --- RECORD OPERATIONS ---
 class RecordService:
     def __init__(self, db_client = DatabaseClient()):
@@ -145,6 +175,12 @@ class RecordService:
         result = self.col.delete_one({"id": record_id})
         return f"Record {record_id} deleted." if result.deleted_count else f"Record {record_id} not found."
 
+    # add by antonio: 🛠 获取所有记录
+    @kernel_function(description="Retrieves all records across all ledgers.")
+    def get_all_records(self) -> Annotated[List[Dict[str, Any]], "List of all records."]:
+        return list(self.col.find({}))
+    
+    
     #未开发功能：用户权限获取
 
 
