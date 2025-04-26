@@ -35,3 +35,7 @@ jinja2
 
 # 渲染 JSON / 安全
 defusedxml
+
+# 其他
+# 语音识别
+easyocr
