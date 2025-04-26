@@ -10,6 +10,8 @@ from backend.datatypes import *
 from bson import ObjectId  # add by antonio: 🛠 for ObjectId support
 from typing import Optional # add by antonio: 🛠 for Optional type
 import os
+import easyocr
+import cv2
 
 def similar_match(entry, reference_names, threshold=80):
     match, score = process.extractOne(entry, reference_names)
@@ -455,3 +457,24 @@ class ChartPlugin:
         from backend.functions import RecordService  # 避免循环导入
         record_service = RecordService()
         return record_service.get_summary(ledger_id, mode, selected_date)
+    
+class OCR:
+    def __init__(self, db_client = DatabaseClient()):
+        self.reader = easyocr.Reader(['en'])
+
+    def extract_text(self, image_path: str) -> str:
+        image = cv2.imread(image_path)
+
+        # Convert image to RGB (OpenCV uses BGR by default)
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Perform OCR on the image
+        results = self.reader.readtext(image_rgb)
+
+        # Extract detected text into a list
+        extracted_texts = [text for (_, text, _) in results]
+
+        # Join all text into a single string
+        combined_text = ' '.join(extracted_texts)
+
+        return combined_text
