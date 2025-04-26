@@ -121,11 +121,11 @@ __all__ = [
     "Database_Agent"
 ]
 
-async def main():
+# async def main():
 
-    response = await Customer_Service_Agent.get_response(messages="Show me all the purchases in ledger with id 97e8f621-a6a1-4882-ad22-d5adfca27ac9")
-    print(str(response.content))
-    #print type(response.content)
-    print(type(str(response.content)))
+#     response = await Customer_Service_Agent.get_response(messages="Show me all the purchases in ledger with id 97e8f621-a6a1-4882-ad22-d5adfca27ac9")
+#     print(str(response.content))
+#     #print type(response.content)
+#     print(type(str(response.content)))
 
-asyncio.run(main()) 
+# asyncio.run(main()) 
