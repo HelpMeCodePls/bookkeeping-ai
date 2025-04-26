@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, Mic, Maximize2, MessageSquare } from "lucide-react";
+import { Send, Mic, Maximize2, MessageSquare, Upload } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { sendMessageToAI } from "../api/aiHandler";
+import { sendMessageToAI, sendImageToOCR } from "../api/aiHandler";
 import { useChatStore } from "../store/chatStore";
 
 export default function ChatbotWidget() {
@@ -48,6 +48,36 @@ export default function ChatbotWidget() {
     "📈 pending trends",
     "➕ Add expense",
   ];
+
+  const handleUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 添加文件类型验证
+    if (!file.type.match('image.*')) {
+      addMessage({ 
+        role: 'bot', 
+        content: '❌ Please upload an image file (JPEG, PNG, etc.)' 
+      });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64Image = reader.result.split(',')[1];
+      addMessage({ role: 'user', content: '[Uploaded a receipt for OCR]' });
+      setLoading(true);
+      try {
+        const result = await sendImageToOCR(base64Image);
+        addMessage({ role: 'bot', content: `🧾 OCR Result:\n${result}` });
+      } catch {
+        addMessage({ role: 'bot', content: 'OCR failed. Please try again.' });
+      } finally {
+        setLoading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
@@ -106,7 +136,7 @@ export default function ChatbotWidget() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* 输入栏 */}
+            {/* 修改输入栏部分 */}
             <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="p-2 border-t flex items-center gap-2">
               <input
                 className="flex-1 px-3 py-2 text-sm border rounded-md"
@@ -116,6 +146,19 @@ export default function ChatbotWidget() {
                 placeholder="Ask me about your budget..."
                 disabled={isLoading}
               />
+              
+              {/* 添加了tooltip的上传按钮 */}
+              <div className="relative group">
+                <label className="text-gray-500 hover:text-blue-500 cursor-pointer">
+                  <Upload size={18} />
+                  <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
+                </label>
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  Upload receipt (Image Only)
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-b-0 border-t-4 border-solid border-l-transparent border-r-transparent border-t-gray-800"></div>
+                </div>
+              </div>
+
               <button className="text-gray-500 hover:text-blue-500" onClick={() => alert("Voice not implemented")}>
                 <Mic size={18} />
               </button>
