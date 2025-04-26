@@ -27,6 +27,7 @@ aiohttp
 
 # 文本处理（OCR后期也会需要）
 fuzzywuzzy
+python-Levenshtein
 
 # 其他辅助库
 nest-asyncio
