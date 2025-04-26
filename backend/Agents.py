@@ -8,8 +8,9 @@ from semantic_kernel.functions import kernel_function,KernelArguments
 from semantic_kernel.kernel import Kernel
 from semantic_kernel.filters import FunctionInvocationContext
 from semantic_kernel.agents import ChatHistoryAgentThread
-from backend.functions import LedgerService, RecordService, NotificationService, DatabaseClient
+from backend.functions import LedgerService, RecordService, NotificationService, DatabaseClient, ChartPlugin
 from typing import Annotated
+
 
 # ============ ENV SETUP ============
 load_dotenv()
@@ -67,7 +68,7 @@ Analyst_Agent = ChatCompletionAgent(
         "Always begin your output with '[Analyst_Agent activated]'.\n"
         "If the task cannot be completed, return '[Forwarding back to Customer_Service_Agent]'."
         ),
-        plugins=[LedgerService(),NotificationService()], # 所有function放在这里
+        plugins=[LedgerService(),ChartPlugin(),NotificationService()], # 所有function放在这里
         #plugins=[]
     )
 
@@ -88,7 +89,7 @@ Database_Agent = ChatCompletionAgent(
         "Be concise, and return data or ask only for clarification needed to complete the task."
     ),
     #plugins=[]
-    plugins=[LedgerService(), RecordService(),NotificationService()], # 所有function放在这里
+    plugins=[RecordService(),NotificationService()], # 所有function放在这里
 )
 
 # ============ MAIN AGENT ============
