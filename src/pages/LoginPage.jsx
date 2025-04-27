@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/auth";
 import { motion } from "framer-motion";
 import { User, Loader2 } from "lucide-react";
+import { api } from "../api/client";
 
 // 固定4个可选用户
 const tempUsers = [
@@ -50,12 +51,17 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // 直接模拟登录，不用 axios 了！
-      const fakeToken = `stub-jwt-${user.id}`;
-      setAuth({
-        token: fakeToken,
-        user,
-      });
+      // // 直接模拟登录，不用 axios 了！
+      // const fakeToken = `stub-jwt-${user.id}`;
+      // setAuth({
+      //   token: fakeToken,
+      //   user,
+      // });
+
+      // 真正的登录逻辑
+      const { data } = await api.post("/auth/login", { email: user.email });
+      setAuth({ token: data.access_token, user: data.user });
+
       navigate("/chatbot"); // 登录成功后跳转到聊天页面
     } catch (err) {
       console.error("登录错误:", err);
