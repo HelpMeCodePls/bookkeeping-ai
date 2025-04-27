@@ -255,7 +255,7 @@ def create_record(ledger_id):
         record_id = record_service.create(
             ledger_id=ledger_id,
             amount=data["amount"],
-            merchant=data["merchant"],
+            # merchant=data["merchant"],
             category=data["category"],
             date=data["date"],
             status=data["status"],
@@ -296,7 +296,7 @@ def update_record(record_id):
 
         ledger_id = data.get("ledger_id")
         amount = data.get("amount")
-        merchant = data.get("merchant")
+        # merchant = data.get("merchant")
         category = data.get("category")
         date = data.get("date")
         status = data.get("status")
@@ -308,7 +308,7 @@ def update_record(record_id):
             record_id=record_id,
             ledger_id=ledger_id,
             amount=amount,
-            merchant=merchant,
+            # merchant=merchant,
             category=category,
             date=date,
             status=status,
