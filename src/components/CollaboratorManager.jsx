@@ -47,7 +47,15 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
     //   axios.post(`/ledgers/${ledgerId}/collaborators`, payload, {
     //     params: { token },
     //   }),
-    mutationFn: (payload) => apiAdd(ledgerId, payload),
+      mutationFn: ({ email, permission }) => {
+          const u = users.find((x) => x.email === email);
+          if (!u) throw new Error("User not found");
+          return apiAdd(ledgerId, {
+            userId: u.id,          
+            email,
+            permission,
+          });
+         },
     onSuccess: async (_, variables) => {
       // variables 就是 { email, permission }
       await axios.post(
