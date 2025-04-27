@@ -475,7 +475,7 @@ class UserService:
         return self.col.find_one({"name": matched_name}) or {}
     
     @kernel_function(description="Retrieves All users.")
-    def get_all(self) -> Annotated[List[Dict[str, Any]], "List of users."]:
+    def get_all_users(self) -> Annotated[List[Dict[str, Any]], "List of users."]:
         print("[LOG] Retrieving all users...")
         all_users = self.col.find({}).to_list()
         return all_users or {}

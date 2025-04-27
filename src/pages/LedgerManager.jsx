@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+// import axios from "axios";
+import {
+    fetchLedgers,
+    fetchLedgerPermission,
+    createLedger,
+} from "../handlers/ledgerHandlers";
 import { useState } from "react";
 import { useLedger } from "../store/ledger";
 import CollaboratorManager from "../components/CollaboratorManager";
@@ -16,30 +21,37 @@ export default function LedgerManager() {
   const token = useAuthStore((s) => s.token);
   const { data: ledgers = [] } = useQuery({
     queryKey: ["ledgers", token], // queryKey也带token，不然不会刷新
-    queryFn: () =>
-      axios.get("/ledgers", { params: { token } }).then((r) => r.data ?? []),
+    // queryFn: () =>
+    //   axios.get("/ledgers", { params: { token } }).then((r) => r.data ?? []),
+    queryFn: fetchLedgers,
     enabled: !!token, //  只有有token时才请求
   });
 
   // 获取用户权限
   const { data: permission } = useQuery({
     queryKey: ["permission", currentId, token], //  queryKey也加token，防止token变化时数据不更新
+    // queryFn: () =>
+    //   currentId && token
+    //     ? axios
+    //         .get(`/ledgers/${currentId}/permission`, { params: { token } })
+    //         .then((r) => r.data)
+    //     : Promise.resolve({}),
     queryFn: () =>
-      currentId && token
-        ? axios
-            .get(`/ledgers/${currentId}/permission`, { params: { token } })
-            .then((r) => r.data)
-        : Promise.resolve({}),
+          currentId && currentId !== "demoLedger"
+            ? fetchLedgerPermission(currentId)
+            : Promise.resolve({}),
     enabled: !!currentId && !!token,
     retry: 1,
   });
 
   const create = useMutation({
-    mutationFn: () => axios.post("/ledgers", { name, budget: 1000, token }),
+    // mutationFn: () => axios.post("/ledgers", { name, budget: 1000, token }),
+    mutationFn: () => createLedger({ name, budget: 1000 }),
     onSuccess: (newLedger) => {
       setName("");
       setId(newLedger._id);
-      setTimeout(() => setShowCollaboratorManager(newLedger._id), 0);
+      // setTimeout(() => setShowCollaboratorManager(newLedger._id), 0);
+      setTimeout(() => setShowCollaboratorManager(newLedger.id), 0);
       qc.invalidateQueries(["ledgers"]);
     },
   });
