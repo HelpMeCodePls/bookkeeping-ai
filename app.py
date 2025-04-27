@@ -317,7 +317,8 @@ def update_record(record_id):
             createdBy=createdBy
         )
 
-        record = record_service.get(record_id)
+        # record = record_service.get(record_id)
+        record = record_service.search_records_by_field("_id", record_id)
         if record:
             ledger_id = record.get("ledger_id")
             if ledger_id:
@@ -334,7 +335,7 @@ def update_record(record_id):
 @app.route("/records/<record_id>", methods=["DELETE"])
 def delete_record(record_id):
     try:
-        record = record_service.get(record_id)
+        record = record_service.search_records_by_field("_id", record_id)
         if not record:
             return jsonify({"error": "Record not found"}), 404
 
@@ -592,7 +593,7 @@ def add_category():
 @app.route("/users", methods=["GET"])
 def get_users():
     try:
-        users = user_service.get_all()  # ✅ 改成 get_all()
+        users = user_service.get_all_users() 
         return jsonify(users), 200
 
     except Exception as e:
