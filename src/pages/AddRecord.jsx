@@ -2,16 +2,21 @@ import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useLedger } from '../store/ledger';
+import { createRecord } from "../handlers/recordHandlers";
 
-const ledgerId = 'demoLedger';
+// const ledgerId = 'demoLedger';
+
 
 export default function AddRecord() {
+  const { currentId: ledgerId } = useLedger();
   const { register, handleSubmit, setValue } = useForm();
   const nav = useNavigate();
   const [split, setSplit] = useState([{ email: '', ratio: 50 }]); // 新增 split 初始值
 
   const onSubmit = async (data) => {
-    await axios.post(`/ledgers/${ledgerId}/records`, { ...data, split });
+    // await axios.post(`/ledgers/${ledgerId}/records`, { ...data, split });
+    await createRecord(ledgerId, { ...data, split });
     nav('/records');
   };
 
