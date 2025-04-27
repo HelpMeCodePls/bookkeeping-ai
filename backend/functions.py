@@ -86,7 +86,6 @@ class LedgerService:
             # Send notification to the user
             notification_service = NotificationService()
             notification_service.create(
-                _id = str(uuid.uuid4()),  # Generate a new UUID for the notification ID
                 user_id=None,
                 ledger_id=result.inserted_id,
                 record_id=None,
@@ -260,7 +259,6 @@ class RecordService:
             # Send notification to the user
             notification_service = NotificationService()
             notification_service.create(
-                _id = str(uuid.uuid4()),  # Generate a new UUID for the notification ID
                 user_id=createdBy,
                 ledger_id=ledger_id,
                 record_id=result.inserted_id,
