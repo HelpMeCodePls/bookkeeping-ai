@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { sendMessageToAI, sendImageToOCR } from '../api/aiHandler';
 import { useChatStore } from '../store/chatStore';
 import { useState } from 'react';
+import { useAuthStore } from '../store/auth';
 
 export default function ChatbotPage() {
   const {
@@ -14,6 +15,8 @@ export default function ChatbotPage() {
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
   const [isListening, setIsListening] = useState(false);
+  // const token = useAuthStore((s) => s.token);
+  const userId = useAuthStore((s) => s.userId);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -25,7 +28,7 @@ export default function ChatbotPage() {
     setMsg('');
     setLoading(true);
     try {
-      const aiReply = await sendMessageToAI(text);
+      const aiReply = await sendMessageToAI(text, userId);
       addMessage({ role: 'bot', content: aiReply });
     } catch {
       addMessage({ role: 'bot', content: 'Sorry, an error occurred.' });
