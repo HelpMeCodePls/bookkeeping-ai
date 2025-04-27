@@ -1,5 +1,9 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import axios from "axios";
+import {
+    createRecord,
+    updateRecord,
+  } from "../handlers/recordHandlers";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import CalculatorPopover from "../components/CalculatorPopover";
@@ -82,9 +86,11 @@ export default function EditRecordModal({
         await onSubmit(payload);
       } else {
         if (isNew) {
-          await axios.post(`/ledgers/${ledgerId}/records`, payload);
+          // await axios.post(`/ledgers/${ledgerId}/records`, payload);
+          await createRecord(ledgerId, payload);
         } else {
-          await axios.put(`/records/${record.id}`, payload);
+          // await axios.put(`/records/${record.id}`, payload);
+          await updateRecord(record.id, payload);
         }
       }
 
