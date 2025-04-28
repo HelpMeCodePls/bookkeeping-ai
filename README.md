@@ -12,7 +12,7 @@ No real backend or database is required for this version.
 ### 1. Clone the repository
 
 ```
-bash
+bash 
 git clone https://github.com/your-repo/expense-assistant.git
 cd expense-assistant
 ```
