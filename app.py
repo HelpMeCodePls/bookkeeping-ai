@@ -227,8 +227,18 @@ def get_records_by_ledger(ledger_id):
 
         filtered_records = []
         for r in records:
-            if month and (not r.get('date') or not r['date'].strftime("%Y-%m").startswith(month)):
-                continue
+            # if month and (not r.get('date') or not r['date'].strftime("%Y-%m").startswith(month)):
+            #     continue
+            if month:
+                date_val = r.get("date")
+                # 允许 str 或 datetime
+                if isinstance(date_val, str):
+                    ok = date_val.startswith(month)
+                else:
+                    ok = date_val and date_val.strftime("%Y-%m").startswith(month)
+                if not ok:
+                    continue
+
             if categories and r.get('category') and r['category'].lower() not in categories:
                 continue
             if split and not any(s['user_id'] == split for s in r.get('split', [])):
@@ -255,7 +265,7 @@ def create_record(ledger_id):
         record_id = record_service.create(
             ledger_id=ledger_id,
             amount=data["amount"],
-            # merchant=data["merchant"],
+            merchant=data["merchant"],
             category=data["category"],
             date=data["date"],
             status=data["status"],
@@ -296,7 +306,7 @@ def update_record(record_id):
 
         ledger_id = data.get("ledger_id")
         amount = data.get("amount")
-        # merchant = data.get("merchant")
+        merchant = data.get("merchant")
         category = data.get("category")
         date = data.get("date")
         status = data.get("status")
@@ -308,7 +318,7 @@ def update_record(record_id):
             record_id=record_id,
             ledger_id=ledger_id,
             amount=amount,
-            # merchant=merchant,
+            merchant=merchant,
             category=category,
             date=date,
             status=status,

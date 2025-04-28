@@ -1,5 +1,6 @@
 import { useForm, useFieldArray } from "react-hook-form";
-import axios from "axios";
+// import axios from "axios";
+import { fetchCollaborators } from "../handlers/collaboratorHandlers";
 import {
     createRecord,
     updateRecord,
@@ -34,8 +35,9 @@ export default function EditRecordModal({
   const qc = useQueryClient();
   const { data: collaborators = [] } = useQuery({
     queryKey: ["collaborators", ledgerId],
-    queryFn: () =>
-      axios.get(`/ledgers/${ledgerId}/collaborators`).then((r) => r.data),
+    // queryFn: () =>
+    //   axios.get(`/ledgers/${ledgerId}/collaborators`).then((r) => r.data),
+    queryFn: () => fetchCollaborators(ledgerId),
     enabled: !!ledgerId,
   });
   const { data: permission } = usePermission(record?.ledger_id);
