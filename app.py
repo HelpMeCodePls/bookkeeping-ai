@@ -338,11 +338,11 @@ def get_records_by_ledger(ledger_id):
         # 原有查询逻辑...
         month = request.args.get('month')
         # categories = request.args.get('categories', '').split(',')
-        raw_cats = request.args.get("categories")  # like 'food,travel'
-        categories = [c.lower() for c in raw_cats.split(",") if c] if raw_cats else []
+        raw_cats   = request.args.get("categories")      # None 表示前端没传
+        categories = [c.lower() for c in raw_cats.split(",") if c] if raw_cats else []          # [] ⇒ 不启用分类过滤
 
-        split = request.args.get('split')
-        split_uid  = request.args.get("split")
+        # split = request.args.get('split')
+        split_uid = request.args.get("split") or None
         collaborator = request.args.get('collaborator')
 
 
@@ -394,10 +394,11 @@ def get_records_by_ledger(ledger_id):
 
             # ---- 3️⃣ 按 split / collaborator 过滤 ----
             if split_uid and not any(
-                    s.get("user_id") == split_uid or s.get("userId") == split_uid
+                    (s.get("user_id") or s.get("userId")) == split_uid   # ✅ 两种字段兼容
                     for s in r.get("split", [])
-                ):
+            ):
                 continue
+            
             if collaborator and r.get("createdBy") != collaborator:
                 continue
 
