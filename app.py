@@ -331,12 +331,17 @@ def get_records_by_ledger(ledger_id):
                 continue
 
             # ---- 3️⃣ 按 split / collaborator 过滤 ----
-            if split_uid and not any(s["user_id"] == split_uid for s in r.get("split", [])):
+            if split_uid and not any(
+                    s.get("user_id") == split_uid or s.get("userId") == split_uid
+                    for s in r.get("split", [])
+                ):
                 continue
             if collaborator and r.get("createdBy") != collaborator:
                 continue
 
             filtered.append(r)
+        for rec in filtered:
+            rec["id"] = rec["_id"]     
 
         return jsonify(filtered), 200
 
@@ -355,7 +360,11 @@ def create_record(ledger_id):
 
         # Edited by David, add split handling
         splits = [
-            {"userId": s["userId"], "amount": float(s.get("amount", 0))}
+            {
+                "user_id": s.get("user_id") or s.get("userId"),   # 两个都兼容
+                "ratio"  : float(s.get("ratio", 0)),
+                "amount" : float(s.get("amount", 0)),
+            }
             for s in data.get("split", [])
         ]
 
@@ -368,8 +377,7 @@ def create_record(ledger_id):
             status=data["status"],
             description=data.get("description", ""),
             is_AI_generated=data.get("is_AI_generated", False),
-            createdBy=data.get("user_id", "default_user"),
-            split=splits
+            createdBy = data.get("createdBy") or data.get("user_id") or "default_user"            split=splits
         )
 
         ledger_service.update_spent(ledger_id)

@@ -164,13 +164,13 @@ class LedgerService:
             "default": 0, "months": {}, "categoryDefaults": {}, "categoryBudgets": {}
         })
 
-        if category != None and category != "":
-            # category budget
-            if setDefault:
-                budgets["categoryDefaults"] = {category: float(budget)}
-            else:
-                budgets["categoryBudgets"]["month"] = {}
-                budgets["categoryBudgets"]["month"][category] = float(budget)
+        if category:
+            if setDefault:                       # ① 设置类别默认值
+                budgets.setdefault("categoryDefaults", {})[category] = float(budget)
+            else:                                # ② 设置某月-某类别预算
+                budgets.setdefault("categoryBudgets", {})\
+                    .setdefault(month, {})[category] = float(budget)
+
 
         else:
             # month‐level budget
