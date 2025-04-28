@@ -61,7 +61,8 @@ export default function RecordList() {
         queryFn: () =>
           fetchRecords({
             ledgerId: currentId,
-            month,
+            // month,
+            // month: month || undefined,           // ← 仅在明确选择时带
             categories: filters.categories,
             split: filters.split,
             collaborator: undefined,
@@ -82,7 +83,9 @@ export default function RecordList() {
   const grouped = useMemo(
     () =>
       records.reduce((acc, r) => {
-        (acc[r.date] = acc[r.date] || []).push(r);
+        // (acc[r.date] = acc[r.date] || []).push(r);
+        const day = (r.date || "").slice(0, 10);  // "2025-01-10"
+        (acc[day] = acc[day] || []).push(r);
         return acc;
       }, {}),
     [records]

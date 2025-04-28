@@ -6,9 +6,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import './index.css'
 
-if (import.meta.env.DEV) {
+if (import.meta.env.VITE_MOCK === "true") {
   const { worker } = await import('./mocks/browser')
-  await worker.start()
+  // await worker.start()
+   // 只想在本地 mock 时才拦截，其余直接放行
+  await worker.start({ onUnhandledRequest: "bypass" });
 }
 
 // ⚠️ 换成你的 Google Client ID
