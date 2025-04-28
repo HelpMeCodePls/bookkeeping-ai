@@ -589,11 +589,20 @@ class UserService:
         return self.col.find_one({"name": matched_name}) or {}
     
     @kernel_function(description="Retrieves All users.")
-    def get_all_users(self) -> Annotated[List[Dict[str, Any]], "List of users."]:
+    # def get_all_users(self) -> Annotated[List[Dict[str, Any]], "List of users."]:
+    #     print("[LOG] Retrieving all users...")
+    #     all_users = self.col.find({}).to_list()
+    #     return all_users or {}
+    def get_all_users(self) -> List[Dict[str, Any]]:
         print("[LOG] Retrieving all users...")
-        all_users = self.col.find({}).to_list()
-        return all_users or {}
+        users = list(self.col.find({}))
         
+        # 转换 ObjectId 为字符串
+        for user in users:
+            if '_id' in user and isinstance(user['_id'], ObjectId):
+                user['_id'] = str(user['_id'])
+        
+        return users
 class ChartPlugin:
     @kernel_function(description="Get chart summary by ledgerId, mode, selectedDate")
     def get_summary(self, ledger_id: str, mode: str = "all", selected_date: str = None):
