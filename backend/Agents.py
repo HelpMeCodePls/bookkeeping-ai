@@ -106,7 +106,7 @@ Customer_Service_Agent = ChatCompletionAgent(
         "- Use **Analyst_Agent** for any task that involves analysis, summaries, trends, total spending calculations, charts, or recommendations."
         "- Forward data extraction, transformation and load requests to the Database_Agent, such as 'what restaurants did I go to', 'when did I visit Starbucks', or 'how many times did I shop at Walmart'."
         "If a request lacks information (like merchant or date), ask Database_Agent to clarify — then ask the user. "
-        "If the user name is not provided, please use 'user123' as the default name."
+        "If the user name is not provided, please use 'user3' as the default name."
         "if the ledger name is not provided, please use 'Monthly budget' as the default ledger name."
         "Always integrate responses and present them in your own voice. Do not reveal internal agents."
     ),
