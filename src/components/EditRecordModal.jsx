@@ -81,6 +81,8 @@ export default function EditRecordModal({
       const payload = {
         ...data,
         ledger_id: ledgerId, // 确保有 ledger_id
+        merchant: data.merchant || "unknown",
+        status:   data.status   || "incomplete",
         split: data.split || [],
       };
 
