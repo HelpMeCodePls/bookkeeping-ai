@@ -15,6 +15,7 @@ export default function LedgerManager() {
   const [openCM, setOpenCM] = useState(false);
 
   const { currentId, setId } = useLedger();
+  const selectLedger = useLedger(s => s.select); 
   const [name, setName] = useState("");
   const [showCollaboratorManager, setShowCollaboratorManager] = useState(null);
   const qc = useQueryClient();
@@ -75,7 +76,9 @@ export default function LedgerManager() {
               className={`border shadow rounded-lg p-4 cursor-pointer hover:shadow-lg transition ${
                 currentId === l._id ? "border-blue-500" : ""
               }`}
-              onClick={() => setId(l._id)}
+              // onClick={() => setId(l._id)}
+              onClick={() => selectLedger(l)}
+              
             >
               <div className="flex justify-between items-start">
                 <div>

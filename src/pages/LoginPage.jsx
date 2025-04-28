@@ -4,6 +4,8 @@ import { useAuthStore } from "../store/auth";
 import { motion } from "framer-motion";
 import { User, Loader2 } from "lucide-react";
 import { api } from "../api/client";
+import { useLedger } from "../store/ledger";
+import { useQueryClient } from '@tanstack/react-query';
 
 // 固定4个可选用户
 const tempUsers = [
@@ -40,11 +42,15 @@ const fadeUp = {
   transition: { duration: 0.3 },
 };
 
+
+
 export default function LoginPage() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const setLedger = useLedger(s => s.setLedger); 
+  const qc        = useQueryClient();
 
   const handleUserSelect = async (user) => {
     setSelectedUser(user);
@@ -61,6 +67,23 @@ export default function LoginPage() {
       // 真正的登录逻辑
       const { data } = await api.post("/auth/login", { email: user.email });
       setAuth({ token: data.access_token, user: data.user });
+
+      const ledgers = await api
+      .get("/ledgers", { params: { token: data.access_token } })
+      .then(r => r.data);
+
+      if (ledgers.length) {
+        const first = ledgers[0];
+        const thisMonth = new Date().toISOString().slice(0,7); // "2025-04"
+
+        // ① 把“单条账本”缓存好，顶栏立即能拿到 name
+        qc.setQueryData(['ledgers', first._id], first);
+        // ② 把“当前用户所有账本”也缓存好，下拉列表马上就有
+        qc.setQueryData(['ledgers', data.access_token], ledgers);
+
+
+        setLedger({ id: first._id, name: first.name, month: thisMonth });
+      }
 
       navigate("/chatbot"); // 登录成功后跳转到聊天页面
     } catch (err) {
