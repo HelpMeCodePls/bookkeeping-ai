@@ -29,6 +29,7 @@ export default function RecordList() {
     split: "",
   });
 
+  console.log("currentId", currentId);
   // 添加用户查询
   const { data: users = [] } = useQuery({
     queryKey: ["users", token],
@@ -65,11 +66,11 @@ export default function RecordList() {
           fetchRecords({
             ledgerId: currentId,
             // month,
-            // month: month || undefined,           // ← 仅在明确选择时带
+            month: month || undefined,           // ← 仅在明确选择时带
             categories: filters.categories,
             split: filters.split,
             collaborator: undefined,
-            token
+            token: token,
           }),
 
     enabled: !!currentId && !!token,

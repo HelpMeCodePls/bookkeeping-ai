@@ -8,14 +8,14 @@ const getToken = () => localStorage.getItem("jwt") || "";
 export const fetchRecords = async ({ ledgerId, month, categories, split, collaborator, token }) => {
     const { data } = await api.get(`/ledgers/${ledgerId}/records`, {
     params: {
-      token,
-      month,
+      token: token || localStorage.getItem("jwt") || "",
+      month: month || undefined,
       categories: categories?.length ? categories.join(",") : undefined,
       split: split || undefined,
       collaborator: collaborator || undefined,
     },
   });
-
+  console.log("ledgerId:", ledgerId);
   console.log("[DEBUG] records length:", data.length);
   return data; // [{…}]
 };
