@@ -9,6 +9,9 @@ pymongo
 # AI & Semantic Kernel
 semantic-kernel
 
+# Azure speech
+azure-cognitiveservices-speech
+
 # OpenAI API
 openai
 
