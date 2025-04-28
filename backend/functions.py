@@ -140,34 +140,36 @@ class LedgerService:
     def get_by_user(self, user_name: Annotated[str, "User name"]) -> Annotated[List[Dict[str, Any]], "List of ledgers."]:
         return self.col.find({"owner": user_name}).to_list()
 
-    @kernel_function(description="Updates the budget of an existing ledger.")
+    @kernel_function(description="Updates the budget of an existing ledger. Only Write the necessary arguments provided by user prompt and the ledger_id, do not fill other arguments unlesss specified.")
     def update_budget(self, ledger_id: Annotated[str, "ID of the ledger to update"], 
                       budget: Annotated[float, "The amount of new budget"],
-                      month: Annotated[str, "The month that the user wants to set the budget for"],
-                      category: Annotated[str, "The type of objective that this budget is used for"],
-                      setDefault:Annotated[bool, "If set to true, then a default value should be applied"]) -> Annotated[Dict[str, bool], "Confirmation message."]:
+                      month: Annotated[str, "The month that the user wants to set the budget for, defaulted to None"] = None,
+                      category: Annotated[str, "The type of objective that this budget is used for, defaulted to None"] = None,
+                      setDefault:Annotated[bool, "If set to true, then a default value should be applied"] = True) -> Annotated[Dict[str, bool], "Confirmation message."]:
+        print("[LOG] Updating ledger budget...")
         ledger = self.col.find_one({"_id": ledger_id})
         if not ledger:
             return False
-
+        # print(type(month), month, type(category), category, type(setDefault), setDefault)
         # ensure budgets object exists
         budgets = ledger.get("budgets", {
             "default": 0, "months": {}, "categoryDefaults": {}, "categoryBudgets": {}
         })
 
-        if category is None:
-            # month‐level budget
-            if setDefault:
-                budgets["default"] = float(budget)
-            else:
-                budgets["months"][month] = float(budget)
-        else:
+        if category != None and category != "":
             # category budget
             if setDefault:
                 budgets["categoryDefaults"] = {category: float(budget)}
             else:
                 budgets["categoryBudgets"]["month"] = {}
                 budgets["categoryBudgets"]["month"][category] = float(budget)
+
+        else:
+            # month‐level budget
+            if setDefault:
+                budgets["default"] = float(budget)
+            else:
+                budgets["months"][month] = float(budget)
 
         # write back
         self.col.update_one(
@@ -216,16 +218,21 @@ class LedgerService:
 
         # 获取账本下所有记录
         records = record_service.get_by_ledger(ledger_id) or []
+        spent = {}
+        for rec in records:
+            cat = rec["category"]
+            spent[cat] = spent.get(cat, 0) + rec["amount"]
+        
 
-        # 计算总支出，确保 amount 是数字
-        total_spent = sum(float(record.get("amount", 0)) for record in records if isinstance(record.get("amount", 0), (int, float)))
+        # # 计算总支出，确保 amount 是数字
+        # total_spent = sum(float(record.get("amount", 0)) for record in records if isinstance(record.get("amount", 0), (int, float)))
 
         # 更新到 ledger
-        result = self.col.update_one({"_id": ledger_id}, {"$set": {"spent": total_spent}})
+        result = self.col.update_one({"_id": ledger_id}, {"$set": {"spent": spent}})
 
         return {
             "ok": bool(result.matched_count),
-            "new_spent": total_spent
+            "new_spent": spent
         }
     
     # edit by Antonio: 🛠 获取所有协作者
@@ -314,6 +321,9 @@ class RecordService:
                 is_read=False,
                 message=f"New record created: {description}"
             )
+
+            print("[LOG] updating ledger spent...")
+            LedgerService().update_spent(ledger_id)  # Update the ledger's spent field after updating the record
         except Exception as e:
             print("[ERROR] Failed to create record:", e)
             return None
@@ -333,24 +343,25 @@ class RecordService:
             print(f"[ERROR] Invalid field name '{field_name}'. Allowed fields: {allowed_fields}")
             return []
         
-        if field_name in ["merchant", "category", "description", "createdBy"]:
+        if field_name in ["ledger_id", "merchant", "category", "description", "createdBy"]:
             reference_values = self.col.distinct(field_name)
             matched_value = similar_match(field_value, reference_values)
             print(f"[LOG] Matched value: {matched_value}")
-        
-        return self.col.find({field_name: matched_value}).to_list()
+            return self.col.find({field_name: matched_value}).to_list()
+        return []
     
-    @kernel_function(description="Retrieves all records for a specific ledger.")
+    @kernel_function(description="Retrieves all records under a specific ledger.")
     def get_by_ledger(self, ledger_id: Annotated[str, "ID of the ledger that this record belongs to"]) -> Annotated[Dict[str, Any], "Record data."]:
+        print(f"[LOG] Retrieving records for ledger ID: {ledger_id}")
         return self.col.find({"ledger_id": ledger_id}).to_list() or {}
 
-    @kernel_function(description="Write the necessary arguments provided by user prompt and the record id, and leave the rest as default values.")
+    @kernel_function(description="Updates a record. Only Write the necessary arguments provided by user prompt and the record id, and leave the rest as None.")
     def update(self, record_id: Annotated[str, "ID of the record"], 
                 ledger_id: Annotated[str, "Ledger ID that this record belongs to"]= None, 
                 amount: Annotated[float, "Amount of money spent on this record"] = None, 
                 merchant: Annotated[str, "The merchant or service provider for this record"] = None,
                 category: Annotated[CategoryEnum, "The category of purpose that this moneyh is spent for"] = None,
-                date: Annotated[datetime, "The date and time of this transaction"] = None,
+                # date: Annotated[datetime, "The date and time of this transaction"] = None,
                 status: Annotated[StatusEnum, "The completion status of this record"] = None,
                 description: Annotated[str, "User defined, optional description of this record"]= None,
                 is_AI_generated: Annotated[bool, "Whether this record is generated by AI Agent or not"]= None,
@@ -363,7 +374,7 @@ class RecordService:
                 "amount": amount,
                 "merchant": merchant,
                 "category": category,
-                "date": date,
+                # "date": date,
                 "status": status,
                 "description": description,
                 "is_AI_generated": is_AI_generated,
@@ -371,8 +382,37 @@ class RecordService:
             }.items() if v is not None
         }
 
-        result = self.col.update_one({"id": record_id}, {"$set": update_data})
+        result = self.col.update_one({"_id": record_id}, {"$set": update_data})
+        try:
+            LedgerService().update_spent(ledger_id)  # Update the ledger's spent field after updating the record
+        except Exception as e:
+            print("[ERROR] Failed to update ledger spent:", e)
+            return None
         return {"ok":True} if result.matched_count else {"ok":False}
+    
+    @kernel_function(description="Add a user to the split list of a record.")
+    def add_split(self, record_id: Annotated[str, "ID of the record to update"], 
+                  user: Annotated[str, "User name of the user to add to the split list"],
+                  split_ratio: Annotated[float, "The ratio that the user should split for, between 0 and 1"]) -> Annotated[str, "Confirmation message."]:
+        print("[LOG] Adding split to record...")
+
+        record = self.col.find_one({"_id": record_id})
+        if not record:
+            return "Record not found."
+        split = record.get("split", [])
+        new_split = {
+            "user_id": user,
+            "ratio": split_ratio,
+            "amount": record["amount"] * split_ratio
+        }
+        split.append(new_split)
+
+        try:
+            self.col.update_one({"_id": record_id}, {"$set": {"split": split}})
+            return {"ok":True}
+        except Exception as e:
+            print("[ERROR] Failed to update record:", e)
+            return None
     
     def get_unfinished_records(self, ledger_id: str) -> List[Dict[str, Any]]:
         return self.col.find({"ledger_id": ledger_id, "status": StatusEnum.incomplete}).to_list() or []
@@ -476,10 +516,20 @@ class NotificationService:
 
     2⃣ 少了 按时间倒序 排序
     '''
-    @kernel_function(description="Retrieves all notifications by a user.")
-    def get_by_user(self, user_id: Annotated[str, "User ID"]):
+    @kernel_function(description="Retrieves all notifications by a user name.")
+    def get_by_user(self, user_id: Annotated[str, "User name"]):
+        print(f"[LOG] Retrieving notifications for user ID: {user_id}")
         notifications = list(
             self.col.find({"user_id": user_id}).sort("created_at", -1)
+        )
+        # print(notifications)
+        return notifications or []
+    
+    @kernel_function(description="Retrieves all unread notifications by a user name.")
+    def get_unread_by_user(self, user_id: Annotated[str, "User name"]):
+        print(f"[LOG] Retrieving unread notifications for user ID: {user_id}")
+        notifications = list(
+            self.col.find({"user_id": user_id, "is_read": False}).sort("created_at", -1)
         )
         return notifications or []
 
