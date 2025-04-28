@@ -363,11 +363,22 @@ class RecordService:
             return self.col.find({field_name: matched_value}).to_list()
         return []
     
-    @kernel_function(description="Retrieves all records under a specific ledger.")
-    def get_by_ledger(self, ledger_id: Annotated[str, "ID of the ledger that this record belongs to"]) -> Annotated[Dict[str, Any], "Record data."]:
+    @kernel_function(
+        description="Retrieves all records under a specific ledger."
+    )
+    def get_by_ledger(
+        self, 
+        ledger_id: Annotated[str, "Ledger ID this record belongs to"]
+    ) -> List[Dict[str, Any]]:           # ✅ 返回列表而不是单条
         print(f"[LOG] Retrieving records for ledger ID: {ledger_id}")
-        # return self.col.find({"ledger_id": ledger_id}).to_list() or {}
-        return list(self.col.find({"ledger_id": ledger_id})) 
+
+        recs = list(self.col.find({"ledger_id": ledger_id}))
+
+        # 👉 把 _id 复制一份给前端用
+        for r in recs:
+            r["id"] = str(r["_id"])      # str() 以防是 ObjectId
+
+        return recs
     
     @kernel_function(description="Updates a record. Only Write the necessary arguments provided by user prompt and the record id, and leave the rest as None.")
     def update(self, record_id: Annotated[str, "ID of the record"], 
