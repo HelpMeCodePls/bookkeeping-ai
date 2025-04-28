@@ -260,7 +260,8 @@ def get_records_by_ledger(ledger_id):
             return jsonify({"error": "Missing token"}), 400
             
         # 验证用户权限
-        user_id = token.replace("stub-jwt-", "")
+        # user_id = token.replace("stub-jwt-", "")
+        user_id = token.split('-')[-1]
         ledger = ledger_service.get(ledger_id)
         if not ledger:
             return jsonify({"error": "Ledger not found"}), 404
@@ -279,28 +280,30 @@ def get_records_by_ledger(ledger_id):
 
 
         records = record_service.get_by_ledger(ledger_id)
+        print(f"[DEBUG] Raw records from DB: {records}") 
+        # filtered_records = []
+        # for r in records:
+        #     # if month and (not r.get('date') or not r['date'].strftime("%Y-%m").startswith(month)):
+        #     #     continue
+        #     if month:
+        #         date_val = r.get("date")
+        #         # 允许 str 或 datetime
+        #         if isinstance(date_val, str):
+        #             ok = date_val.startswith(month)
+        #         else:
+        #             ok = date_val and date_val.strftime("%Y-%m").startswith(month)
+        #         if not ok:
+        #             continue
 
-        filtered_records = []
-        for r in records:
-            # if month and (not r.get('date') or not r['date'].strftime("%Y-%m").startswith(month)):
-            #     continue
-            if month:
-                date_val = r.get("date")
-                # 允许 str 或 datetime
-                if isinstance(date_val, str):
-                    ok = date_val.startswith(month)
-                else:
-                    ok = date_val and date_val.strftime("%Y-%m").startswith(month)
-                if not ok:
-                    continue
+        #     if categories and r.get('category') and r['category'].lower() not in categories:
+        #         continue
+        #     if split and not any(s['user_id'] == split for s in r.get('split', [])):
+        #         continue
+        #     if collaborator and r.get('createdBy') != collaborator:
+        #         continue
+        #     filtered_records.append(r)
 
-            if categories and r.get('category') and r['category'].lower() not in categories:
-                continue
-            if split and not any(s['user_id'] == split for s in r.get('split', [])):
-                continue
-            if collaborator and r.get('createdBy') != collaborator:
-                continue
-            filtered_records.append(r)
+        filtered_records = records
 
         return jsonify(filtered_records), 200
 

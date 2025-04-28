@@ -18,7 +18,7 @@ export const fetchLedger = async (ledgerId) => {
 export const createLedger = async ({ name, budget }) => {
     const { data } = await api.post("/ledgers", {
       name,
-      budget,
+      budgets: { default: Number(budget) } ,
       token: getToken(),   
     });
     return data;           // { id: "…" }
