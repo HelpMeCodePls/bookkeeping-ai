@@ -3,7 +3,7 @@
 This project is the **Frontend Mock Version** of Expense Assistant.  
 It uses **Mock Service Worker (MSW)** and **Local Mock Data** for development and UI testing.  
 No real backend or database is required for this version.
-
+ 
 ---
  
 ## 🛠 How to Set Up
