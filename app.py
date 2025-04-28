@@ -377,7 +377,8 @@ def create_record(ledger_id):
             status=data["status"],
             description=data.get("description", ""),
             is_AI_generated=data.get("is_AI_generated", False),
-            createdBy = data.get("createdBy") or data.get("user_id") or "default_user"            split=splits
+            createdBy = data.get("createdBy") or data.get("user_id") or "default_user" ,
+            split=splits
         )
 
         ledger_service.update_spent(ledger_id)
