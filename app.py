@@ -421,79 +421,136 @@ def create_record(ledger_id):
         return jsonify({"error": "添加新纪录 Error", "details": str(e)}), 500
 
 #更新一条记录
+# @app.route("/records/<record_id>", methods=["PUT"])
+# def update_record(record_id):
+#     try:
+#         data = request.get_json()
+#         if not data:
+#             return jsonify({"error": "Missing request body"}), 400
+
+#         ledger_id = data.get("ledger_id")
+#         amount = data.get("amount")
+#         merchant = data.get("merchant")
+#         category = data.get("category")
+#         date = data.get("date")
+#         status = data.get("status")
+#         description = data.get("description")
+#         is_AI_generated = data.get("is_AI_generated")
+#         createdBy = data.get("createdBy")
+
+#         result = record_service.update(
+#             record_id=record_id,
+#             ledger_id=ledger_id,
+#             amount=amount,
+#             merchant=merchant,
+#             category=category,
+#             date=date,
+#             status=status,
+#             description=description,
+#             is_AI_generated=is_AI_generated,
+#             createdBy=createdBy
+#         )
+
+#         # record = record_service.get(record_id)
+#         # record = record_service.search_records_by_field("_id", record_id)
+#         # if record:
+#         #     ledger_id = record.get("ledger_id")
+#         #     if ledger_id:
+#         #         ledger_service.update_spent(ledger_id)
+#         if ledger_id:
+#             ledger_service.update_spent(ledger_id)
+
+#         return jsonify({"ok": True})
+
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         return jsonify({"error": "更新一条记录 Error", "details": str(e)}), 500
+
 @app.route("/records/<record_id>", methods=["PUT"])
 def update_record(record_id):
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "Missing request body"}), 400
+        data = request.get_json() or {}
 
-        ledger_id = data.get("ledger_id")
-        amount = data.get("amount")
-        merchant = data.get("merchant")
-        category = data.get("category")
-        date = data.get("date")
-        status = data.get("status")
-        description = data.get("description")
-        is_AI_generated = data.get("is_AI_generated")
-        createdBy = data.get("createdBy")
-
-        result = record_service.update(
-            record_id=record_id,
-            ledger_id=ledger_id,
-            amount=amount,
-            merchant=merchant,
-            category=category,
-            date=date,
-            status=status,
-            description=description,
-            is_AI_generated=is_AI_generated,
-            createdBy=createdBy
+        # 1️⃣ 直接更新
+        record_service.update(
+            record_id          = record_id,
+            ledger_id          = data.get("ledger_id"),
+            amount             = data.get("amount"),
+            merchant           = data.get("merchant"),
+            category           = data.get("category"),
+            date               = data.get("date"),
+            status             = data.get("status"),
+            description        = data.get("description"),
+            is_AI_generated    = data.get("is_AI_generated"),
+            createdBy          = data.get("createdBy"),
         )
 
-        # record = record_service.get(record_id)
-        # record = record_service.search_records_by_field("_id", record_id)
-        # if record:
-        #     ledger_id = record.get("ledger_id")
-        #     if ledger_id:
-        #         ledger_service.update_spent(ledger_id)
+        # 2️⃣ 重新统计 spent —— 如果前端没带 ledger_id，就自己查一下
+        ledger_id = data.get("ledger_id")
+        if not ledger_id:
+            doc = record_service.col.find_one({"_id": record_id})
+            ledger_id = doc["ledger_id"] if doc else None
+
         if ledger_id:
             ledger_service.update_spent(ledger_id)
 
         return jsonify({"ok": True})
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        import traceback; traceback.print_exc()
         return jsonify({"error": "更新一条记录 Error", "details": str(e)}), 500
 
 # 删除一条记录
+# @app.route("/records/<record_id>", methods=["DELETE"])
+# def delete_record(record_id):
+#     try:
+#         # record = record_service.search_records_by_field("_id", record_id)
+#         # if not record:
+#         #     return jsonify({"error": "Record not found"}), 404
+
+#         # ledger_id = record.get("ledger_id")
+
+#         rec_list = record_service.search_records_by_field("_id", record_id)
+#         record   = rec_list[0] if rec_list else None
+#         if not record:
+#             return jsonify({"error": "Record not found"}), 404
+
+#         ledger_id = record.get("ledger_id")
+
+#         record_service.delete(record_id)
+
+#         if ledger_id:
+#             ledger_service.update_spent(ledger_id)
+
+#         return jsonify({"ok": True})
+
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         return jsonify({"error": "删除一条记录 Error", "details": str(e)}), 500
+
 @app.route("/records/<record_id>", methods=["DELETE"])
 def delete_record(record_id):
     try:
-        # record = record_service.search_records_by_field("_id", record_id)
-        # if not record:
-        #     return jsonify({"error": "Record not found"}), 404
-
-        # ledger_id = record.get("ledger_id")
-        
-        rec_list = record_service.search_records_by_field("_id", record_id)
-        record   = rec_list[0] if rec_list else None
-        if not record:
+        # 1️⃣ 先取到这条记录
+        doc = record_service.col.find_one({"_id": record_id})
+        if not doc:
             return jsonify({"error": "Record not found"}), 404
 
-        ledger_id = record.get("ledger_id")
+        ledger_id = doc["ledger_id"]
 
+        # 2️⃣ 真正删除
         record_service.delete(record_id)
 
+        # 3️⃣ 同步 ledger 的 spent
         if ledger_id:
             ledger_service.update_spent(ledger_id)
 
         return jsonify({"ok": True})
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        import traceback; traceback.print_exc()
         return jsonify({"error": "删除一条记录 Error", "details": str(e)}), 500
 
 # 获取所有未完成的记录
