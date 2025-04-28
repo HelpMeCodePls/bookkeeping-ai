@@ -6,7 +6,7 @@ const getToken = () => localStorage.getItem("jwt") || "";
 /* ---------- Queries ---------- */
 // 1) GET /ledgers/:id/records
 export const fetchRecords = async ({ ledgerId, month, categories, split, collaborator, token }) => {
-  const { data } = await api.get(`/ledgers/${ledgerId}/records`, {
+    const { data } = await api.get(`/ledgers/${ledgerId}/records`, {
     params: {
       token,
       month,
@@ -15,6 +15,8 @@ export const fetchRecords = async ({ ledgerId, month, categories, split, collabo
       collaborator: collaborator || undefined,
     },
   });
+
+  console.log("[DEBUG] records length:", data.length);
   return data; // [{…}]
 };
 

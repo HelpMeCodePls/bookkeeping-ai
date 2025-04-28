@@ -361,8 +361,9 @@ class RecordService:
     @kernel_function(description="Retrieves all records under a specific ledger.")
     def get_by_ledger(self, ledger_id: Annotated[str, "ID of the ledger that this record belongs to"]) -> Annotated[Dict[str, Any], "Record data."]:
         print(f"[LOG] Retrieving records for ledger ID: {ledger_id}")
-        return self.col.find({"ledger_id": ledger_id}).to_list() or {}
-
+        # return self.col.find({"ledger_id": ledger_id}).to_list() or {}
+        return list(self.col.find({"ledger_id": ledger_id})) 
+    
     @kernel_function(description="Updates a record. Only Write the necessary arguments provided by user prompt and the record id, and leave the rest as None.")
     def update(self, record_id: Annotated[str, "ID of the record"], 
                 ledger_id: Annotated[str, "Ledger ID that this record belongs to"]= None, 
@@ -423,8 +424,11 @@ class RecordService:
             return None
     
     def get_unfinished_records(self, ledger_id: str) -> List[Dict[str, Any]]:
-        return self.col.find({"ledger_id": ledger_id, "status": StatusEnum.incomplete}).to_list() or []
-
+        # return self.col.find({"ledger_id": ledger_id, "status": StatusEnum.incomplete}).to_list() or []
+        return list(
+            self.col.find({"ledger_id": ledger_id, "status": StatusEnum.incomplete})
+        )
+    
     @kernel_function(description="Deletes a record by its ID.")
     def delete(self, record_id: Annotated[str, "ID of the record to delete"]) -> Annotated[str, "Confirmation message."]:
         result = self.col.delete_one({"id": record_id})
