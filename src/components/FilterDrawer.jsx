@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
+import { api } from "../api/client";
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { useLedger } from '../store/ledger'
@@ -23,8 +24,9 @@ export default function FilterDrawer({
 
    const { data: collaborators = [] } = useQuery({
        queryKey: ['collaborators', ledgerId],
-       queryFn: () => axios.get(`/ledgers/${ledgerId}/collaborators`).then(r => r.data),
-       enabled: open && !!ledgerId
+      //  queryFn: () => axios.get(`/ledgers/${ledgerId}/collaborators`).then(r => r.data),
+      queryFn: () => api.get(`/ledgers/${ledgerId}/collaborators`).then((r) => r.data), 
+      enabled: open && !!ledgerId
      });
 
   const cats = propCategories || fetchedCategories;

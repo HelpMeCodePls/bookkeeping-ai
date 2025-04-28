@@ -37,24 +37,37 @@ export default function RecordList() {
 
   const findUser = (id) => users.find((u) => u.id === id) || {};
 
-  // 获取记录数据（带筛选）
-  const { data: records = [] } = useQuery({
-    queryKey: ["records", keyword, currentId, month, filters, token],
-    queryFn: () =>
-      axios
-        .get(`/ledgers/${currentId}/records`, {
-          params: {
-            token, // ⭐加token
-            keyword,
-            month,
-            categories:
-              filters.categories.length > 0
-                ? filters.categories.join(",")
-                : undefined,
-            split: filters.split || undefined,
-          },
-        })
-        .then((r) => r.data),
+  // // 获取记录数据（带筛选）
+  // const { data: records = [] } = useQuery({
+  //   queryKey: ["records", keyword, currentId, month, filters, token],
+  //   queryFn: () =>
+  //     axios
+  //       .get(`/ledgers/${currentId}/records`, {
+  //         params: {
+  //           token, // ⭐加token
+  //           keyword,
+  //           month,
+  //           categories:
+  //             filters.categories.length > 0
+  //               ? filters.categories.join(",")
+  //               : undefined,
+  //           split: filters.split || undefined,
+  //         },
+  //       })
+  //       .then((r) => r.data),
+
+   const { data: records = [] } = useQuery({
+       queryKey: ["records", keyword, currentId, month, filters],
+        queryFn: () =>
+          fetchRecords({
+            ledgerId: currentId,
+            // month,
+            // month: month || undefined,           // ← 仅在明确选择时带
+            categories: filters.categories,
+            split: filters.split,
+            collaborator: undefined,
+          }),
+
     enabled: !!currentId && !!token,
   });
 
@@ -70,7 +83,9 @@ export default function RecordList() {
   const grouped = useMemo(
     () =>
       records.reduce((acc, r) => {
-        (acc[r.date] = acc[r.date] || []).push(r);
+        // (acc[r.date] = acc[r.date] || []).push(r);
+        const day = (r.date || "").slice(0, 10);  // "2025-01-10"
+        (acc[day] = acc[day] || []).push(r);
         return acc;
       }, {}),
     [records]
@@ -84,15 +99,17 @@ export default function RecordList() {
     );
   }, [filters.categories, categories]);
 
+  // const deleteRec = async (id) => {
+  //   await axios.delete(`/records/${id}`, { params: { token } });
   const deleteRec = async (id) => {
-    await axios.delete(`/records/${id}`, { params: { token } });
+    await apiDeleteRecord(id);
     queryClient.invalidateQueries([
       "records",
       keyword,
       currentId,
       month,
       filters,
-      token,
+      // token,
     ]);
     setDeleteId(null);
   };

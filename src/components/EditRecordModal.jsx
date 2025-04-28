@@ -1,5 +1,10 @@
 import { useForm, useFieldArray } from "react-hook-form";
-import axios from "axios";
+// import axios from "axios";
+import { fetchCollaborators } from "../handlers/collaboratorHandlers";
+import {
+    createRecord,
+    updateRecord,
+  } from "../handlers/recordHandlers";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import CalculatorPopover from "../components/CalculatorPopover";
@@ -30,8 +35,9 @@ export default function EditRecordModal({
   const qc = useQueryClient();
   const { data: collaborators = [] } = useQuery({
     queryKey: ["collaborators", ledgerId],
-    queryFn: () =>
-      axios.get(`/ledgers/${ledgerId}/collaborators`).then((r) => r.data),
+    // queryFn: () =>
+    //   axios.get(`/ledgers/${ledgerId}/collaborators`).then((r) => r.data),
+    queryFn: () => fetchCollaborators(ledgerId),
     enabled: !!ledgerId,
   });
   const { data: permission } = usePermission(record?.ledger_id);
@@ -82,9 +88,11 @@ export default function EditRecordModal({
         await onSubmit(payload);
       } else {
         if (isNew) {
-          await axios.post(`/ledgers/${ledgerId}/records`, payload);
+          // await axios.post(`/ledgers/${ledgerId}/records`, payload);
+          await createRecord(ledgerId, payload);
         } else {
-          await axios.put(`/records/${record.id}`, payload);
+          // await axios.put(`/records/${record.id}`, payload);
+          await updateRecord(record.id, payload);
         }
       }
 
