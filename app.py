@@ -10,7 +10,8 @@ from PIL import Image
 import easyocr
 import cv2
 import numpy as np
-
+from dateutil import parser as dtparser
+from datetime import datetime
 
 # ==== Flask 初始化 ====
 app = Flask(__name__, static_folder="frontend_build", static_url_path="")
@@ -274,14 +275,19 @@ def get_records_by_ledger(ledger_id):
 
         # 原有查询逻辑...
         month = request.args.get('month')
-        categories = request.args.get('categories', '').split(',')
+        # categories = request.args.get('categories', '').split(',')
+        raw_cats = request.args.get("categories")  # like 'food,travel'
+        categories = [c.lower() for c in raw_cats.split(",") if c] if raw_cats else []
+
         split = request.args.get('split')
+        split_uid  = request.args.get("split")
         collaborator = request.args.get('collaborator')
 
 
         records = record_service.get_by_ledger(ledger_id)
-        print(f"[DEBUG] Raw records from DB: {records}") 
+        # print(f"[DEBUG] Raw records from DB: {records}") 
         # filtered_records = []
+        filtered = []
         # for r in records:
         #     # if month and (not r.get('date') or not r['date'].strftime("%Y-%m").startswith(month)):
         #     #     continue
@@ -303,9 +309,36 @@ def get_records_by_ledger(ledger_id):
         #         continue
         #     filtered_records.append(r)
 
-        filtered_records = records
+        # filtered_records = records
+        for r in records:
 
-        return jsonify(filtered_records), 200
+            # ---- 1️⃣ 按月份过滤 ----
+            if month:
+                raw_date = r.get("date")
+                if isinstance(raw_date, datetime):
+                    year_month = raw_date.strftime("%Y-%m")
+                else:
+                    # ISO-string / any str → 统一转 datetime 再取年月
+                    try:
+                        year_month = dtparser.isoparse(str(raw_date)).strftime("%Y-%m")
+                    except Exception:
+                        continue          # 无法解析，直接排除
+                if year_month != month:
+                    continue
+
+            # ---- 2️⃣ 按分类过滤 ----
+            if categories and r.get("category", "").lower() not in categories:
+                continue
+
+            # ---- 3️⃣ 按 split / collaborator 过滤 ----
+            if split_uid and not any(s["user_id"] == split_uid for s in r.get("split", [])):
+                continue
+            if collaborator and r.get("createdBy") != collaborator:
+                continue
+
+            filtered.append(r)
+
+        return jsonify(filtered), 200
 
     except Exception as e:
         import traceback
