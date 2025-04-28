@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+// import axios from "axios";
+import { api } from "../api/client"; 
 import {
   PieChart,
   Pie,
@@ -31,6 +32,8 @@ const COLORS = [
   "#d88884",
 ];
 
+const thisMonth = dayjs().format("YYYY-MM");
+
 export default function AnalysisPage() {
   const { currentId: ledgerId, month: currentMonth } = useLedger();
   const [mode, setMode] = useState("month");
@@ -43,7 +46,8 @@ export default function AnalysisPage() {
   // 获取 ledger 数据（包含 spent）
   const { data: ledger } = useQuery({
     queryKey: ["ledgers", ledgerId],
-    queryFn: () => axios.get(`/ledgers/${ledgerId}`).then((r) => r.data),
+    // queryFn: () => axios.get(`/ledgers/${ledgerId}`).then((r) => r.data),
+    queryFn: () => api.get(`/ledgers/${ledgerId}`).then(r => r.data),
     enabled: !!ledgerId,
   });
 
@@ -53,10 +57,13 @@ export default function AnalysisPage() {
     isLoading,
   } = useQuery({
     queryKey: ["charts", ledgerId, mode, selectedDate],
+    // queryFn: () =>
+    //   axios
+    //     .get("/charts/summary", { params: { ledgerId, mode, selectedDate } })
+    //     .then((r) => r.data),
     queryFn: () =>
-      axios
-        .get("/charts/summary", { params: { ledgerId, mode, selectedDate } })
-        .then((r) => r.data),
+       api.get("/charts/summary", { params: { ledgerId, mode, selectedDate } })
+          .then(r => r.data),
     enabled: !!ledgerId,
   });
 
@@ -78,20 +85,29 @@ export default function AnalysisPage() {
   }, [data]);
 
   const barData = pieData;
-  
+
   const top5 = [...pieData].sort((a, b) => b.value - a.value).slice(0, 5);
 
   // 使用 ledger.spent 计算总支出
+  // const totalSpending = useMemo(() => {
+  //   if (!ledger?.spent) return 0;
+  //   if (mode === "all") {
+  //     return Object.values(ledger.spent).reduce(
+  //       (sum, amount) => sum + amount,
+  //       0
+  //     );
+  //   }
+  //   return ledger.spent[selectedDate] || 0;
+  // }, [ledger?.spent, mode, selectedDate]);
+
   const totalSpending = useMemo(() => {
-    if (!ledger?.spent) return 0;
-    if (mode === "all") {
-      return Object.values(ledger.spent).reduce(
-        (sum, amount) => sum + amount,
-        0
-      );
-    }
-    return ledger.spent[selectedDate] || 0;
-  }, [ledger?.spent, mode, selectedDate]);
+      // 直接用刚拿到的 summary
+      if (mode === "all") {
+        return Object.values(data.byCategory).reduce((s, a) => s + a, 0);
+      }
+      // month / week / year 用 daily 数组最保险
+      return (data.daily ?? []).reduce((s, [ , v]) => s + Number(v || 0), 0);
+    }, [data, mode]);
 
   const avgDaily = lineData.length
     ? (totalSpending / lineData.length).toFixed(2)
@@ -147,7 +163,7 @@ export default function AnalysisPage() {
       while (start.isBefore(max)) {
         const end = start.endOf("week");
         options.push(
-          `${start.format("YYYY-MM-DD")} ~ ${end.format("YYYY-MM-DD")}`
+          `${start.format("YYYY-MM-DD")}~${end.format("YYYY-MM-DD")}`
         );
         start = start.add(1, "week");
       }
