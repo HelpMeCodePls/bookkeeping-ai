@@ -1,5 +1,5 @@
 // src/api/aiHandler.js
-const API_BASE = "https://spendoraai.onrender.com"; // 替换成真实 URL！
+const API_BASE = "https://spendoraai.onrender.com";
 
 export async function sendMessageToAI(message, userId) {
   try {
