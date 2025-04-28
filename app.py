@@ -4,7 +4,9 @@ from flask_cors import CORS
 from backend.Agents import Customer_Service_Agent  # 你的主智能体
 from backend.functions import LedgerService, RecordService, NotificationService, UserService, ChartPlugin  
 from semantic_kernel.agents import ChatHistoryAgentThread
+import azure.cognitiveservices.speech as speechsdk
 import base64
+import uuid
 from io import BytesIO
 from PIL import Image
 import easyocr
@@ -117,7 +119,55 @@ def ocr():
         import traceback
         traceback.print_exc()
         return jsonify({"response": f"[系统错误]: {str(e)}"})
+    
 
+# ==== voice to text ====
+@app.route('/voice', methods=['POST'])
+def voice_to_text():
+    try:
+        speech_key = os.getenv("SPEECH_KEY")
+        service_region = os.getenv("SERVICE_REGION")
+        speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+        data = request.get_json()
+        audio_base64 = data.get('audio')
+        mime_type = data.get('mime')  # example: 'audio/webm'
+
+        if not audio_base64 or not mime_type:
+            return jsonify({'error': 'Invalid request format'}), 400
+
+        # Determine file extension from mime type
+        extension = mime_type.split('/')[1]
+        filename = f"temp_audio_{uuid.uuid4()}.{extension}"
+
+        # Save base64 to file
+        with open(filename, "wb") as audio_file:
+            audio_file.write(base64.b64decode(audio_base64))
+
+        # Recognize speech from file
+        audio_config = speechsdk.audio.AudioConfig(filename=filename)
+        speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+        result = speech_recognizer.recognize_once()
+
+        # Delete temp file
+        os.remove(filename)
+
+        # Process result
+        if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+            return jsonify({'text': result.text})
+        elif result.reason == speechsdk.ResultReason.NoMatch:
+            return jsonify({'text': '[未识别]'})
+        elif result.reason == speechsdk.ResultReason.Canceled:
+            cancellation_details = result.cancellation_details
+            print(f"Speech Recognition canceled: {cancellation_details.reason}")
+            if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                print(f"Error details: {cancellation_details.error_details}")
+            return jsonify({'text': '[语音识别失败]'})
+        else:
+            return jsonify({'text': '[语音识别失败]'})
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'text': '[语音识别失败]'}), 500
 # ==== 📁 Ledger APIs ====
 
 #✅ 获取当前用户所有账本，用 ledger_service.get_by_user(user_id)，直接调用 ✅
