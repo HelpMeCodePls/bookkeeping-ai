@@ -452,11 +452,13 @@ def update_record(record_id):
         )
 
         # record = record_service.get(record_id)
-        record = record_service.search_records_by_field("_id", record_id)
-        if record:
-            ledger_id = record.get("ledger_id")
-            if ledger_id:
-                ledger_service.update_spent(ledger_id)
+        # record = record_service.search_records_by_field("_id", record_id)
+        # if record:
+        #     ledger_id = record.get("ledger_id")
+        #     if ledger_id:
+        #         ledger_service.update_spent(ledger_id)
+        if ledger_id:
+            ledger_service.update_spent(ledger_id)
 
         return jsonify({"ok": True})
 
@@ -469,7 +471,14 @@ def update_record(record_id):
 @app.route("/records/<record_id>", methods=["DELETE"])
 def delete_record(record_id):
     try:
-        record = record_service.search_records_by_field("_id", record_id)
+        # record = record_service.search_records_by_field("_id", record_id)
+        # if not record:
+        #     return jsonify({"error": "Record not found"}), 404
+
+        # ledger_id = record.get("ledger_id")
+        
+        rec_list = record_service.search_records_by_field("_id", record_id)
+        record   = rec_list[0] if rec_list else None
         if not record:
             return jsonify({"error": "Record not found"}), 404
 
