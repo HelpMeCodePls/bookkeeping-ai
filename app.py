@@ -147,14 +147,16 @@ def create_ledger():
             return jsonify({"error": "新建账本 Missing request body"}), 400
 
         name = data.get("name")
-        budget = data.get("budget")
+        # budget = data.get("budget") ## Edited by David, cuz the front end is sending budget in a json format.
+        budget = data.get("budgets", {}).get("default")
+        
         token = data.get("token")
 
         if not all([name, budget, token]):
             return jsonify({"error": "新建账本 Missing required fields"}), 400
 
         owner = token.split('-')[-1]
-        ledger_id = ledger_service.create(name, owner, str(budget), spent="0")
+        ledger_id = ledger_service.create(name, owner, str(budget))
 
         return jsonify({"id": ledger_id}), 201
 
@@ -163,24 +165,58 @@ def create_ledger():
         traceback.print_exc()
         return jsonify({"error": "新建账本 Error", "details": str(e)}), 500
 
-#✅ 更新账本预算，用 ledger_service.update_budget()，直接调用 ✅
+# #✅ 更新账本预算，用 ledger_service.update_budget()，直接调用 ✅ # 鱼的budget
+# @app.route("/ledgers/<ledger_id>/budgets", methods=["PATCH"])
+# def update_ledger_budget(ledger_id):
+#     try:
+#         data = request.get_json()
+#         if not data or "budget" not in data:
+#             return jsonify({"error": "更新账本预算 Missing budget"}), 400
+
+#         new_budget = float(data["budget"])
+#         result = ledger_service.update_budget(ledger_id, new_budget)
+#         return jsonify(result), 200
+
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         return jsonify({"error": "更新账本预算 Error", "details": str(e)}), 500
+
+# Edited by David, 
 @app.route("/ledgers/<ledger_id>/budgets", methods=["PATCH"])
 def update_ledger_budget(ledger_id):
     try:
-        data = request.get_json()
-        if not data or "budget" not in data:
-            return jsonify({"error": "更新账本预算 Missing budget"}), 400
+        data = request.get_json() or {}
+        # pull exactly the four fields the JS mock sends
+        month      = data.get("month")            # e.g. "2025-04"
+        category   = data.get("category")         # e.g. "Food" or None
+        budget     = data.get("budget")           # required
+        set_default= bool(data.get("setDefault")) # true/false
 
-        new_budget = float(data["budget"])
-        result = ledger_service.update_budget(ledger_id, new_budget)
-        return jsonify(result), 200
+        if budget is None:
+            return jsonify({"error": "Missing field: budget"}), 400
 
+        # coerce
+        budget = float(budget)
+
+        # delegate to your service
+        updated = ledger_service.update_budget(
+            ledger_id,
+            budget=budget,
+            month=month,
+            category=category,
+            set_default=set_default
+        )
+        if not updated:
+            return jsonify({"error": "Ledger not found"}), 404
+
+        return jsonify({"ok": True}), 200
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
     except Exception as e:
-        import traceback
-        traceback.print_exc()
+        import traceback; traceback.print_exc()
         return jsonify({"error": "更新账本预算 Error", "details": str(e)}), 500
-
-#删除帐本？？
 
 
 #🛠 获取当前用户对账本的权限 新增加
@@ -262,6 +298,12 @@ def create_record(ledger_id):
         if not data:
             return jsonify({"error": "Missing request body"}), 400
 
+        # Edited by David, add split handling
+        splits = [
+            {"userId": s["userId"], "amount": float(s.get("amount", 0))}
+            for s in data.get("split", [])
+        ]
+
         record_id = record_service.create(
             ledger_id=ledger_id,
             amount=data["amount"],
@@ -271,7 +313,8 @@ def create_record(ledger_id):
             status=data["status"],
             description=data.get("description", ""),
             is_AI_generated=data.get("is_AI_generated", False),
-            createdBy=data.get("user_id", "default_user")
+            createdBy=data.get("user_id", "default_user"),
+            split=splits
         )
 
         ledger_service.update_spent(ledger_id)
