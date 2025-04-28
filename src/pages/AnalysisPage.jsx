@@ -67,16 +67,18 @@ export default function AnalysisPage() {
     }
   }, [mode, data.minDate, data.maxDate]);
 
-  const pieData = useMemo(
-    () =>
-      Object.entries(data.byCategory).map(([name, value]) => ({ name, value })),
-    [data]
-  );
-  const lineData = useMemo(
-    () => data.daily.map(([date, value]) => ({ date, value })),
-    [data]
-  );
+  const pieData = useMemo(() => {
+      const byCat = data?.byCategory ?? {};
+      return Object.entries(byCat).map(([name, value]) => ({ name, value }))
+    }, [data]);
+
+  const lineData = useMemo(() => {
+    const dailyArr = Array.isArray(data?.daily) ? data.daily : [];
+    return dailyArr.map(([date, value]) => ({ date, value }));
+  }, [data]);
+
   const barData = pieData;
+  
   const top5 = [...pieData].sort((a, b) => b.value - a.value).slice(0, 5);
 
   // 使用 ledger.spent 计算总支出

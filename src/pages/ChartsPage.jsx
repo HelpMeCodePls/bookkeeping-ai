@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
+// import axios from 'axios'
 import { PieChart, Pie, Cell, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { useLedger } from '../store/ledger'
-
+import { fetchChartSummary } from '../services/chartService'
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7f50', '#8dd1e1']
 
 export default function ChartsPage() {
@@ -11,7 +11,8 @@ export default function ChartsPage() {
 
   const { data = { byCategory: {}, daily: [] } } = useQuery({
     queryKey: ['charts', ledgerId, month],
-    queryFn: () => axios.get('/charts/summary', { params: { ledgerId, month } }).then((r) => r.data),
+    // queryFn: () => axios.get('/charts/summary', { params: { ledgerId, month } }).then((r) => r.data),
+    queryFn: () => fetchChartSummary({ ledgerId, mode: 'month', selectedDate: month }),
     enabled: !!ledgerId, // 只有在有 ledgerId 时才拉数据
 })
 

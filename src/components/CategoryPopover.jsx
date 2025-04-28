@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import axios from 'axios'
+// import axios from 'axios'
+import { fetchCategories, addCategory } from "../services/categoryService";
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus } from 'lucide-react'
 
@@ -8,7 +9,8 @@ export default function CategoryPopover({ value, onChange }) {
   const qc = useQueryClient()
   const { data: cats = [] } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => axios.get('/categories').then((r) => r.data),
+    // queryFn: () => axios.get('/categories').then((r) => r.data),
+    queryFn: fetchCategories,
   })
 
   const [open, setOpen] = useState(false)
@@ -20,7 +22,8 @@ export default function CategoryPopover({ value, onChange }) {
   const [position, setPosition] = useState({ top: 0, left: 0, direction: 'bottom' })
 
   const addMut = useMutation({
-    mutationFn: () => axios.post('/categories', { label: newLabel, icon: newIcon || '🗂️' }),
+    // mutationFn: () => axios.post('/categories', { label: newLabel, icon: newIcon || '🗂️' }),
+    mutationFn: () => addCategory({ label: newLabel, icon: newIcon || "🗂️" }),
     onSuccess: () => {
       qc.invalidateQueries(['categories']);
       setAdding(false);   // 只关闭新增小表单
