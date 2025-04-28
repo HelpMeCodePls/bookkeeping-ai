@@ -1,5 +1,10 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import axios from "axios";
+// import axios from "axios";
+import {
+    fetchNotifications,
+    fetchUnreadCount,
+    markNotificationRead,
+  } from "../handlers/notificationHandlers";
 import NotificationItem from "../components/NotificationItem";
 import { useState } from "react";
 // import socketService from '../utils/socket';
@@ -65,26 +70,33 @@ export default function AlertsPage() {
   //   }, [queryClient])
 
   // 查询通知（15秒轮询一次）
-  const { data: notificationsResponse } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: async () => {
-      try {
-        const res = await axios.get("/notifications", { params: { token } });
-        // 确保返回数组格式
-        if (Array.isArray(res.data)) {
-          return res.data;
-        } else if (Array.isArray(res.data?.data)) {
-          return res.data.data;
-        }
-        return []; // 默认返回空数组
-      } catch (e) {
-        console.error("Failed to fetch notifications", e);
-        return [];
-      }
-    },
-    refetchInterval: 15000,
-    enabled: !!token,
-  });
+  // const { data: notificationsResponse } = useQuery({
+  //   queryKey: ["notifications"],
+  //   queryFn: async () => {
+  //     try {
+  //       const res = await axios.get("/notifications", { params: { token } });
+  //       // 确保返回数组格式
+  //       if (Array.isArray(res.data)) {
+  //         return res.data;
+  //       } else if (Array.isArray(res.data?.data)) {
+  //         return res.data.data;
+  //       }
+  //       return []; // 默认返回空数组
+  //     } catch (e) {
+  //       console.error("Failed to fetch notifications", e);
+  //       return [];
+  //     }
+  //   },
+  //   refetchInterval: 15000,
+  //   enabled: !!token,
+  // });
+
+  const { data: notificationsResponse = [] } = useQuery({
+      queryKey: ["notifications"],
+      queryFn: fetchNotifications,
+      refetchInterval: 15000,
+      enabled: !!token,
+    });
 
   // 确保 notifications 是数组
   const notifications = Array.isArray(notificationsResponse)
@@ -92,23 +104,30 @@ export default function AlertsPage() {
     : [];
 
   // 查询未读数（30秒轮询一次）
+  // const { data: unreadCount = 0 } = useQuery({
+  //   queryKey: ["notifications", "unread"],
+  //   queryFn: async () => {
+  //     try {
+  //       const res = await axios.get("/notifications/unread_count", {
+  //         params: { token },
+  //       });
+  //       // 确保返回数字
+  //       return Number(res.data?.count) || 0;
+  //     } catch (e) {
+  //       console.error("Failed to fetch unread count", e);
+  //       return 0;
+  //     }
+  //   },
+  //   refetchInterval: 30000,
+  //   enabled: !!token,
+  // });
+
   const { data: unreadCount = 0 } = useQuery({
-    queryKey: ["notifications", "unread"],
-    queryFn: async () => {
-      try {
-        const res = await axios.get("/notifications/unread_count", {
-          params: { token },
-        });
-        // 确保返回数字
-        return Number(res.data?.count) || 0;
-      } catch (e) {
-        console.error("Failed to fetch unread count", e);
-        return 0;
-      }
-    },
-    refetchInterval: 30000,
-    enabled: !!token,
-  });
+      queryKey: ["notifications", "unread"],
+      queryFn: fetchUnreadCount,
+      refetchInterval: 30000,
+      enabled: !!token,
+    });
 
   // 过滤通知
   const filteredNotifications = notifications.filter((n) => {

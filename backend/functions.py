@@ -442,8 +442,18 @@ class RecordService:
 
         # 再根据 mode 和 selectedDate进一步筛选
         if mode != "all" and selected_date:
-            if (mode == "month" or mode == "year") and len(selected_date) >= 7:
-                filtered = [r for r in filtered if r.get("date", "").startswith(selected_date)]
+            # if (mode == "month" or mode == "year") and len(selected_date) >= 7:
+            #     filtered = [r for r in filtered if r.get("date", "").startswith(selected_date)]
+            if mode in ("month", "year") and selected_date:
+                def date_ok(raw):
+                    # 允许 str / datetime 都能比对
+                    if isinstance(raw, datetime):
+                        raw = raw.strftime("%Y-%m-%d")
+                    raw = str(raw)
+                    return raw.startswith(selected_date)           # 例: 2025-04
+
+                filtered = [r for r in filtered if date_ok(r.get("date"))]
+
             elif mode == "week" and "~" in selected_date:
                 start, end = selected_date.split("~")
                 start_date = datetime.strptime(start.strip(), "%Y-%m-%d")
@@ -460,14 +470,21 @@ class RecordService:
         # 每日统计
         daily_map = {}
         for r in filtered:
-            date = r.get("date")
+            # date = r.get("date")
+            raw = r.get("date")
+            date = raw.strftime("%Y-%m-%d") if isinstance(raw, datetime) else str(raw)[:10]
+
             amount = float(r.get("amount", 0))
             if date:
                 daily_map[date] = daily_map.get(date, 0) + amount
 
-        daily = sorted(daily_map.items(), key=lambda x: x[0])  # 按日期排序
+        # daily = sorted(daily_map.items(), key=lambda x: x[0])  # 按日期排序
+        daily = sorted(daily_map.items()) 
 
-        return {"byCategory": by_category, "daily": daily}
+        minDate = daily[0][0] if daily else ""
+        maxDate = daily[-1][0] if daily else ""
+
+        return {"byCategory": by_category, "daily": daily, "minDate": minDate, "maxDate": maxDate}
     #未开发功能：用户权限获取
 
 

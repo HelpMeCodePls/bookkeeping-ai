@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
+// import axios from 'axios'
+import { fetchCategories } from "../services/categoryService";
 import { api } from "../api/client";
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Check, ChevronDown, ChevronUp } from 'lucide-react'
@@ -16,7 +17,8 @@ export default function FilterDrawer({
   // 使用传入的 categories 或从 API 获取
   const { data: fetchedCategories = [] } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => axios.get('/categories').then(r=>r.data),
+    // queryFn: () => axios.get('/categories').then(r=>r.data),
+    queryFn: fetchCategories,
     enabled: !propCategories // 如果没有传入 categories 才获取
   });
   

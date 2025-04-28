@@ -6,6 +6,7 @@ import {
     updateCollaboratorPermission as apiUpdatePerm,
     deleteCollaborator as apiDelete,
   } from "../handlers/collaboratorHandlers";
+import { fetchUsers } from "../services/userService";
 import { useState } from "react";
 import ConfirmDialog from "./ConfirmDialog";
 import { useAuthStore } from "../store/auth";
@@ -36,8 +37,9 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
   // 获取用户基本信息
   const { data: users = [] } = useQuery({
     queryKey: ["users", token],
-    queryFn: () =>
-      axios.get("/users", { params: { token } }).then((r) => r.data),
+    // queryFn: () =>
+    //   axios.get("/users", { params: { token } }).then((r) => r.data),
+    queryFn: () => fetchUsers(token),
     enabled: open && !!token,
   });
 
