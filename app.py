@@ -13,6 +13,22 @@ import numpy as np
 from dateutil import parser as dtparser
 from datetime import datetime
 
+
+def _serialize_record(rec: dict) -> dict:
+    """
+    把 Mongo 里拿到的 record 转成前端友好的 JSON：
+    - _id ➜ id         （前端用 r.id）
+    - datetime ➜ 'YYYY-MM-DD'
+    """
+    rec = dict(rec)                # 把 Cursor 返回的 BSON 拷一份
+    rec["id"] = rec.pop("_id")
+
+    d = rec.get("date")
+    if isinstance(d, datetime):
+        rec["date"] = d.strftime("%Y-%m-%d")
+    return rec
+
+
 # ==== Flask 初始化 ====
 app = Flask(__name__, static_folder="frontend_build", static_url_path="")
 CORS(app)
@@ -343,7 +359,8 @@ def get_records_by_ledger(ledger_id):
         for rec in filtered:
             rec["id"] = rec["_id"]     
 
-        return jsonify(filtered), 200
+        payload = [_serialize_record(r) for r in filtered]
+        return jsonify(payload), 200
 
     except Exception as e:
         import traceback
