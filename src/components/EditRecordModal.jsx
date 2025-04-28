@@ -210,7 +210,7 @@ export default function EditRecordModal({
                                 )
                                 .map((c) => (
                                   <option key={c.userId} value={c.userId}>
-                                    {c.name || c.email} ({c.avatar})
+                                    {c.avatar} {c.name || c.email}
                                   </option>
                                 ))
                             )}
