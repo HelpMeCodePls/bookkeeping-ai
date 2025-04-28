@@ -346,11 +346,16 @@ class RecordService:
         print(f"[LOG] Searching records where {field_name} = {field_value}")
         
         # Optional: Validate allowed fields
-        allowed_fields = {"ledger_id", "amount", "merchant", "category", "date", "status", "description", "createdBy"}
+        allowed_fields = {"_id", "ledger_id", "amount", "merchant",
+                  "category", "date", "status", "description", "createdBy"}
         if field_name not in allowed_fields:
             print(f"[ERROR] Invalid field name '{field_name}'. Allowed fields: {allowed_fields}")
             return []
         
+        if field_name == "_id":
+            rec = self.col.find_one({"_id": field_value})
+            return [rec] if rec else []
+
         if field_name in ["ledger_id", "merchant", "category", "description", "createdBy"]:
             reference_values = self.col.distinct(field_name)
             matched_value = similar_match(field_value, reference_values)
