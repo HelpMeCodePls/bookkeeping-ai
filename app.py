@@ -72,16 +72,12 @@ def ocr():
     header, encoded = image_data.split(",", 1)
     image_bytes = base64.b64decode(encoded)
 
-    # Open image with PIL
-    image = Image.open(BytesIO(image_bytes))
+    reader = easyocr.Reader(['en'])  # Set gpu=True if you have a GPU and want to use it
+    results = reader.readtext(image_bytes)
 
-    if image.mode != 'RGB':
-        image = image.convert('RGB')
-    image_np = np.array(image)
-
-    # use easyocr to read text from the image
-    reader = easyocr.Reader(['en'])  # or your desired languages
-    results = reader.readtext(image_np)
+    # Prepare response: convert results to text list
+    text_results = [text for _, text, _ in results] 
+    results = " ".join(text_results)
     message = "You will be given contents of a receipt. " \
     "Please extract the following information from the receipt: " \
     "1. Total amount spent (in dollars) " \
@@ -90,7 +86,7 @@ def ocr():
     "Then pass it to database agent to store the data. " \
     "If the receipt is not valid, please reply with: '[Invalid receipt]'. " \
     "Here is the receipt content: "
-    message = message + "\n" + str(results)
+    message = message + "\n" + results
 
     try:
         async def run():
@@ -377,7 +373,8 @@ def create_record(ledger_id):
             status=data["status"],
             description=data.get("description", ""),
             is_AI_generated=data.get("is_AI_generated", False),
-            createdBy = data.get("createdBy") or data.get("user_id") or "default_user"            split=splits
+            createdBy = data.get("createdBy") or data.get("user_id") or "default_user",            
+            split=splits
         )
 
         ledger_service.update_spent(ledger_id)
