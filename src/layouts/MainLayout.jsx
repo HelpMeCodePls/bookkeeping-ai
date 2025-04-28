@@ -12,7 +12,8 @@ import {
   MessageCircle,
   Power,
 } from "lucide-react";
-import axios from "axios";
+// import axios from "axios";
+import { fetchUnreadCount } from "../handlers/notificationHandlers";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../store/auth";
 import ChatbotDrawer from "../components/ChatbotDrawer";
@@ -77,15 +78,22 @@ export default function MainLayout() {
   //     refetchInterval: 10_000,
   //   });
 
+  // const { data: unreadCount = 0 } = useQuery({
+  //   queryKey: ["notifications", "unread"],
+  //   queryFn: () =>
+  //     axios
+  //       .get("/notifications/unread_count", { params: { token } })
+  //       .then((r) => r.data.count),
+  //   refetchInterval: 60000,
+  //   enabled: !!token,
+  // });
+
   const { data: unreadCount = 0 } = useQuery({
-    queryKey: ["notifications", "unread"],
-    queryFn: () =>
-      axios
-        .get("/notifications/unread_count", { params: { token } })
-        .then((r) => r.data.count),
-    refetchInterval: 60000,
-    enabled: !!token,
-  });
+      queryKey: ["notifications", "unread"],
+      queryFn: fetchUnreadCount,
+      refetchInterval: 60000,
+      enabled: !!token,
+    });
 
   return (
     <div className="flex h-screen">

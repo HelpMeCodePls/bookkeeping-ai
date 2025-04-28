@@ -1,9 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+// import axios from "axios";
 import {
     fetchRecords,
     deleteRecord as apiDeleteRecord,
   } from "../handlers/recordHandlers";
+  import { fetchCategories } from "../services/categoryService";
+  import { fetchUsers } from "../services/userService";
 import { useState, useMemo, Fragment } from "react";
 import EditRecordModal from "../components/EditRecordModal";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -30,8 +32,9 @@ export default function RecordList() {
   // 添加用户查询
   const { data: users = [] } = useQuery({
     queryKey: ["users", token],
-    queryFn: () =>
-      axios.get("/users", { params: { token } }).then((r) => r.data),
+    // queryFn: () =>
+    //   axios.get("/users", { params: { token } }).then((r) => r.data),
+    queryFn: () => fetchUsers(token),
     enabled: !!token,
   });
 
@@ -74,8 +77,9 @@ export default function RecordList() {
   // 获取分类数据
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", token],
-    queryFn: () =>
-      axios.get("/categories", { params: { token } }).then((r) => r.data),
+    // queryFn: () =>
+    //   axios.get("/categories", { params: { token } }).then((r) => r.data),
+    queryFn: fetchCategories,
     enabled: !!token,
   });
 

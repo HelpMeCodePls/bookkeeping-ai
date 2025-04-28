@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLedger } from "../store/ledger";
-import axios from "axios";
+// import axios from "axios";
+import { api } from "../api/client"; 
+import { fetchChartSummary } from "../services/chartService";
+import { fetchCategories } from "../services/categoryService";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
@@ -16,37 +19,51 @@ export default function BudgetPage() {
   // 修改获取 ledger 的查询，确保包含 spent
   const { data: ledger } = useQuery({
     queryKey: ["ledgers", currentId],
+    // queryFn: () =>
+    //   axios.get(`/ledgers/${currentId}`).then((r) => ({
+    //     ...r.data,
+    //     spent: r.data.spent || {}, // 确保 spent 总是对象
+    //   })),
     queryFn: () =>
-      axios.get(`/ledgers/${currentId}`).then((r) => ({
+      api.get(`/ledgers/${currentId}`).then((r) => ({
         ...r.data,
         spent: r.data.spent || {}, // 确保 spent 总是对象
       })),
+        
     enabled: !!currentId,
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
-    queryFn: () => axios.get("/categories").then((r) => r.data),
+    // queryFn: () => axios.get("/categories").then((r) => r.data),
+    queryFn: fetchCategories,
   });
 
   // 添加预算检查函数
   const checkBudget = async (month) => {
     try {
-      const { data: summary } = await axios.get("/charts/summary", {
-        params: {
-          ledgerId: currentId,
-          mode: "month",
-          selectedDate: month,
-        },
-      });
-
+      // const { data: summary } = await axios.get("/charts/summary", {
+      //   params: {
+      //     ledgerId: currentId,
+      //     mode: "month",
+      //     selectedDate: month,
+      //   },
+      // }
+          const summary = await fetchChartSummary({
+              ledgerId: currentId,
+              mode: "month",
+              selectedDate: month,
+            })
+            
+    
       const catBudgets = ledger.budgets?.categoryBudgets?.[month] || {};
       const defaultCatBudgets = ledger.budgets?.categoryDefaults || {};
 
       Object.entries(summary.byCategory).forEach(async ([category, amount]) => {
         const budget = catBudgets[category] || defaultCatBudgets[category];
         if (budget && amount > budget) {
-          await axios.post("/notifications", {
+          // await axios.post("/notifications", {
+          await api.post("/notifications", {
             type: "budget",
             content: `Budget exceeded in ${category} (${amount.toFixed(
               2
@@ -68,7 +85,8 @@ export default function BudgetPage() {
 
   const save = useMutation({
     mutationFn: (payload) =>
-      axios.patch(`/ledgers/${currentId}/budgets`, payload),
+      // axios.patch(`/ledgers/${currentId}/budgets`, payload),
+      api.patch(`/ledgers/${currentId}/budgets`, payload), 
     onSuccess: (_, payload) => {
       // 手动更新本地数据，避免重新获取
       queryClient.setQueryData(["ledgers", currentId], (oldData) => {
