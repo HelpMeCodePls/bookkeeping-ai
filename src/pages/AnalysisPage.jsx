@@ -196,7 +196,8 @@ export default function AnalysisPage() {
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Analysis</h2>
           <div className="flex gap-2">
-            {["week", "month", "year", "all"].map((m) => (
+            {/* {["week", "month", "year", "all"].map((m) => ( */}
+            {["month", "year", "all"].map((m) => (
               <button
                 key={m}
                 onClick={() => {
