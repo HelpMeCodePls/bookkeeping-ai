@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { api } from "../api/client";
 import {
     fetchCollaborators,
     addCollaborator as apiAdd,
@@ -49,35 +50,55 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
     //   axios.post(`/ledgers/${ledgerId}/collaborators`, payload, {
     //     params: { token },
     //   }),
-      mutationFn: ({ email, permission }) => {
-          const u = users.find((x) => x.email === email);
-          if (!u) throw new Error("User not found");
-          return apiAdd(ledgerId, {
-            userId: u.id,          
-            email,
-            permission,
-          });
-         },
-    onSuccess: async (_, variables) => {
+      // mutationFn: ({ email, permission }) => {
+      //     const u = users.find((x) => x.email === email);
+      //     if (!u) throw new Error("User not found");
+      //     return apiAdd(ledgerId, {
+      //       userId: u.id,          
+      //       email,
+      //       permission,
+      //     });
+      //    },
+      // onSuccess: async (_, variables) => {
       // variables 就是 { email, permission }
-      await axios.post(
-        "/notifications",
-        {
-          type: "collaboration",
-          content: `You added ${
-            variables.email
-          } as ${variables.permission.toLowerCase()}`,
-          ledgerId,
-          metadata: { permission: variables.permission },
-        },
-        { params: { token } }
-      );
+      // await axios.post(
+      //   "/notifications",
+      //   {
+      //     type: "collaboration",
+      //     content: `You added ${
+      //       variables.email
+      //     } as ${variables.permission.toLowerCase()}`,
+      //     ledgerId,
+      //     metadata: { permission: variables.permission },
+      //   },
+      //   { params: { token } }
+      // );
+      mutationFn: async ({ email, permission }) => {
+        const u = users.find((x) => x.email === email);
+        if (!u) throw new Error("User not found");
+   
+        // ① 调用后端新增协作者
+        await apiAdd(ledgerId, {
+          userId: u.id,
+          email,
+          permission,
+        });
+          // ② 发送通知 —— 用统一的 api 实例
+        await api.post("/notifications", {
+          user_id : u.id,                     // 后端需要的字段
+          ledger_id : ledgerId,
+          record_id : "",
+          is_read   : false,
+          message   : `You added ${email} as ${permission.toLowerCase()}`
+        });
 
-      queryClient.invalidateQueries(["collaborators", ledgerId, token]);
-      queryClient.invalidateQueries(["notifications"]);
-      setEmail("");
-    },
-  });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries(["collaborators", ledgerId]);
+        queryClient.invalidateQueries(["notifications"]);
+        setEmail("");
+      },
+    });
 
   // 移除协作者
   const removeCollaborator = useMutation({
