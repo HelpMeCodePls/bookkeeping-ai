@@ -137,9 +137,17 @@ class LedgerService:
         return all_ledgers or {}
     
     @kernel_function(description="Retrieves all ledgers of a single user.")
-    def get_by_user(self, user_name: Annotated[str, "User name"]) -> Annotated[List[Dict[str, Any]], "List of ledgers."]:
-        return self.col.find({"owner": user_name}).to_list()
-
+    # def get_by_user(self, user_name: Annotated[str, "User name"]) -> Annotated[List[Dict[str, Any]], "List of ledgers."]:
+    #     return self.col.find({"owner": user_name}).to_list()
+    def get_by_user(self, user_id: str) -> List[Dict[str, Any]]:
+        """返回“我拥有的 + 我被加入协作的”所有账本"""
+        return list(self.col.find({
+            "$or": [
+                {"owner": user_id},                 # 我是 owner
+                {"collaborators.userId": user_id}   # 我在 collaborators 数组里
+            ]
+        }))
+    
     @kernel_function(description="Updates the budget of an existing ledger. Only Write the necessary arguments provided by user prompt and the ledger_id, do not fill other arguments unlesss specified.")
     def update_budget(self, ledger_id: Annotated[str, "ID of the ledger to update"], 
                       budget: Annotated[float, "The amount of new budget"],
@@ -458,7 +466,15 @@ class RecordService:
                 start, end = selected_date.split("~")
                 start_date = datetime.strptime(start.strip(), "%Y-%m-%d")
                 end_date = datetime.strptime(end.strip(), "%Y-%m-%d")
-                filtered = [r for r in filtered if start_date <= datetime.strptime(r.get("date", "1970-01-01"), "%Y-%m-%d") <= end_date]
+                filtered = [
+                    r for r in filtered 
+                    # if start_date <= datetime.strptime(r.get("date", "1970-01-01"), "%Y-%m-%d")
+                    # <= end_date
+                    if start_date <= (
+                        r["date"] if isinstance(r.get("date"), datetime)
+                        else datetime.strptime(str(r.get("date")), "%Y-%m-%d")
+                     ) <= end_date  
+                      ]
 
         # 分类统计
         by_category = {}

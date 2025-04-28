@@ -205,7 +205,8 @@ def update_ledger_budget(ledger_id):
             budget=budget,
             month=month,
             category=category,
-            set_default=set_default
+            # set_default=set_default
+            setDefault=set_default
         )
         if not updated:
             return jsonify({"error": "Ledger not found"}), 404
