@@ -60,7 +60,7 @@ export default function RecordList() {
   //       .then((r) => r.data),
 
    const { data: records = [] } = useQuery({
-       queryKey: ["records", keyword, currentId, month, filters],
+       queryKey: ["records", keyword, currentId, month, filters, token],
         queryFn: () =>
           fetchRecords({
             ledgerId: currentId,
@@ -69,6 +69,7 @@ export default function RecordList() {
             categories: filters.categories,
             split: filters.split,
             collaborator: undefined,
+            token
           }),
 
     enabled: !!currentId && !!token,
