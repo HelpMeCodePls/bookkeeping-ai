@@ -254,10 +254,28 @@ def get_ledger_permission(ledger_id):
 @app.route("/ledgers/<ledger_id>/records", methods=["GET"])
 def get_records_by_ledger(ledger_id):
     try:
+        token = request.args.get("token", "")
+        if not token:
+            return jsonify({"error": "Missing token"}), 400
+            
+        # 验证用户权限
+        user_id = token.replace("stub-jwt-", "")
+        ledger = ledger_service.get(ledger_id)
+        if not ledger:
+            return jsonify({"error": "Ledger not found"}), 404
+            
+        # 检查用户是否有权限访问该账本
+        if ledger["owner"] != user_id and not any(
+            c["userId"] == user_id for c in ledger.get("collaborators", [])
+        ):
+            return jsonify({"error": "Unauthorized"}), 403
+
+        # 原有查询逻辑...
         month = request.args.get('month')
         categories = request.args.get('categories', '').split(',')
         split = request.args.get('split')
         collaborator = request.args.get('collaborator')
+
 
         records = record_service.get_by_ledger(ledger_id)
 
@@ -643,9 +661,28 @@ def add_category():
 # ==== 👤 User APIs ==== 
 
 #【GET 获取所有用户】
+# @app.route("/users", methods=["GET"])
+# def get_users():
+#     try:
+#         users = user_service.get_all_users() 
+#         return jsonify(users), 200
+
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+
 @app.route("/users", methods=["GET"])
 def get_users():
     try:
+        token = request.args.get("token", "")
+        if not token:
+            return jsonify({"error": "Missing token"}), 400
+            
+        # 简单验证token格式
+        if not token.startswith("stub-jwt-"):
+            return jsonify({"error": "Invalid token format"}), 401
+            
         users = user_service.get_all_users() 
         return jsonify(users), 200
 
@@ -653,7 +690,7 @@ def get_users():
         import traceback
         traceback.print_exc()
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
-
+    
 #【GET 获取当前登录用户】
 @app.route("/users/me", methods=["GET"])
 def get_myself():
