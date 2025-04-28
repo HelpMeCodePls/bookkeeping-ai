@@ -6,6 +6,7 @@ import { User, Loader2 } from "lucide-react";
 import { api } from "../api/client";
 import { useLedger } from "../store/ledger";
 import { useQueryClient } from '@tanstack/react-query';
+import brandLogo from "../assets/icons/LOGO.svg";
 
 // 固定4个可选用户
 const tempUsers = [
@@ -42,7 +43,7 @@ const fadeUp = {
   transition: { duration: 0.3 },
 };
 
-
+const spring = { type: "spring", stiffness: 120, damping: 20 };
 
 export default function LoginPage() {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -95,62 +96,74 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <motion.div
-        className="sm:mx-auto sm:w-full sm:max-w-md"
-        initial={fadeUp.initial}
-        animate={fadeUp.animate}
-        transition={fadeUp.transition}
-      >
-        <div className="flex justify-center">
-          <User className="h-12 w-12 text-blue-600" />
-        </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Select User
-        </h2>
-      </motion.div>
+    <div className="min-h-screen flex">
+      {/* 左侧：Logo + 用户选择卡片 */}
+      <div className="w-full lg:w-1/2 bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        {/* Logo 缩放入场 */}
+        <motion.div
+          className="sm:mx-auto sm:w-full sm:max-w-md text-center mb-8"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <img src={brandLogo} alt="Logo" className="h-48 w-48 mx-auto" />
+        </motion.div>
 
-      <motion.div
-        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
-        initial={fadeUp.initial}
-        animate={fadeUp.animate}
-        transition={fadeUp.transition}
-      >
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        {/* 用户列表卡片 弹簧入场 */}
+        <motion.div
+          className="sm:mx-auto sm:w-full sm:max-w-md bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={spring}
+        >
           <div className="space-y-4">
             {tempUsers.map((user) => (
               <motion.button
                 key={user.id}
                 onClick={() => handleUserSelect(user)}
-                className={`w-full flex items-center p-4 border rounded-lg ${
-                  selectedUser?.id === user.id
+                className={`
+                  w-full flex items-center p-4 border rounded-lg
+                  ${selectedUser?.id === user.id
                     ? "bg-blue-50 border-blue-500"
-                    : "border-gray-200"
-                }`}
+                    : "border-gray-200"}
+                `}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span className="text-2xl mr-5">{user.avatar}</span>{" "}
-                {/* 👉 这里间距大一点 */}
+                <span className="text-2xl mr-5">{user.avatar}</span>
                 <div className="leading-tight text-left">
-                  {" "}
-                  {/* 👉 补充行间距和左对齐 */}
-                  <p className="font-semibold text-base">{user.name}</p>{" "}
-                  {/* 👉 字大一点 */}
-                  <p className="text-xs text-gray-400">{user.email}</p>{" "}
-                  {/* 👉 更小更浅 */}
+                  <p className="font-semibold text-base">{user.name}</p>
+                  <p className="text-xs text-gray-400">{user.email}</p>
                 </div>
               </motion.button>
             ))}
           </div>
-
           {isLoading && (
-            <div className="mt-4 flex justify-center">
-              <Loader2 className="h-5 w-5 animate-spin" />
+            <div className="mt-6 flex justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
             </div>
           )}
+        </motion.div>
+      </div>
+
+      {/* 右侧：深蓝卡片 + 标语 + 插画，仅 lg 及以上显示 */}
+      <div className="hidden lg:flex w-1/2 h-screen bg-gray-100 items-center justify-center p-0">
+        <div className="relative w-full h-full bg-blue-600 rounded-l-3xl overflow-hidden shadow-xl flex flex-col items-center justify-center p-12 space-y-8">
+          {/* 宣传标语 */}
+          <div className="text-center text-white max-w-xs space-y-4">
+            <h3 className="text-3xl font-bold">Welcome Back!</h3>
+            <p className="text-base opacity-90">
+              Sign in and start managing your finances smartly.
+            </p>
+          </div>
+          {/* 插画 */}
+          <img
+            src="/animations/login_img.svg"
+            alt="Login Illustration"
+            className="w-3/4 max-w-lg h-auto object-contain"
+          />
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

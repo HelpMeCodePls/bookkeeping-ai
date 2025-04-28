@@ -85,108 +85,134 @@ export default function ChatbotWidget() {
     <div className="fixed bottom-6 right-6 z-50">
       <AnimatePresence mode="wait">
         {open ? (
+          /* ─── Opened Chat Window ──────────────────────────────────────── */
           <motion.div
             key="chatbot-widget"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="w-[340px] h-[400px] rounded-xl shadow-lg border bg-white flex flex-col"
+            className="
+              fixed bottom-20 right-4
+              w-[400px] h-[650px]                  /* 增加高度以适配更大的按钮 */
+              bg-[#E0E7FF]/30 backdrop-blur-lg
+              rounded-2xl shadow-xl
+              flex flex-col overflow-hidden
+            "
           >
-            {/* 顶部栏 */}
-            <div className="flex items-center justify-between px-4 py-2 border-b bg-gray-100 font-medium">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs">🤖</div>
-                Spendora Assistant
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    setTimeout(() => navigate("/chatbot"), 200);
-                  }}
-                >
-                  <Maximize2 size={16} />
-                </button>
-                <button onClick={() => setOpen(false)}>✕</button>
-              </div>
-            </div>
-
-            {/* 聊天内容区域 */}
-            <div className="flex-1 p-3 overflow-y-auto space-y-3 text-sm">
-              <AnimatePresence initial={false}>
-                {history.map((m, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+            {/* 内层内容容器 */}
+            <div className="relative flex-1 flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-2 bg-[#F8FAFC]/90 text-[#1E293B] font-semibold">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-[#2563EB] flex items-center justify-center text-xs text-white">
+                    🤖
+                  </div>
+                  Spendora Assistant
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      setTimeout(() => navigate("/chatbot"), 200);
+                    }}
                   >
-                    <div className={`px-3 py-2 rounded-lg max-w-[75%] ${m.role === "user" ? "bg-blue-600 text-white" : "bg-gray-100"}`}>
-                      {m.content}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-
-              {isLoading && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-gray-400 italic">
-                  Spendora Assistant is thinking...
-                </motion.div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* 修改输入栏部分 */}
-            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="p-2 border-t flex items-center gap-2">
-              <input
-                className="flex-1 px-3 py-2 text-sm border rounded-md"
-                value={msg}
-                onChange={(e) => setMsg(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && send()}
-                placeholder="Ask me about your budget..."
-                disabled={isLoading}
-              />
-              
-              {/* 添加了tooltip的上传按钮 */}
-              <div className="relative group">
-                <label className="text-gray-500 hover:text-blue-500 cursor-pointer">
-                  <Upload size={18} />
-                  <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
-                </label>
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  Upload receipt (Image Only)
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-b-0 border-t-4 border-solid border-l-transparent border-r-transparent border-t-gray-800"></div>
+                    <Maximize2 size={16} />
+                  </button>
+                  <button onClick={() => setOpen(false)}>✕</button>
                 </div>
               </div>
 
-              <button className="text-gray-500 hover:text-blue-500" onClick={() => alert("Voice not implemented")}>
-                <Mic size={18} />
-              </button>
-              <button
-                onClick={() => send()}
-                disabled={!msg.trim() || isLoading}
-                className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm"
-              >
-                <Send size={16} />
-              </button>
-            </motion.div>
+              {/* Chat Content */}
+              <div className="flex-1 p-3 overflow-y-auto space-y-3 text-sm bg-[#E0E7FF]/20 backdrop-blur-md">
+                <AnimatePresence initial={false}>
+                  {history.map((m, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`
+                          px-3 py-2 rounded-lg max-w-[75%]
+                          ${
+                            m.role === "user"
+                              ? "bg-gradient-to-r from-[#2563EB] to-[#84C8FF] text-white"
+                              : "bg-white/80 text-gray-800"
+                          }
+                        `}
+                      >
+                        {m.content}
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                {isLoading && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-gray-200 italic">
+                    Spendora Assistant is thinking...
+                  </motion.div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
 
-            {/* 快捷按钮 */}
-            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="px-3 py-2 flex gap-2 flex-wrap text-sm border-t bg-gray-50">
-              {quickReplies.map((text, i) => (
-                <button
-                  key={i}
-                  onClick={() => send(text.replace(/^[^a-zA-Z]+/, ""))}
-                  className="bg-white border rounded-md px-2 py-1 hover:bg-gray-100 transition-colors"
-                >
-                  {text}
+              {/* Input Row */}
+              <motion.div
+                initial={{ boxShadow: "0 0 0 rgba(37,99,235,0)" }}
+                whileFocusWithin={{ boxShadow: "0 0 12px rgba(37,99,235,0.6)" }}
+                className="p-2 border-t bg-[#E0E7FF]/20 flex items-center gap-2"
+              >
+                <motion.input
+                  className="flex-1 px-3 py-2 text-sm border rounded-lg bg-white/90"
+                  value={msg}
+                  onChange={(e) => setMsg(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && send()}
+                  placeholder="Ask me about your budget..."
+                  disabled={isLoading}
+                />
+                <div className="relative group">
+                  <label className="text-gray-500 hover:text-blue-500 cursor-pointer">
+                    <Upload size={18} />
+                    <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
+                  </label>
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    Upload receipt (Image Only)
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-b-0 border-t-4 border-solid border-l-transparent border-r-transparent border-t-gray-800" />
+                  </div>
+                </div>
+                <button className="text-gray-500 hover:text-blue-500" onClick={() => alert("Voice not implemented")}>
+                  <Mic size={18} />
                 </button>
-              ))}
-            </motion.div>
+                <button
+                  onClick={() => send()}
+                  disabled={!msg.trim() || isLoading}
+                  className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm"
+                >
+                  <Send size={16} />
+                </button>
+              </motion.div>
+
+              {/* Quick Replies */}
+              <motion.div
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="px-4 py-3 flex gap-3 flex-wrap text-sm border-t bg-gray-50"
+              >
+                {quickReplies.map((text, i) => (
+                  <button
+                    key={i}
+                    onClick={() => send(text.replace(/^[^a-zA-Z]+/, ""))}
+                    className="bg-white border rounded-lg px-4 py-2 hover:bg-gray-100 transition-colors"
+                  >
+                    {text}
+                  </button>
+                ))}
+              </motion.div>
+            </div>
           </motion.div>
         ) : (
+          /* ─── Closed Chat Button ──────────────────────────────────────── */
           <motion.button
             key="chat-open-button"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -196,9 +222,9 @@ export default function ChatbotWidget() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg"
+            className="fixed bottom-6 right-6 p-0 bg-transparent rounded-full shadow-lg"
           >
-            <MessageSquare size={20} />
+            <video src="/animations/chatbot.webm" autoPlay muted loop className="h-20 w-20" />
           </motion.button>
         )}
       </AnimatePresence>
