@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+// import axios from "axios";
+import { api } from "../api/client"; 
 import EditRecordModal from "../components/EditRecordModal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useLedger } from "../store/ledger";
@@ -15,22 +16,32 @@ export default function IncompleteList() {
 
   const { data: items = [] } = useQuery({
     queryKey: ["incomplete", currentId],
-    queryFn: () => axios.get("/records/incomplete").then((r) => r.data),
+    // queryFn: () => axios.get("/records/incomplete").then((r) => r.data),
+      queryFn: () =>
+          api.get(`/ledgers/${currentId}/records`, {
+            params: { status: "incomplete" }   // ① 后端已经支持 status 过滤
+          }).then(r => r.data),
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
-    queryFn: () => axios.get("/categories").then((r) => r.data),
+    // queryFn: () => axios.get("/categories").then((r) => r.data),
+    queryFn: () => api.get("/categories").then(r => r.data),
   });
 
   const mark = async (data) => {
-    await axios.put(`/records/${target.id}`, { ...data, status: "confirmed" });
+    // await axios.put(`/records/${target.id}`, { ...data, status: "confirmed" });
+    await api.put(`/records/${target.id}`, {
+      ...data,
+      status: "confirmed",
+    });
     queryClient.invalidateQueries(["incomplete", currentId]);
     setTarget(null);
   };
 
   const handleDelete = async () => {
-    await axios.delete(`/records/${deleteId}`);
+    // await axios.delete(`/records/${deleteId}`);
+    await api.delete(`/records/${deleteId}`);
     queryClient.invalidateQueries(["incomplete", currentId]);
     setDeleteId(null);
   };
