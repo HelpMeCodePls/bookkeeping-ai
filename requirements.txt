@@ -30,6 +30,7 @@ aiohttp
 
 # 文本处理（OCR后期也会需要）
 fuzzywuzzy
+easyocr
 python-Levenshtein
 
 # 其他辅助库
