@@ -56,3 +56,27 @@ export const sendImageToOCR = async (base64Image) => {
     throw new Error('OCR service is currently unavailable. Please try again later.');
   }
 };
+
+/** 把录音 Blob 发送给 /voice，拿到识别文本 */
+export async function sendAudioToVoice(blob) {
+  // 把 blob -> base64，避免 multipart
+  const base64Audio = await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(",")[1]); // 纯 base64
+    reader.readAsDataURL(blob);
+  });
+
+  try {
+    const res = await fetch(`${API_BASE}/voice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ audio: base64Audio, mime: blob.type }), // webm/ogg
+    });
+
+    const { text } = await res.json();          // {text:"..."}
+    return text || "[未识别]";
+  } catch (err) {
+    console.error("Voice API error", err);
+    return "[语音识别失败]";
+  }
+}
