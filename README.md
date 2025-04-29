@@ -1,77 +1,111 @@
-# Expense Assistant - Frontend Mock Version
- 
-This project is the **Frontend Mock Version** of Expense Assistant.  
-It uses **Mock Service Worker (MSW)** and **Local Mock Data** for development and UI testing.  
-No real backend or database is required for this version.
- 
+# 💼 Spendora – AI-Powered Bookkeeping Assistant  
+*A full-stack project for the Microsoft AI Agent Hackathon*  
+🌐 Live Site: [https://spendoraai.onrender.com](https://spendoraai.onrender.com)
+
 ---
- 
-## 🛠 How to Set Up
 
-### 1. Clone the repository
- 
-```
-bash 
-git clone https://github.com/your-repo/expense-assistant.git
-cd expense-assistant
-```
+## 📘 Project Overview
 
-### 2. Install dependencies
- 
-```
-npm install
-```
+**Spendora** is an intelligent, collaborative expense management platform that helps users understand, track, and optimize their financial lives. Designed with both individuals and teams in mind, Spendora combines a powerful AI agent, a clean interface, and a scalable backend to streamline bookkeeping.
 
-### 3. Start local development server
+Built for the **Microsoft AI Agent Hackathon**, this project demonstrates the potential of multi-agent AI systems in automating daily tasks, enabling financial transparency, and fostering smarter decision-making.
 
-```
-npm run dev
-```
+---
 
-### 4. Then open http://localhost:5173 in your browser.
+## 🎯 Why Spendora?
 
+Our AI agent empowers users to gain deeper insights into their spending patterns—whether in their personal lives or at work. With intelligent budgeting, automated record generation, and real-time collaboration, Spendora enables confident and informed financial management.
 
-## 📦 Tech Stack
+---
 
-Vite + React 18
+## 🖥️ Core Features
 
-React Router
+### 🔐 Authentication & User Profiles
+- Login using email (token-based simulation).
+- View and manage user profiles.
+- Retrieve user details and search users by name.
 
-React Query
+### 📁 Ledger Management
+- Create multiple ledgers for different projects or personal budgets.
+- Set and update total, monthly, and category-based budgets.
+- Collaborate with others by adding **Editors** or **Viewers**.
+- Real-time notification when ledgers are shared or updated.
 
-Tailwind CSS
+### 🧾 Record Management
+- Add and manage expenses with amount, date, merchant, category, and description.
+- Support for **AI-generated** records via chatbot or OCR.
+- Add **splits** to share expenses among collaborators.
+- Filter by month, category, contributor, and split participants.
+- Update or delete existing records.
 
-Framer Motion (animations)
+### 🗂️ Incomplete Record Handling
+- Automatically detect and list incomplete records added by AI.
+- Prompt users to manually review and complete missing data.
 
-Lucide React (icons)
+### 📊 Visual Analysis
+- Interactive dashboard with monthly/yearly/all-time data summaries.
+- Real-time charts by category and date range.
+- Integrated budget progress tracking.
 
-Mock Service Worker (MSW) (mock API)
+### 💬 AI Chat Assistant
+- Smart chatbot interface (floating and fullscreen):
+  - Create records.
+  - Modify budgets.
+  - Summarize expenses.
+  - Cross-page interaction enabled.
 
-Nanoid (ID generation)
+### 🧾 OCR (Receipt Scanner)
+- Upload images of receipts.
+- Extract total amount, date, and merchant using EasyOCR.
+- Parsed information is passed to the AI agent for automatic record creation.
 
-## 📄 Notes for Mock Setup
-Mock data is stored in /src/mocks/mockData.js.
+### 🎤 Voice Input
+- Record and upload voice messages.
+- Speech-to-text powered by Azure Cognitive Services.
+- Transcribed input is used to interact with the AI agent.
 
-Mock API handlers are located under /src/mocks/handlers/.
+### 🔔 Notification System
+- View all past and unread alerts.
+- Automatically receive alerts for new records or ledger activity.
+- Mark notifications as read.
 
-Mock Service Worker is initialized automatically when running locally (no extra setup needed).
+### 🗃️ Category Management
+- Built-in category presets with emojis.
+- Users can define their own categories with custom names and icons.
 
-No backend server is involved in this version.
+---
 
-## 🛡 If Encountering Issues
-Make sure you are running in a local environment (localhost:5173).
+## 🧱 Tech Stack
 
-If page is blank or errors appear:
+### 💻 Frontend
+- React 18 + Vite  
+- Tailwind CSS  
+- React Router  
+- React Query  
+- Framer Motion  
+- Lucide React Icons  
 
-Try refreshing the page
+### 🛠 Backend
+- Python + Flask  
+- MongoDB (via PyMongo)  
+- EasyOCR (receipt parsing)  
+- Azure Speech-to-Text (voice input)  
+- Semantic Kernel agents  
 
-Stop and re-run npm run dev
+### 🤖 AI Integration
+- Custom multi-agent architecture  
+- LLM-powered AI assistant for user interaction, classification, and task delegation  
+- OCR-to-agent workflow and conversational memory via Semantic Kernel  
 
-Mock worker (browser.js) only activates in development mode.
+### 🚀 Deployment
+- Full-stack deployed via **Render**  
+- Public URL: [https://spendoraai.onrender.com](https://spendoraai.onrender.com)
 
-## ⚡ Common Commands
+---
 
-Command	Purpose
-npm run dev	Start local development
-npm run build	Build for production (no need for mock version)
-npm run preview	Preview production build
+## 🧪 How to Run Locally
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-repo/spendora.git
+cd spendora
