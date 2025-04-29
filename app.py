@@ -93,6 +93,7 @@ def ocr():
 
     reader = easyocr.Reader(['en'], gpu=False, download_enabled=False)  # Set gpu=True if you have a GPU and want to use it
     results = reader.readtext(image_bytes)
+    print("[OCR] Processing finished. Sending to AI agent...")
 
     # Prepare response: convert results to text list
     text_results = [text for _, text, _ in results] 
