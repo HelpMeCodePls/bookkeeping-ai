@@ -107,14 +107,15 @@ def ocr():
     message = message + "\n" + results
 
     try:
-        async def run():
-            response = await Customer_Service_Agent.get_response(messages=message,thread=thread )
-            print(f"[RESPONSE] {response.content}")
-            return str(response.content)  # ⚠️ 必须转成字符串，不能直接 jsonify 对象
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
-        result = asyncio.run(run())
-        return jsonify({"response": result})
-
+        response = loop.run_until_complete(
+            Customer_Service_Agent.get_response(messages=message, thread=thread)
+        )
+        loop.close()
+        print(f"[RESPONSE] {response.content}")
+        return jsonify({"response": str(response.content)})  # ⚠️ 必须转成字符串，不能直接 jsonify 对象
     except Exception as e:
         import traceback
         traceback.print_exc()
