@@ -31,7 +31,6 @@ def normalize_entry(name: str) -> str:
 
 class DatabaseClient:
     def __init__(self, uri: str = None, db_name: str = "bookkeeping_db"):
-        # 从环境变量中获取 URI，如果没传参数就用它
         uri = uri or os.environ.get("MONGO_URI")
         if not uri:
             raise ValueError("Mongo URI is missing. Please set the MONGO_URI environment variable.")
@@ -126,8 +125,8 @@ class LedgerService:
         """返回“我拥有的 + 我被加入协作的”所有账本"""
         return list(self.col.find({
             "$or": [
-                {"owner": user_id},                 # 我是 owner
-                {"collaborators.userId": user_id}   # 我在 collaborators 数组里
+                {"owner": user_id},                 #  owner
+                {"collaborators.userId": user_id}   # inside collaborators array
             ]
         }))
     
@@ -148,9 +147,9 @@ class LedgerService:
         })
 
         if category:
-            if setDefault:                       # ① 设置类别默认值
+            if setDefault:                       # ① set catgory default budget
                 budgets.setdefault("categoryDefaults", {})[category] = float(budget)
-            else:                                # ② 设置某月-某类别预算
+            else:                                # ② set month-category budget
                 budgets.setdefault("categoryBudgets", {})\
                     .setdefault(month, {})[category] = float(budget)
 
@@ -184,7 +183,7 @@ class LedgerService:
         )
         return f"Ledger {ledger_id} deleted." if result.deleted_count else f"Ledger {ledger_id} not found."
 
-    #edit by antonio: 🛠 获取当前用户对账本的权限
+    #edit by antonio: 🛠 get current user's permission to ledger
     @kernel_function(description="Retrieves permission of a user on a ledger.")
     def get_permission(self, ledger_id: str, user_id: str) -> Dict[str, str]:
         ledger = self.db['ledgers'].find_one({"_id": ledger_id})
@@ -201,24 +200,21 @@ class LedgerService:
 
         return {"permission": "VIEWER"}
     
-    # edit by Antonio: 🛠 更新账本的支出
+    # edit by Antonio: 🛠 update spend for this ledger
     @kernel_function(description="Updates the spent field of a ledger by recalculating from records.")
     def update_spent(self, ledger_id: Annotated[str, "ID of the ledger to update the spent"]):
-        from backend.functions import RecordService  # 避免循环导入
+        from backend.functions import RecordService  
         record_service = RecordService()
 
-        # 获取账本下所有记录
+        # get all records of this ledger
         records = record_service.get_by_ledger(ledger_id) or []
         spent = {}
         for rec in records:
             cat = rec["category"]
+            if(not rec["amount"]):
+                continue
             spent[cat] = spent.get(cat, 0) + rec["amount"]
-        
-
-        # # 计算总支出，确保 amount 是数字
-        # total_spent = sum(float(record.get("amount", 0)) for record in records if isinstance(record.get("amount", 0), (int, float)))
-
-        # 更新到 ledger
+  
         result = self.col.update_one({"_id": ledger_id}, {"$set": {"spent": spent}})
 
         return {
@@ -226,7 +222,7 @@ class LedgerService:
             "new_spent": spent
         }
     
-    # edit by Antonio: 🛠 获取所有协作者
+    # edit by Antonio: 🛠 Get all collaborators of a ledger
     @kernel_function(description="Get all collaborators of a ledger.")
     def get_collaborators(self, ledger_id: Annotated[str, "Ledger ID"]) -> Annotated[List[Dict[str, Any]], "List of collaborators"]:
         ledger = self.col.find_one({"_id": ledger_id})
@@ -234,7 +230,7 @@ class LedgerService:
             return ledger["collaborators"]
         return []
 
-    # edit by Antonio: 🛠 添加一个新的协作者
+    # edit by Antonio: 🛠 add new collaborator
     @kernel_function(description="Add a new collaborator to a ledger.")
     def add_collaborator(self, ledger_id: Annotated[str, "Ledger ID"], user_id: Annotated[str, "User ID"], email: Annotated[str, "Email"], permission: Annotated[str, "Permission level"]) -> Annotated[Dict[str, Any], "New collaborator"]:
         new_collaborator = {
@@ -249,7 +245,7 @@ class LedgerService:
         )
         return new_collaborator
 
-    # edit by Antonio: 🛠 更新某个协作者的权限
+    # edit by Antonio: 🛠 update collaborator's permission
     @kernel_function(description="Update a collaborator's permission in a ledger.")
     def update_collaborator_permission(self, ledger_id: Annotated[str, "Ledger ID"], user_id: Annotated[str, "User ID"], new_permission: Annotated[str, "New permission"]) -> Annotated[Dict[str, Any], "Confirmation"]:
         result = self.col.update_one(
@@ -258,7 +254,7 @@ class LedgerService:
         )
         return {"ok": result.modified_count > 0}
 
-    # edit by Antonio: 🛠 移除一个协作者
+    # edit by Antonio: 🛠 remove collaborator
     @kernel_function(description="Remove a collaborator from a ledger.")
     def remove_collaborator(self, ledger_id: Annotated[str, "Ledger ID"], user_id: Annotated[str, "User ID"]) -> Annotated[Dict[str, Any], "Confirmation"]:
         result = self.col.update_one(
@@ -351,14 +347,14 @@ class RecordService:
     def get_by_ledger(
         self, 
         ledger_id: Annotated[str, "Ledger ID this record belongs to"]
-    ) -> List[Dict[str, Any]]:           # ✅ 返回列表而不是单条
+    ) -> List[Dict[str, Any]]:           
         print(f"[LOG] Retrieving records for ledger ID: {ledger_id}")
 
         recs = list(self.col.find({"ledger_id": ledger_id}))
 
         # 👉 把 _id 复制一份给前端用
         for r in recs:
-            r["id"] = str(r["_id"])      # str() 以防是 ObjectId
+            r["id"] = str(r["_id"])     
 
         return recs
     
@@ -439,12 +435,12 @@ class RecordService:
         result = self.col.delete_one({"_id": record_id})
         return f"Record {record_id} deleted." if result.deleted_count else f"Record {record_id} not found."
 
-    # add by antonio: 🛠 获取所有记录
+    # add by antonio: 🛠 Get all records
     @kernel_function(description="Retrieves all records across all ledgers.")
     def get_all_records(self) -> Annotated[List[Dict[str, Any]], "List of all records."]:
         return list(self.col.find({}))
     
-    # 🆕 Antonio新增: 🛠 获取账本支出图表汇总
+    # 🆕 Antonio: 🛠 get summary chart
     @kernel_function(description="Get summary of records for a ledger, by category and by day.")
     def get_summary(
         self, 
@@ -454,16 +450,14 @@ class RecordService:
     ) -> Annotated[Dict[str, Any], "Summary data including byCategory and daily"]:
         records = self.col.find({"ledger_id": ledger_id})
 
-        # 📝 先筛选出 ledger_id 匹配的记录
         filtered = list(records)
 
-        # 再根据 mode 和 selectedDate进一步筛选
         if mode != "all" and selected_date:
             # if (mode == "month" or mode == "year") and len(selected_date) >= 7:
             #     filtered = [r for r in filtered if r.get("date", "").startswith(selected_date)]
             if mode in ("month", "year") and selected_date:
                 def date_ok(raw):
-                    # 允许 str / datetime 都能比对
+                    # allow both str / datetime
                     if isinstance(raw, datetime):
                         raw = raw.strftime("%Y-%m-%d")
                     raw = str(raw)
@@ -485,14 +479,14 @@ class RecordService:
                      ) <= end_date  
                       ]
 
-        # 分类统计
+        # categorical summary
         by_category = {}
         for r in filtered:
             category = r.get("category", "Other")
             amount = float(r.get("amount", 0))
             by_category[category] = by_category.get(category, 0) + amount
 
-        # 每日统计
+        # daily summary
         daily_map = {}
         for r in filtered:
             # date = r.get("date")
@@ -510,7 +504,6 @@ class RecordService:
         maxDate = daily[-1][0] if daily else ""
 
         return {"byCategory": by_category, "daily": daily, "minDate": minDate, "maxDate": maxDate}
-    #未开发功能：用户权限获取
 
 
 class NotificationService:
@@ -539,25 +532,7 @@ class NotificationService:
     def get_unread_number(self, user_id: Annotated[str, "User ID"]):
         unread_count = self.col.count_documents({"user_id": user_id, "is_read": False})
         return unread_count
-    '''
-    原来版本:
-    @kernel_function(description="Retrieves all notifications by a user.")
-    def get_by_user(self, user_id: Annotated[str, "User ID"]):
-        return self.col.find({"user_id": user_id}).to_list() or {}
-    🔵 问题分析：
 
-    self.col.find({"user_id": user_id})：查到了这个用户的所有通知，但没有排序。
-
-    .to_list()：MongoDB 官方 driver 其实没有 .to_list() 这个方法（注意⚡，find() 返回的是一个 Cursor，要手动 list()）。
-
-    or {}：这里返回的是 {}（空字典）不是 []（空数组），不太符合前端预期（前端要的是列表 [] 不是 {} 字典）。
-
-    所以你这版虽然可以正常返回，但是：
-
-    1⃣ 返回类型应该是 列表，不是字典
-
-    2⃣ 少了 按时间倒序 排序
-    '''
     @kernel_function(description="Retrieves all notifications by a user name.")
     def get_by_user(self, user_id: Annotated[str, "User name"]):
         print(f"[LOG] Retrieving notifications for user ID: {user_id}")
@@ -622,7 +597,6 @@ class UserService:
         print("[LOG] Retrieving all users...")
         users = list(self.col.find({}))
         
-        # 转换 ObjectId 为字符串
         for user in users:
             if '_id' in user and isinstance(user['_id'], ObjectId):
                 user['_id'] = str(user['_id'])

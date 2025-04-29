@@ -20,7 +20,6 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 # ============ KERNEL SETUP ============
 kernel = Kernel()
-# (可选) 添加 debug filter：显示插件调用过程
 
 async def function_invocation_filter(context: FunctionInvocationContext, next):
     """A filter that will be called for each function call in the response."""
@@ -35,7 +34,6 @@ async def function_invocation_filter(context: FunctionInvocationContext, next):
 # The filter is used for demonstration purposes to show the function invocation.
 kernel.add_filter("function_invocation", function_invocation_filter)
 
-# 通用设置（可复用）
 settings = OpenAIChatPromptExecutionSettings(
     #tool_choice="auto",
     temperature=0.5,
@@ -106,10 +104,9 @@ Customer_Service_Agent = ChatCompletionAgent(
         "- Forward data extraction, transformation, load requests, purchase, ledger and record related queries to the Database_Agent, such as 'what restaurants did I go to', 'when did I visit Starbucks', or 'how many times did I shop at Walmart'."
         "If a request lacks information (like merchant or date), ask Database_Agent to clarify — then ask the user. "
         "If the user name is not provided, please use 'user3' as the default name."
-        "if the ledger name is not provided, please use 'Monthly budget' as the default ledger name."
+        "if the ledger name is not provided, please use 'Default Ledger' as the default ledger name."
         "Always integrate responses and present them in your own voice. Do not reveal internal agents."
     ),
-    #plugins=[],
     plugins=[TaskRouter(),Analyst_Agent, Database_Agent]
 )
 

@@ -31,11 +31,11 @@ def _serialize_record(rec: dict) -> dict:
     return rec
 
 
-# ==== Flask 初始化 ====
+# ==== Flask initialization ====
 app = Flask(__name__, static_folder="frontend_build", static_url_path="")
 CORS(app)
 
-# 初始化必要对象
+
 ledger_service = LedgerService()
 record_service = RecordService()
 notification_service = NotificationService()
@@ -43,7 +43,7 @@ user_service = UserService()
 chart_plugin = ChartPlugin()
 thread: ChatHistoryAgentThread = ChatHistoryAgentThread()
 
-# ==== 首页：加载聊天前端页面 ====
+# ==== front page：load frontend chat page ====
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):
@@ -52,12 +52,12 @@ def serve_frontend(path):
     else:
         return send_from_directory(app.static_folder, "index.html")
 
-# ==== 健康检查 ====
+# ==== health check ====
 @app.route("/ping")
 def ping():
     return "pong", 200
 
-# ==== 主聊天Chat接口（使用 get_response） ====
+# ==== Main Page Chat Interface（ get_response） ====
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
@@ -70,7 +70,7 @@ def chat():
         async def run():
             response = await Customer_Service_Agent.get_response(messages=message,thread=thread )
             print(f"[RESPONSE] {response.content}")
-            return str(response.content)  # ⚠️ 必须转成字符串，不能直接 jsonify 对象
+            return str(response.content)  # ⚠️ must convert to str，cant directly jsonify the object
 
         result = asyncio.run(run())
         return jsonify({"response": result})
@@ -78,9 +78,9 @@ def chat():
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return jsonify({"response": f"[系统错误]: {str(e)}"})
+        return jsonify({"response": f"[system error]: {str(e)}"})
     
-# ==== OCR接口（图片识别） ====
+# ==== OCR ====
 @app.route('/ocr', methods=['POST'])
 def ocr():
     print("[OCR] Image received")
@@ -117,11 +117,11 @@ def ocr():
         )
         loop.close()
         # print(f"[RESPONSE] {response.content}")
-        return jsonify({"response": str(response.content)})  # ⚠️ 必须转成字符串，不能直接 jsonify 对象
+        return jsonify({"response": str(response.content)})  # ⚠️ must convert to str，cant directly jsonify the object
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return jsonify({"response": f"[系统错误]: {str(e)}"})
+        return jsonify({"response": f"[system error]: {str(e)}"})
     
 
 # ==== voice to text ====
@@ -158,22 +158,22 @@ def voice_to_text():
         if result.reason == speechsdk.ResultReason.RecognizedSpeech:
             return jsonify({'text': result.text})
         elif result.reason == speechsdk.ResultReason.NoMatch:
-            return jsonify({'text': '[未识别]'})
+            return jsonify({'text': '[unrecognized speech]'})
         elif result.reason == speechsdk.ResultReason.Canceled:
             cancellation_details = result.cancellation_details
             print(f"Speech Recognition canceled: {cancellation_details.reason}")
             if cancellation_details.reason == speechsdk.CancellationReason.Error:
                 print(f"Error details: {cancellation_details.error_details}")
-            return jsonify({'text': '[语音识别失败]'})
+            return jsonify({'text': '[voice recognition failed]'})
         else:
-            return jsonify({'text': '[语音识别失败]'})
+            return jsonify({'text': '[voice recognition failed]'})
         
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({'text': '[语音识别失败]'}), 500
+        return jsonify({'text': '[voice recognition failed]'}), 500
 # ==== 📁 Ledger APIs ====
 
-#✅ 获取当前用户所有账本，用 ledger_service.get_by_user(user_id)，直接调用 ✅
+#✅ get all ledgers for current user，directly use ledger_service.get_by_user(user_id) ✅
 @app.route("/ledgers", methods=["GET"])
 def get_ledgers():
     try:
@@ -191,7 +191,7 @@ def get_ledgers():
         traceback.print_exc()
         return jsonify({"error": "获取当前用户所有账本 Error", "details": str(e)}), 500
 
-#✅ 获取单个账本，用 ledger_service.get(ledger_id)，直接调用 ✅
+#✅ get single ledgers for current user， ledger_service.get(ledger_id) ✅
 @app.route("/ledgers/<ledger_id>", methods=["GET"])
 def get_ledger(ledger_id):
     try:
@@ -204,7 +204,7 @@ def get_ledger(ledger_id):
         traceback.print_exc()
         return jsonify({"error": "获取单个账本 Error", "details": str(e)}), 500
 
-#✅ 新建账本，用 ledger_service.create()，直接调用 ✅
+#✅ create ledger， ledger_service.create()， ✅
 @app.route("/ledgers", methods=["POST"])
 def create_ledger():
     try:
@@ -231,22 +231,6 @@ def create_ledger():
         traceback.print_exc()
         return jsonify({"error": "新建账本 Error", "details": str(e)}), 500
 
-# #✅ 更新账本预算，用 ledger_service.update_budget()，直接调用 ✅ # 鱼的budget
-# @app.route("/ledgers/<ledger_id>/budgets", methods=["PATCH"])
-# def update_ledger_budget(ledger_id):
-#     try:
-#         data = request.get_json()
-#         if not data or "budget" not in data:
-#             return jsonify({"error": "更新账本预算 Missing budget"}), 400
-
-#         new_budget = float(data["budget"])
-#         result = ledger_service.update_budget(ledger_id, new_budget)
-#         return jsonify(result), 200
-
-#     except Exception as e:
-#         import traceback
-#         traceback.print_exc()
-#         return jsonify({"error": "更新账本预算 Error", "details": str(e)}), 500
 
 # Edited by David, 
 @app.route("/ledgers/<ledger_id>/budgets", methods=["PATCH"])
@@ -286,7 +270,7 @@ def update_ledger_budget(ledger_id):
         return jsonify({"error": "更新账本预算 Error", "details": str(e)}), 500
 
 
-#🛠 获取当前用户对账本的权限 新增加
+#🛠 get current user's permission for current ledger
 @app.route("/ledgers/<ledger_id>/permission", methods=["GET"])
 def get_ledger_permission(ledger_id):
     try:
@@ -317,7 +301,7 @@ def get_ledger_permission(ledger_id):
 
 
 # ==== 📄 Record APIs ====
-#获取账本下的所有记录
+#get all records under this ledger
 @app.route("/ledgers/<ledger_id>/records", methods=["GET"])
 def get_records_by_ledger(ledger_id):
     try:
@@ -325,20 +309,19 @@ def get_records_by_ledger(ledger_id):
         if not token:
             return jsonify({"error": "Missing token"}), 400
             
-        # 验证用户权限
+        # validate user permission
         # user_id = token.replace("stub-jwt-", "")
         user_id = token.split('-')[-1]
         ledger = ledger_service.get(ledger_id)
         if not ledger:
             return jsonify({"error": "Ledger not found"}), 404
             
-        # 检查用户是否有权限访问该账本
+        # validate user permission
         if ledger["owner"] != user_id and not any(
             c["userId"] == user_id for c in ledger.get("collaborators", [])
         ):
             return jsonify({"error": "Unauthorized"}), 403
 
-        # 原有查询逻辑...
         month = request.args.get('month')
         # categories = request.args.get('categories', '').split(',')
         raw_cats   = request.args.get("categories")      # None 表示前端没传
@@ -352,30 +335,7 @@ def get_records_by_ledger(ledger_id):
 
         records = record_service.get_by_ledger(ledger_id)
         # print(f"[DEBUG] Raw records from DB: {records}") 
-        # filtered_records = []
         filtered = []
-        # for r in records:
-        #     # if month and (not r.get('date') or not r['date'].strftime("%Y-%m").startswith(month)):
-        #     #     continue
-        #     if month:
-        #         date_val = r.get("date")
-        #         # 允许 str 或 datetime
-        #         if isinstance(date_val, str):
-        #             ok = date_val.startswith(month)
-        #         else:
-        #             ok = date_val and date_val.strftime("%Y-%m").startswith(month)
-        #         if not ok:
-        #             continue
-
-        #     if categories and r.get('category') and r['category'].lower() not in categories:
-        #         continue
-        #     if split and not any(s['user_id'] == split for s in r.get('split', [])):
-        #         continue
-        #     if collaborator and r.get('createdBy') != collaborator:
-        #         continue
-        #     filtered_records.append(r)
-
-        # filtered_records = records
         for r in records:
                 # 0️⃣ 按 status 过滤
             if status and r.get("status") != status:
@@ -386,21 +346,21 @@ def get_records_by_ledger(ledger_id):
                 if isinstance(raw_date, datetime):
                     year_month = raw_date.strftime("%Y-%m")
                 else:
-                    # ISO-string / any str → 统一转 datetime 再取年月
+                    # ISO-string / any str → turn to  datetime then get the year month
                     try:
                         year_month = dtparser.isoparse(str(raw_date)).strftime("%Y-%m")
                     except Exception:
-                        continue          # 无法解析，直接排除
+                        continue          # cannot parse this date, skip it
                 if year_month != month:
                     continue
 
-            # ---- 2️⃣ 按分类过滤 ----
+            # ---- 2️⃣ filter by category ----
             if categories and r.get("category", "").lower() not in categories:
                 continue
 
             # ---- 3️⃣ 按 split / collaborator 过滤 ----
             if split_uid and not any(
-                    (s.get("user_id") or s.get("userId")) == split_uid   # ✅ 两种字段兼容
+                    (s.get("user_id") or s.get("userId")) == split_uid   # ✅ two compatible keys
                     for s in r.get("split", [])
             ):
                 continue
@@ -420,7 +380,7 @@ def get_records_by_ledger(ledger_id):
         traceback.print_exc()
         return jsonify({"error": "获取账本下的所有记录Error", "details": str(e)}), 500
 
-# 添加新纪录
+# add a new record to a ledger
 @app.route("/ledgers/<ledger_id>/records", methods=["POST"])
 def create_record(ledger_id):
     try:
@@ -473,59 +433,13 @@ def create_record(ledger_id):
         traceback.print_exc()
         return jsonify({"error": "添加新纪录 Error", "details": str(e)}), 500
 
-#更新一条记录
-# @app.route("/records/<record_id>", methods=["PUT"])
-# def update_record(record_id):
-#     try:
-#         data = request.get_json()
-#         if not data:
-#             return jsonify({"error": "Missing request body"}), 400
-
-#         ledger_id = data.get("ledger_id")
-#         amount = data.get("amount")
-#         merchant = data.get("merchant")
-#         category = data.get("category")
-#         date = data.get("date")
-#         status = data.get("status")
-#         description = data.get("description")
-#         is_AI_generated = data.get("is_AI_generated")
-#         createdBy = data.get("createdBy")
-
-#         result = record_service.update(
-#             record_id=record_id,
-#             ledger_id=ledger_id,
-#             amount=amount,
-#             merchant=merchant,
-#             category=category,
-#             date=date,
-#             status=status,
-#             description=description,
-#             is_AI_generated=is_AI_generated,
-#             createdBy=createdBy
-#         )
-
-#         # record = record_service.get(record_id)
-#         # record = record_service.search_records_by_field("_id", record_id)
-#         # if record:
-#         #     ledger_id = record.get("ledger_id")
-#         #     if ledger_id:
-#         #         ledger_service.update_spent(ledger_id)
-#         if ledger_id:
-#             ledger_service.update_spent(ledger_id)
-
-#         return jsonify({"ok": True})
-
-#     except Exception as e:
-#         import traceback
-#         traceback.print_exc()
-#         return jsonify({"error": "更新一条记录 Error", "details": str(e)}), 500
-
+# update a record
 @app.route("/records/<record_id>", methods=["PUT"])
 def update_record(record_id):
     try:
         data = request.get_json() or {}
 
-        # 1️⃣ 直接更新
+        # 1️⃣ update first
         record_service.update(
             record_id          = record_id,
             ledger_id          = data.get("ledger_id"),
@@ -539,7 +453,7 @@ def update_record(record_id):
             createdBy          = data.get("createdBy"),
         )
 
-        # 2️⃣ 重新统计 spent —— 如果前端没带 ledger_id，就自己查一下
+        # 2️⃣ recalculate spent —— if doesnt come with ledger_id，look it up
         ledger_id = data.get("ledger_id")
         if not ledger_id:
             doc = record_service.col.find_one({"_id": record_id})
@@ -554,35 +468,7 @@ def update_record(record_id):
         import traceback; traceback.print_exc()
         return jsonify({"error": "更新一条记录 Error", "details": str(e)}), 500
 
-# 删除一条记录
-# @app.route("/records/<record_id>", methods=["DELETE"])
-# def delete_record(record_id):
-#     try:
-#         # record = record_service.search_records_by_field("_id", record_id)
-#         # if not record:
-#         #     return jsonify({"error": "Record not found"}), 404
-
-#         # ledger_id = record.get("ledger_id")
-
-#         rec_list = record_service.search_records_by_field("_id", record_id)
-#         record   = rec_list[0] if rec_list else None
-#         if not record:
-#             return jsonify({"error": "Record not found"}), 404
-
-#         ledger_id = record.get("ledger_id")
-
-#         record_service.delete(record_id)
-
-#         if ledger_id:
-#             ledger_service.update_spent(ledger_id)
-
-#         return jsonify({"ok": True})
-
-#     except Exception as e:
-#         import traceback
-#         traceback.print_exc()
-#         return jsonify({"error": "删除一条记录 Error", "details": str(e)}), 500
-
+# Delete Record
 @app.route("/records/<record_id>", methods=["DELETE"])
 def delete_record(record_id):
     try:
@@ -606,7 +492,7 @@ def delete_record(record_id):
         import traceback; traceback.print_exc()
         return jsonify({"error": "删除一条记录 Error", "details": str(e)}), 500
 
-# 获取所有未完成的记录
+# Get unfinished Records
 @app.route("/records/incomplete", methods=["GET"])
 def get_incomplete_records():
     try:
@@ -619,7 +505,7 @@ def get_incomplete_records():
         return jsonify({"error": "获取所有未完成的记录 Error", "details": str(e)}), 500
 
 # ==== 🔔 Notification APIs ====
-# 获取所有通知
+# Get all notifications for current user
 @app.route("/notifications", methods=["GET"])
 def get_notifications():
     try:
@@ -636,7 +522,7 @@ def get_notifications():
         traceback.print_exc()
         return jsonify({"error": "获取所有通知 Error", "details": str(e)}), 500
 
-# 获取未读通知数量
+# Get unread notifications count
 @app.route("/notifications/unread_count", methods=["GET"])
 def get_unread_notifications():
     try:
@@ -653,7 +539,7 @@ def get_unread_notifications():
         traceback.print_exc()
         return jsonify({"error": "获取未读通知数量 Error", "details": str(e)}), 500
 
-# 标记通知为已读
+# Mark notification as read
 @app.route("/notifications/<notification_id>", methods=["PATCH"])
 def mark_notification_read(notification_id):
     try:
@@ -670,7 +556,7 @@ def mark_notification_read(notification_id):
         traceback.print_exc()
         return jsonify({"error": "标记通知为已读 Error", "details": str(e)}), 500
 
-# 创建一条新通知
+# Create a new notification
 @app.route("/notifications", methods=["POST"])
 def create_notification():
     try:
@@ -701,7 +587,7 @@ def create_notification():
 
 # ==== 📁 Ledger Collaborators APIs ====
 
-# 获取账本的所有协作者
+# Get all collaborators for a ledger
 @app.route("/ledgers/<ledger_id>/collaborators", methods=["GET"])
 def get_collaborators(ledger_id):
     try:
@@ -747,7 +633,7 @@ def add_collaborator(ledger_id):
         traceback.print_exc()
         return jsonify({"error": "添加一个协作者 Error", "details": str(e)}), 500
 
-# 更新协作者的权限
+# update collaborator permission
 @app.route("/ledgers/<ledger_id>/collaborators/<user_id>", methods=["PATCH"])
 def update_collaborator(ledger_id, user_id):
     try:
@@ -770,7 +656,7 @@ def update_collaborator(ledger_id, user_id):
         traceback.print_exc()
         return jsonify({"error": "更新协作者的权限 Error", "details": str(e)}), 500
 
-# 删除协作者
+# Delete a collaborator
 @app.route("/ledgers/<ledger_id>/collaborators/<user_id>", methods=["DELETE"])
 def delete_collaborator(ledger_id, user_id):
     try:
@@ -796,7 +682,7 @@ def delete_collaborator(ledger_id, user_id):
 
 # ==== 📁 Category APIs (categories) ====
 
-# 预设分类列表（内存存储，简单版）
+# preset categories (easy version)
 categories = [
     {"key": "food", "label": "Food", "icon": "🍔"},
     {"key": "transport", "label": "Transport", "icon": "🚗"},
@@ -807,7 +693,7 @@ categories = [
     {"key": "other", "label": "Other", "icon": "✨"},
 ]
 
-# 🛠 GET /categories - 获取所有分类
+# 🛠 GET /categories - 
 @app.route("/categories", methods=["GET"])
 def get_categories():
     try:
@@ -818,7 +704,7 @@ def get_categories():
         traceback.print_exc()
         return jsonify({"error": "获取所有分类 Error", "details": str(e)}), 500
 
-# 🛠 POST /categories - 新增分类
+# 🛠 POST /categories - Create Category
 @app.route("/categories", methods=["POST"])
 def add_category():
     try:
@@ -842,18 +728,7 @@ def add_category():
 
 # ==== 👤 User APIs ==== 
 
-#【GET 获取所有用户】
-# @app.route("/users", methods=["GET"])
-# def get_users():
-#     try:
-#         users = user_service.get_all_users() 
-#         return jsonify(users), 200
-
-#     except Exception as e:
-#         import traceback
-#         traceback.print_exc()
-#         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
-
+# Get all users (for admin)
 @app.route("/users", methods=["GET"])
 def get_users():
     try:
@@ -873,7 +748,7 @@ def get_users():
         traceback.print_exc()
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
     
-#【GET 获取当前登录用户】
+# Get current user
 @app.route("/users/me", methods=["GET"])
 def get_myself():
     try:
@@ -894,16 +769,16 @@ def get_myself():
         traceback.print_exc()
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
     
-# 【GET 模糊搜索用户】根据名字
+# 【Search User by name】
 @app.route("/users/search", methods=["GET"])
 def search_user_by_name():
     try:
-        # 1. 取 query 参数
+        # 1. take params
         name = request.args.get("name", "")
         if not name:
             return jsonify({"error": "Missing name parameter"}), 400
 
-        # 2. 调用 user_service 搜索
+        # 2. search with user_service 
         user = user_service.get_by_name(name)
 
         if not user:
@@ -916,9 +791,9 @@ def search_user_by_name():
         traceback.print_exc()
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
     
-# ==== 📈 Charts APIs (支出图表模块) ====
+# ==== 📈 Charts APIs (Expense Chart) ====
 
-from backend.functions import ChartPlugin  # ✅ 确保引入
+from backend.functions import ChartPlugin  
 
 chart_plugin = ChartPlugin()
 
@@ -942,7 +817,7 @@ def get_charts_summary():
 
     except Exception as e:
         import traceback
-        traceback.print_exc()  # 打印详细错误日志，方便debug
+        traceback.print_exc()  # print the error stack trace
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 # ==== 🔑 Auth APIs ====
@@ -977,13 +852,3 @@ def login():
         traceback.print_exc()
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
     
-# # ==== 启动服务（支持 Render 端口配置） ====
-
-# def parse_token(token: str) -> str:
-#     # 这里简单地提取 token 的 user_id，比如 token="stub-jwt-user3"，提取 user3
-#     return token.split("-")[-1]
-
-
-# if __name__ == "__main__":
-#     port = int(os.environ.get("PORT", 5000))
-#     app.run(host="0.0.0.0", port=port, debug=True)
