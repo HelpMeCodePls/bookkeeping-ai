@@ -90,7 +90,6 @@ Our AI agent empowers users to gain deeper insights into their spending patterns
 ### 🤖 AI Integration
 - Custom multi-agent architecture  
 - LLM-powered AI assistant for user interaction, classification, and task delegation  
-- OCR-to-agent workflow and conversational memory via Semantic Kernel  
 
 ### 🚀 Deployment
 - Full-stack deployed via **Render**  
