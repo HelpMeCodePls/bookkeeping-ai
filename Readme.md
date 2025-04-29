@@ -161,10 +161,10 @@ python app.py
 
 This project was created by a team of 4 passionate developers for the **Microsoft AI Agent Hackathon**:
 
-- **Antonio** – Full-stack development, AI agent orchestration, backend logic  
-- **Olivia** – UX/UI design, frontend integration, Frontend engineering 
-- **Chenchen** – AI-human interaction flow, AI-human interaction flow, UI design  
-- **David** – Function Developer, Data modelling, testing support
+- **Antonio** – Frontend & Backend Integration, AI agent orchestration  
+- **Olivia** – Full-stack Development, Database Design
+- **Chenchen** – AI-human interaction flow, UX/UI design  
+- **David** – Function Developer, Data Engineering
 
 Big thanks to **Microsoft** for providing cutting-edge AI tools and infrastructure, and for the opportunity to explore the future of human-AI collaboration.
 
