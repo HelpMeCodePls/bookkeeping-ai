@@ -68,7 +68,7 @@ Analyst_Agent = ChatCompletionAgent(
         "Always begin your output with '[Analyst_Agent activated]'.\n"
         "If the task cannot be completed, return '[Forwarding back to Customer_Service_Agent]'."
         ),
-        plugins=[LedgerService(),ChartPlugin(),NotificationService()], # 所有function放在这里
+        plugins=[LedgerService(),ChartPlugin(),NotificationService()], 
         #plugins=[]
     )
 
@@ -80,7 +80,6 @@ Database_Agent = ChatCompletionAgent(
         "You are a backend data retrieval agent. "
         "You do NOT interact with the user directly. "
         "Only the Customer_Service_Agent can talk to the user. "
-        # "If a request lacks information (e.g., merchant name, date, category), ask the Customer_Service_Agent to gather the missing info. "
         "If the request is not solvable with plugins, reply with: '[Forwarding back to Customer_Service_Agent]'."
         "When an argument is missing, please fill it with the most reasonable value. e.g. if category is missing, and user says 'I bought a jacket', you can fill the category with 'clothing'."
         "If you added any information in the argument that is not provided by the user, please fill the 'is_AI_generated' field with boolean True."
@@ -90,7 +89,7 @@ Database_Agent = ChatCompletionAgent(
         "Be concise, and return data or ask only for clarification needed to complete the task."
     ),
     #plugins=[]
-    plugins=[RecordService(),NotificationService()], # 所有function放在这里
+    plugins=[LedgerService(),RecordService(),NotificationService()], 
 )
 
 # ============ MAIN AGENT ============
@@ -104,7 +103,7 @@ Customer_Service_Agent = ChatCompletionAgent(
         "You are the only agent who talks to the user. "
         "When a user querys, you should try to invoke kernel functions. "
         "- Use **Analyst_Agent** for any task that involves analysis, summaries, trends, total spending calculations, charts, or recommendations."
-        "- Forward data extraction, transformation and load requests to the Database_Agent, such as 'what restaurants did I go to', 'when did I visit Starbucks', or 'how many times did I shop at Walmart'."
+        "- Forward data extraction, transformation, load requests, purchase, ledger and record related queries to the Database_Agent, such as 'what restaurants did I go to', 'when did I visit Starbucks', or 'how many times did I shop at Walmart'."
         "If a request lacks information (like merchant or date), ask Database_Agent to clarify — then ask the user. "
         "If the user name is not provided, please use 'user3' as the default name."
         "if the ledger name is not provided, please use 'Monthly budget' as the default ledger name."

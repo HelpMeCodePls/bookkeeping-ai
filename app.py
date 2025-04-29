@@ -83,6 +83,7 @@ def chat():
 # ==== OCR接口（图片识别） ====
 @app.route('/ocr', methods=['POST'])
 def ocr():
+    print("[OCR] Image received")
     data = request.get_json()
     image_data = data['image']
 
@@ -90,7 +91,7 @@ def ocr():
     header, encoded = image_data.split(",", 1)
     image_bytes = base64.b64decode(encoded)
 
-    reader = easyocr.Reader(['en'])  # Set gpu=True if you have a GPU and want to use it
+    reader = easyocr.Reader(['en'], gpu=False, download_enabled=False)  # Set gpu=True if you have a GPU and want to use it
     results = reader.readtext(image_bytes)
 
     # Prepare response: convert results to text list
@@ -114,7 +115,7 @@ def ocr():
             Customer_Service_Agent.get_response(messages=message, thread=thread)
         )
         loop.close()
-        print(f"[RESPONSE] {response.content}")
+        # print(f"[RESPONSE] {response.content}")
         return jsonify({"response": str(response.content)})  # ⚠️ 必须转成字符串，不能直接 jsonify 对象
     except Exception as e:
         import traceback
