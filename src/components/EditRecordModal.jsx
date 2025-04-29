@@ -27,7 +27,10 @@ export default function EditRecordModal({
     defaultValues: {
       ...(record ?? {}),
       split: record?.split || [],
-      date: record?.date || new Date().toISOString().split("T")[0],
+      // date: record?.date || new Date().toISOString().split("T")[0],
+         date: record?.date
+           ? new Date(record.date).toISOString().slice(0, 10)  // ← yyyy-MM-dd
+           : new Date().toISOString().slice(0, 10),
     },
   });
 
@@ -100,7 +103,8 @@ export default function EditRecordModal({
 
       // 5. 刷新
       qc.invalidateQueries(["records"]);
-      qc.invalidateQueries(["incomplete"]);
+      // qc.invalidateQueries(["incomplete"]);
+      qc.invalidateQueries(["incomplete", ledgerId]);
       onClose();
     } catch (error) {
       console.error("Error saving record:", error);
@@ -121,10 +125,11 @@ export default function EditRecordModal({
 
   React.useEffect(() => {
     reset(record);
-    reset({
-      ...(record ?? {}),
-      split: record?.split?.length > 0 ? record.split : [], // 只有有split才给split
-    });
+      reset({
+          ...(record ?? {}),
+          split: record?.split?.length ? record.split : [],
+          date: record?.date ? new Date(record.date).toISOString().slice(0, 10) : ""
+        });
   }, [record, reset]);
 
   return (

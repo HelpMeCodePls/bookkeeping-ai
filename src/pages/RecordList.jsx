@@ -27,6 +27,7 @@ export default function RecordList() {
   const [filters, setFilters] = useState({
     categories: [],
     split: "",
+    collaborator: ""
   });
 
   console.log("currentId", currentId);
@@ -68,8 +69,8 @@ export default function RecordList() {
             // month,
             month: month || undefined,           // ← 仅在明确选择时带
             categories: filters.categories,
-            split: filters.split,
-            collaborator: undefined,
+            split: filters.split || undefined,   
+            collaborator: filters.collaborator || undefined,
             token: token,
           }),
 

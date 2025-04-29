@@ -346,6 +346,7 @@ def get_records_by_ledger(ledger_id):
         split_uid = request.args.get("split") or None
         collaborator = request.args.get('collaborator')
 
+        status       = request.args.get("status") 
 
         records = record_service.get_by_ledger(ledger_id)
         # print(f"[DEBUG] Raw records from DB: {records}") 
@@ -374,7 +375,9 @@ def get_records_by_ledger(ledger_id):
 
         # filtered_records = records
         for r in records:
-
+                # 0️⃣ 按 status 过滤
+            if status and r.get("status") != status:
+                continue
             # ---- 1️⃣ 按月份过滤 ----
             if month:
                 raw_date = r.get("date")

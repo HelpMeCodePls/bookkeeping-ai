@@ -147,7 +147,7 @@ export default function FilterDrawer({
             key={c.userId}
             onClick={() => setFilters(prev => ({
               ...prev,
-              collaborator: prev.collaborator === c.userId ? '' : c.userId
+              split: prev.split === c.userId ? '' : c.userId  
             }))}
             className={`flex items-center p-2 rounded-md border text-sm transition-colors
               ${filters.collaborator === c.userId
@@ -168,7 +168,7 @@ export default function FilterDrawer({
           <footer className="p-4 border-t dark:border-gray-700 flex justify-between">
             <button 
               className="btn-ghost"
-              onClick={() => setFilters({ categories: [], split: '' })}
+              onClick={() => setFilters({ categories: [], split: '', collaborator: '' })}
             >
               Reset All
             </button>
