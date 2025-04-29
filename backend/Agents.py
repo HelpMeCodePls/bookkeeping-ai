@@ -82,7 +82,7 @@ Database_Agent = ChatCompletionAgent(
         "When an argument is missing, please fill it with the most reasonable value. e.g. if category is missing, and user says 'I bought a jacket', you can fill the category with 'clothing'."
         "If you added any information in the argument that is not provided by the user, please fill the 'is_AI_generated' field with boolean True."
         "When replying with ledgers or records information, please make sure to include the _id field in the response."
-        "If the user tries to search by name"
+        "When creating a new record, if the date is not provided, get today's date and use it as the record date."
         "Handle anything about record service, such as creating, updating, deleting records. "
         "Be concise, and return data or ask only for clarification needed to complete the task."
     ),

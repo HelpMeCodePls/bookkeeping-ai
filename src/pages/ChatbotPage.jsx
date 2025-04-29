@@ -52,42 +52,42 @@ export default function ChatbotPage() {
     recognition.start();
   };
 
-  const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  // const handleUpload = async (e) => {
+  //   const file = e.target.files[0];
+  //   if (!file) return;
     
-    if (!file.type.match('image.*')) {
-      addMessage({ 
-        role: 'bot', 
-        content: '❌ Please upload an image file (JPEG, PNG, etc.)' 
-      });
-      return;
-    }
+  //   if (!file.type.match('image.*')) {
+  //     addMessage({ 
+  //       role: 'bot', 
+  //       content: '❌ Please upload an image file (JPEG, PNG, etc.)' 
+  //     });
+  //     return;
+  //   }
   
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64Image = reader.result.split(',')[1];
-      addMessage({ role: 'user', content: '[Uploaded a receipt for OCR]' });
-      setLoading(true);
+  //   const reader = new FileReader();
+  //   reader.onload = async () => {
+  //     const base64Image = reader.result.split(',')[1];
+  //     addMessage({ role: 'user', content: '[Uploaded a receipt for OCR]' });
+  //     setLoading(true);
       
-      try {
-        const result = await sendImageToOCR(base64Image);
-        if (result.includes('error') || result.includes('fail')) {
-          throw new Error(result);
-        }
-        addMessage({ role: 'bot', content: result });
-      } catch (error) {
-        console.error('OCR Error:', error);
-        addMessage({ 
-          role: 'bot', 
-          content: 'Failed to process receipt. Please ensure the image is clear and try again.' 
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
+  //     try {
+  //       const result = await sendImageToOCR(base64Image);
+  //       if (result.includes('error') || result.includes('fail')) {
+  //         throw new Error(result);
+  //       }
+  //       addMessage({ role: 'bot', content: result });
+  //     } catch (error) {
+  //       console.error('OCR Error:', error);
+  //       addMessage({ 
+  //         role: 'bot', 
+  //         content: 'Failed to process receipt. Please ensure the image is clear and try again.' 
+  //       });
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   reader.readAsDataURL(file);
+  // };
 
   const suggestions = [
     "Show me today's expenses",

@@ -315,6 +315,11 @@ class RecordService:
             return None
         return result.inserted_id
     
+    @kernel_function(description="Get today's date.")
+    def get_date(self) -> Annotated[str, "Today's date in YYYY-MM-DD format."]:
+        today = datetime.now().strftime("%Y-%m-%d")
+        return today
+
     @kernel_function(description="Searches for records based on a single field and its value.")
     def search_records_by_field(
         self,
