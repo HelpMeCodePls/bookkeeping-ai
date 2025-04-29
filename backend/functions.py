@@ -29,23 +29,6 @@ def normalize_entry(name: str) -> str:
     return name
 
 
-# --- DATABASE CLIENT ---
-# class DatabaseClient:
-#     def __init__(self, uri: str = "mongodb+srv://ldvdzhang:Zsk011006@cluster0.ltnlqvq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", db_name: str = "bookkeeping_db"):
-
-#         # Create a new client and connect to the server
-#         client = MongoClient(uri)
-
-#         # Send a ping to confirm a successful connection
-#         try:
-#             client.admin.command('ping')
-#             print("Pinged your deployment. You successfully connected to MongoDB!")
-#             self.client = client
-#             self.db = client[db_name]
-#         except Exception as e:
-#             print(e)
-#             print("Could not connect to MongoDB. Please check your connection string and try again.")
-# 把你的 functions.py 中 Mongo URI 改成读取环境变量的形式，这样部署时更安全、也更灵活。
 class DatabaseClient:
     def __init__(self, uri: str = None, db_name: str = "bookkeeping_db"):
         # 从环境变量中获取 URI，如果没传参数就用它
