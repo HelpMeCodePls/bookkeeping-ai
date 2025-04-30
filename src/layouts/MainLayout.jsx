@@ -150,7 +150,7 @@ export default function MainLayout() {
   }, [ledgers, currentId, setLedger]);
 
   useEffect(() => {
-    console.log("Current ledger state:", { currentId, currentName });
+    // console.log("Current ledger state:", { currentId, currentName });
   }, [currentId, currentName]);
 
   return (
