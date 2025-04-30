@@ -30,12 +30,14 @@ With AI-assistance and a shared dashboard, Spendora helps keep everyone on the s
 ### 🔐 Authentication
 - Simulated login system: Users can choose from four pre-defined demo accounts to explore the app.
 - Retrieve user details and search users by name.
+![login](https://github.com/user-attachments/assets/390f5729-a61f-4b1b-85df-e303c726e899)
 
 ### 📁 Ledger Management
 - Create multiple ledgers for different projects or personal budgets.
 - Set and update total, monthly, and category-based budgets.
 - Collaborate with others by adding **Editors** or **Viewers**.
 - Real-time notification when ledgers are shared or updated.
+![ledger](https://github.com/user-attachments/assets/e0617864-e61a-475a-b3e2-daa0602557d9)
 
 ### 🧾 Record Management
 - Add and manage expenses with amount, date, merchant, category, and description.
@@ -43,15 +45,18 @@ With AI-assistance and a shared dashboard, Spendora helps keep everyone on the s
 - Add **splits** to share expenses among collaborators.
 - Filter by month, category, contributor, and split participants.
 - Update or delete existing records.
+![image](https://github.com/user-attachments/assets/26b2a115-d0be-4b30-a798-4af656b31678)
 
 ### 🗂️ Incomplete Record Handling
 - Automatically detect and list incomplete records added by AI.
 - Prompt users to manually review and complete missing data.
+![image](https://github.com/user-attachments/assets/e33b7a62-ca3a-417c-845c-0abdb7846ce4)
 
 ### 📊 Visual Analysis
 - Interactive dashboard with monthly/yearly/all-time data summaries.
 - Real-time charts by category and date range.
 - Integrated budget progress tracking.
+![analysis](https://github.com/user-attachments/assets/0ad35ecb-4cd7-433e-9eab-31f47d0c3575)
 
 ### 💬 AI Chat Assistant
 - Smart chatbot interface (floating and fullscreen):
@@ -59,20 +64,31 @@ With AI-assistance and a shared dashboard, Spendora helps keep everyone on the s
   - Modify budgets.
   - Summarize expenses.
   - Cross-page interaction enabled.
+![ai](https://github.com/user-attachments/assets/c26e5d48-cb9e-4942-ad69-735a368d1b70)
 
 ### 🎤 Voice Input
 - Record and upload voice messages.
 - Speech-to-text powered by Azure Cognitive Services.
 - Transcribed input is used to interact with the AI agent.
+![voice](https://github.com/user-attachments/assets/ca484467-b2fc-49d1-863e-c65dc0d28984)
 
 ### 🔔 Notification System
 - View all past and unread alerts
 - Automatically receive alerts for new records or ledger activity.
 - Mark notifications as read.
+![image](https://github.com/user-attachments/assets/fb64f14d-fe08-4438-9d48-f70a0cd9bb3a)
 
 ### 🗃️ Category Management
 - Built-in category presets with emojis.
 - Users can define their own categories with custom names and icons.
+![image](https://github.com/user-attachments/assets/1fd148bd-f858-4dc0-a09b-da92584eb5a4)
+
+### 📊 Budget Configuration
+
+- Configure monthly budgets to reflect changing needs over time.
+- Set up default budgets that automatically apply to all months unless overridden.
+- Customize category-level budgets for precision—e.g., allocate $200 to “Groceries” and $100 to “Entertainment”.
+![image](https://github.com/user-attachments/assets/f2650901-133c-42da-89ac-4f7fed877967)
 
 ---
 
@@ -107,7 +123,7 @@ With AI-assistance and a shared dashboard, Spendora helps keep everyone on the s
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-repo/spendora.git
+git clone https://github.com/HelpMeCodePls/bookkeeping-ai.git
 cd spendora
 ```
 
