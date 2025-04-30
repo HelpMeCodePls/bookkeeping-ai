@@ -20,44 +20,34 @@ import { useNavigate } from 'react-router-dom';
 export default function App() {
   const token = useAuthStore((s) => s.token);
   const setAuth = useAuthStore((s) => s.setAuth);
-  const setLedger = useLedger((s) => s.setLedger);
-  const qc = useQueryClient();
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedToken = localStorage.getItem("jwt");
-
-    if (!token && storedToken) {
-      // 1️⃣ 恢复用户状态
+    if (storedToken) {
       api.get("/auth/profile", { params: { token: storedToken } })
         .then((res) => {
           setAuth({ token: storedToken, user: res.data });
-
-          // 2️⃣ 顺便加载 ledger 数据
-          return api.get("/ledgers", { params: { token: storedToken } });
-        })
-        .then((res) => {
-          const ledgers = res.data;
-          qc.setQueryData(["ledgers", storedToken], ledgers);
-
-          if (ledgers.length > 0) {
-            const first = ledgers[0];
-            const thisMonth = new Date().toISOString().slice(0, 7);
-            setLedger({ id: first._id, name: first.name, month: thisMonth });
-            qc.setQueryData(["ledgers", first._id], first); // 设置当前选中的 ledger 数据
+          // 如果当前在登录页，跳转到 dashboard
+          if (window.location.pathname === "/login") {
+            navigate("/dashboard");
           }
         })
         .catch(() => {
           localStorage.removeItem("jwt");
+          navigate("/login");
         })
         .finally(() => {
           setIsLoading(false);
         });
     } else {
       setIsLoading(false);
+      if (!window.location.pathname.includes("/login")) {
+        navigate("/login");
+      }
     }
-  }, [token]);
+  }, []); // 空依赖数组，只运行一次
   
   if (isLoading) return <div>Loading...</div>; 
 
