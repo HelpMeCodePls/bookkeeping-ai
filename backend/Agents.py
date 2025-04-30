@@ -67,9 +67,9 @@ Analyst_Agent = ChatCompletionAgent(
         "If the task cannot be completed, return '[Forwarding back to Customer_Service_Agent]'."
         ),
         plugins=[LedgerService(),ChartPlugin(),NotificationService()], 
-        #plugins=[]
     )
 
+# this is the agent that will handle all the database related tasks, such as creating, updating, deleting records 
 Database_Agent = ChatCompletionAgent(
     service=AzureChatCompletion(),
     kernel=kernel,
@@ -117,6 +117,7 @@ __all__ = [
     "Database_Agent"
 ]
 
+# ============ TESTING ============
 # async def main():
 
 #     response = await Customer_Service_Agent.get_response(messages="Show me all the purchases in ledger with id 97e8f621-a6a1-4882-ad22-d5adfca27ac9")

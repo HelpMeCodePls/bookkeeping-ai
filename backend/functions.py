@@ -1,23 +1,24 @@
-from pydantic import BaseModel
-from pymongo import MongoClient
-from typing import Annotated, Dict, Any, List
-from datetime import datetime
-from semantic_kernel.functions import kernel_function
-import uuid
-import re
-from fuzzywuzzy import process
-from backend.datatypes import *
-from bson import ObjectId  # add by antonio: 🛠 for ObjectId support
-from typing import Optional # add by antonio: 🛠 for Optional type
+from pydantic import BaseModel # for data validation
+from pymongo import MongoClient # for MongoDB connection
+from typing import Optional, Annotated, Dict, Any, List # for type hinting
+from datetime import datetime # for date and time handling
+from semantic_kernel.functions import kernel_function # for defining kernel functions
+import uuid # for generating unique IDs
+import re  # for regular expressions
+from fuzzywuzzy import process # for fuzzy string matching
+from backend.datatypes import * 
+from bson import ObjectId  # for ObjectId handling
 import os
 
+# this function is used to match a string with a list of reference names
 def similar_match(entry, reference_names, threshold=80):
     match, score = process.extractOne(entry, reference_names)
     if score >= threshold:
         return match
     else:
         return entry  # or None if no match is good enoughf
-    
+
+# this function is used to normalize the entry name
 def normalize_entry(name: str) -> str:
     # Normalize the entry to lowercase and strip whitespace
     name = name.lower().strip()
@@ -26,7 +27,7 @@ def normalize_entry(name: str) -> str:
     name = re.sub(r"_+", "_", name)       # collapse multiple underscores
     return name
 
-
+# this class is used to connect to the MongoDB database
 class DatabaseClient:
     def __init__(self, uri: str = None, db_name: str = "bookkeeping_db"):
         uri = uri or os.environ.get("MONGO_URI")
@@ -48,12 +49,12 @@ class LedgerService:
     def __init__(self, db_client = DatabaseClient()):
         self.col = db_client.db['ledgers']
 
+    # this function is used to create a new ledger
     @kernel_function(description="Creates a new ledger.")
     def create(self, name: str, 
                owner: str, 
                budgets: Annotated[str, "The total amount of budget, set by the user."]) -> Annotated[str, "Ledger ID"]:
         # Instantiate via model constructor
-        # print("TAKING LEDGER DATA: ****************\n",name, owner, budgets, spent)
         ledger_data = {
             "_id": str(uuid.uuid4()),  # Generate a new UUID for the ledger ID
             "name": normalize_entry(name),
@@ -83,9 +84,9 @@ class LedgerService:
             print("[ERROR] Failed to create Ledger:", e)
             return None
         
-        
         return ledger_data["_id"]  # Return the ID of the created ledger
     
+    # this function is used to search a ledger
     @kernel_function(description="Searches for ledgers based on a single field and its value.")
     def search_ledger_by_field(
         self,
@@ -120,7 +121,7 @@ class LedgerService:
     # def get_by_user(self, user_name: Annotated[str, "User name"]) -> Annotated[List[Dict[str, Any]], "List of ledgers."]:
     #     return self.col.find({"owner": user_name}).to_list()
     def get_by_user(self, user_id: str) -> List[Dict[str, Any]]:
-        """返回“我拥有的 + 我被加入协作的”所有账本"""
+        # retruns all ledgers where the user is either the owner or a collaborator
         return list(self.col.find({
             "$or": [
                 {"owner": user_id},                 #  owner
@@ -128,6 +129,7 @@ class LedgerService:
             ]
         }))
     
+    # update bedget by its ID
     @kernel_function(description="Updates the budget of an existing ledger. Only Write the necessary arguments provided by user prompt and the ledger_id, do not fill other arguments unlesss specified.")
     def update_budget(self, ledger_id: Annotated[str, "ID of the ledger to update"], 
                       budget: Annotated[float, "The amount of new budget"],
@@ -166,6 +168,7 @@ class LedgerService:
         )
         return {"ok":True}
 
+    # delete a ledger by its ID
     @kernel_function(description="Deletes a ledger by giving its ID.")
     def delete(self, ledger_id: Annotated[str, "ID of the ledger to delete"]) -> Annotated[str, "Confirmation message."]:
         result = self.col.delete_one({"_id": ledger_id})
@@ -181,7 +184,7 @@ class LedgerService:
         )
         return f"Ledger {ledger_id} deleted." if result.deleted_count else f"Ledger {ledger_id} not found."
 
-    #edit by antonio: 🛠 get current user's permission to ledger
+    # get current user's permission to ledger
     @kernel_function(description="Retrieves permission of a user on a ledger.")
     def get_permission(self, ledger_id: str, user_id: str) -> Dict[str, str]:
         ledger = self.db['ledgers'].find_one({"_id": ledger_id})
@@ -198,7 +201,7 @@ class LedgerService:
 
         return {"permission": "VIEWER"}
     
-    # edit by Antonio: 🛠 update spend for this ledger
+    # update spend for this ledger
     @kernel_function(description="Updates the spent field of a ledger by recalculating from records.")
     def update_spent(self, ledger_id: Annotated[str, "ID of the ledger to update the spent"]):
         from backend.functions import RecordService  
@@ -220,7 +223,7 @@ class LedgerService:
             "new_spent": spent
         }
     
-    # edit by Antonio: 🛠 Get all collaborators of a ledger
+    # Get all collaborators of a ledger
     @kernel_function(description="Get all collaborators of a ledger.")
     def get_collaborators(self, ledger_id: Annotated[str, "Ledger ID"]) -> Annotated[List[Dict[str, Any]], "List of collaborators"]:
         ledger = self.col.find_one({"_id": ledger_id})
@@ -228,7 +231,7 @@ class LedgerService:
             return ledger["collaborators"]
         return []
 
-    # edit by Antonio: 🛠 add new collaborator
+    # add new collaborator
     @kernel_function(description="Add a new collaborator to a ledger.")
     def add_collaborator(self, ledger_id: Annotated[str, "Ledger ID"], user_id: Annotated[str, "User ID"], email: Annotated[str, "Email"], permission: Annotated[str, "Permission level"]) -> Annotated[Dict[str, Any], "New collaborator"]:
         new_collaborator = {
@@ -243,7 +246,7 @@ class LedgerService:
         )
         return new_collaborator
 
-    # edit by Antonio: 🛠 update collaborator's permission
+    # update collaborator's permission
     @kernel_function(description="Update a collaborator's permission in a ledger.")
     def update_collaborator_permission(self, ledger_id: Annotated[str, "Ledger ID"], user_id: Annotated[str, "User ID"], new_permission: Annotated[str, "New permission"]) -> Annotated[Dict[str, Any], "Confirmation"]:
         result = self.col.update_one(
@@ -252,7 +255,7 @@ class LedgerService:
         )
         return {"ok": result.modified_count > 0}
 
-    # edit by Antonio: 🛠 remove collaborator
+    # remove collaborator
     @kernel_function(description="Remove a collaborator from a ledger.")
     def remove_collaborator(self, ledger_id: Annotated[str, "Ledger ID"], user_id: Annotated[str, "User ID"]) -> Annotated[Dict[str, Any], "Confirmation"]:
         result = self.col.update_one(
@@ -355,7 +358,6 @@ class RecordService:
 
         recs = list(self.col.find({"ledger_id": ledger_id}))
 
-        # 👉 把 _id 复制一份给前端用
         for r in recs:
             r["id"] = str(r["_id"])     
 
@@ -508,7 +510,7 @@ class RecordService:
 
         return {"byCategory": by_category, "daily": daily, "minDate": minDate, "maxDate": maxDate}
 
-
+# --- NotificationService OPERATIONS ---
 class NotificationService:
     def __init__(self, db_client = DatabaseClient()):
         self.col = db_client.db['notifications']
@@ -605,13 +607,16 @@ class UserService:
                 user['_id'] = str(user['_id'])
         
         return users
+    
+# --- CHART OPERATIONS ---
 class ChartPlugin:
     @kernel_function(description="Get chart summary by ledgerId, mode, selectedDate")
     def get_summary(self, ledger_id: str, mode: str = "all", selected_date: str = None):
-        from backend.functions import RecordService  # 避免循环导入
+        from backend.functions import RecordService 
         record_service = RecordService()
         return record_service.get_summary(ledger_id, mode, selected_date)
-    
+
+# future development:
 # class OCR:
 #     def __init__(self, db_client = DatabaseClient()):
 #         self.reader = easyocr.Reader(['en'])
