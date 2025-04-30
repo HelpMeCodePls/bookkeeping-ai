@@ -171,7 +171,7 @@ export default function ChatbotWidget() {
                   placeholder="Ask me about your budget..."
                   disabled={isLoading}
                 />
-                <div className="relative group">
+                {/* <div className="relative group">
                   <label className="text-gray-500 hover:text-blue-500 cursor-pointer">
                     <Upload size={18} />
                     <input type="file" accept="image/*" onChange={handleUpload} className="hidden" />
@@ -180,7 +180,7 @@ export default function ChatbotWidget() {
                     Upload receipt (Image Only)
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-b-0 border-t-4 border-solid border-l-transparent border-r-transparent border-t-gray-800" />
                   </div>
-                </div>
+                </div> */}
                 <button className="text-gray-500 hover:text-blue-500" onClick={() => alert("Voice not implemented")}>
                   <Mic size={18} />
                 </button>

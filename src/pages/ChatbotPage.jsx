@@ -175,7 +175,7 @@ export default function ChatbotPage() {
     disabled={isLoading}
   />
   
-  {/* 上传按钮 */}
+  {/* 上传按钮
   <div className="relative group">
     <label className={
       `w-12 h-12 flex items-center justify-center rounded-full cursor-pointer transition-all
@@ -203,7 +203,7 @@ export default function ChatbotPage() {
       Upload receipt (Image only)
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-b-0 border-t-4 border-solid border-l-transparent border-r-transparent border-t-gray-800"></div>
     </div>
-  </div>
+  </div> */}
 
   {/* 新增的语音输入按钮 */}
   <div className="relative group">
