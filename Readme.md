@@ -1,4 +1,3 @@
-![login_img](https://github.com/user-attachments/assets/b1b6a0a6-ec66-4c2b-b552-94346fe2c36e)
 # 💼 Spendora – AI-Powered Bookkeeping Assistant  
 *A full-stack project for the Microsoft AI Agent Hackathon*  
 🌐 Live Site: [https://spendoraai.onrender.com](https://spendoraai.onrender.com)
