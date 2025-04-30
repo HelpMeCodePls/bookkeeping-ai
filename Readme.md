@@ -2,7 +2,7 @@
 *A full-stack project for the Microsoft AI Agent Hackathon*  
 🌐 Live Site: [https://spendoraai.onrender.com](https://spendoraai.onrender.com)  
 📦 Backup Site: [https://spendoraai.vercel.app/](https://spendoraai.vercel.app/)
----
+--- 
  
 ## 📘 Project Overview
 
