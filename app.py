@@ -27,7 +27,11 @@ def _serialize_record(rec: dict) -> dict:
 
 
 # ==== Flask initialization ====
-app = Flask(__name__, static_folder="frontend_build", static_url_path="")
+app = Flask(
+    __name__,
+    static_folder="frontend_build/assets",        # 静态资源路径
+    static_url_path="/assets"                     # 改成 /assets 避免路径冲突
+)
 CORS(app)
 
 
@@ -42,13 +46,27 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
     
 #==== front page：load frontend chat page ====
+# @app.route("/", defaults={"path": ""})
+# @app.route("/<path:path>")
+# def serve_frontend(path):
+#     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+#         return send_from_directory(app.static_folder, path)
+#     else:
+#         return send_from_directory(app.static_folder, "index.html")
+
+
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
-def serve_frontend(path):
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, "index.html")
+def serve_spa(path):
+    if path.startswith("assets/"):
+        return send_from_directory("frontend_build/assets", path[len("assets/"):])
+
+    return send_from_directory("frontend_build", "index.html")
+
+
+@app.errorhandler(404)
+def fallback(e):
+    return send_from_directory("frontend_build", "index.html")
 
 
 # ==== health check ====
