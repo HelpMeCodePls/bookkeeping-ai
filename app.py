@@ -9,7 +9,6 @@ import base64
 import uuid
 from io import BytesIO
 from PIL import Image
-import easyocr
 import cv2
 import numpy as np
 from dateutil import parser as dtparser
@@ -81,48 +80,48 @@ def chat():
         traceback.print_exc()
         return jsonify({"response": f"[system error]: {str(e)}"})
     
-# ==== OCR ====
-@app.route('/ocr', methods=['POST'])
-def ocr():
-    print("[OCR] Image received")
-    data = request.get_json()
-    image_data = data['image']
+# # ==== OCR ====
+# @app.route('/ocr', methods=['POST'])
+# def ocr():
+#     print("[OCR] Image received")
+#     data = request.get_json()
+#     image_data = data['image']
 
-    # Remove header 'data:image/jpeg;base64,'
-    header, encoded = image_data.split(",", 1)
-    image_bytes = base64.b64decode(encoded)
+#     # Remove header 'data:image/jpeg;base64,'
+#     header, encoded = image_data.split(",", 1)
+#     image_bytes = base64.b64decode(encoded)
 
-    reader = easyocr.Reader(['en'], gpu=False, download_enabled=False)  # Set gpu=True if you have a GPU and want to use it
-    results = reader.readtext(image_bytes)
-    print("[OCR] Processing finished. Sending to AI agent...")
+#     reader = easyocr.Reader(['en'], gpu=False, download_enabled=False)  # Set gpu=True if you have a GPU and want to use it
+#     results = reader.readtext(image_bytes)
+#     print("[OCR] Processing finished. Sending to AI agent...")
 
-    # Prepare response: convert results to text list
-    text_results = [text for _, text, _ in results] 
-    results = " ".join(text_results)
-    message = "You will be given contents of a receipt. " \
-    "Please extract the following information from the receipt: " \
-    "1. Total amount spent (in dollars) " \
-    "2. Merchant name " \
-    "3. Date of transaction " \
-    "Then pass it to database agent to store the data. " \
-    "If the receipt is not valid, please reply with: '[Invalid receipt]'. " \
-    "Here is the receipt content: "
-    message = message + "\n" + results
+#     # Prepare response: convert results to text list
+#     text_results = [text for _, text, _ in results] 
+#     results = " ".join(text_results)
+#     message = "You will be given contents of a receipt. " \
+#     "Please extract the following information from the receipt: " \
+#     "1. Total amount spent (in dollars) " \
+#     "2. Merchant name " \
+#     "3. Date of transaction " \
+#     "Then pass it to database agent to store the data. " \
+#     "If the receipt is not valid, please reply with: '[Invalid receipt]'. " \
+#     "Here is the receipt content: "
+#     message = message + "\n" + results
 
-    try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+#     try:
+#         loop = asyncio.new_event_loop()
+#         asyncio.set_event_loop(loop)
 
-        response = loop.run_until_complete(
-            Customer_Service_Agent.get_response(messages=message, thread=thread)
-        )
-        loop.close()
-        # print(f"[RESPONSE] {response.content}")
-        return jsonify({"response": str(response.content)})  # ⚠️ must convert to str，cant directly jsonify the object
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return jsonify({"response": f"[system error]: {str(e)}"})
+#         response = loop.run_until_complete(
+#             Customer_Service_Agent.get_response(messages=message, thread=thread)
+#         )
+#         loop.close()
+#         # print(f"[RESPONSE] {response.content}")
+#         return jsonify({"response": str(response.content)})  # ⚠️ must convert to str，cant directly jsonify the object
+#     except Exception as e:
+#         import traceback
+#         traceback.print_exc()
+#         return jsonify({"response": f"[system error]: {str(e)}"})
     
 
 # ==== voice to text ====
