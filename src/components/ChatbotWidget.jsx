@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { sendMessageToAI, sendImageToOCR } from "../api/aiHandler";
 import { useChatStore } from "../store/chatStore";
 import { useAuthStore } from "../store/auth";
+import chatbotVideo from '../assets/animations/chatbot.webm';
 
 export default function ChatbotWidget() {
   const navigate = useNavigate();
@@ -229,7 +230,7 @@ export default function ChatbotWidget() {
             className="fixed bottom-6 right-6 p-0 bg-transparent rounded-full shadow-lg"
           >
             <video
-              src="/animations/chatbot.webm"
+              src={chatbotVideo}
               autoPlay
               muted
               loop

@@ -7,6 +7,7 @@ import { api } from "../api/client";
 import { useLedger } from "../store/ledger";
 import { useQueryClient } from "@tanstack/react-query";
 import brandLogo from "../assets/icons/LOGO.svg";
+import loginImg from '../assets/animations/login_img.svg';
 
 const tempUsers = [
   {
@@ -148,7 +149,8 @@ export default function LoginPage() {
             </p>
           </div>
           <img
-            src="/animations/login_img.svg"
+            src=
+            {loginImg}
             alt="Login Illustration"
             className="w-3/4 max-w-lg h-auto object-contain"
           />
