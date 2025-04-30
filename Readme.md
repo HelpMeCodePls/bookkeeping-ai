@@ -3,7 +3,7 @@
 🌐 Live Site: [https://spendoraai.onrender.com](https://spendoraai.onrender.com)  
 📦 Backup Site: [https://spendoraai.vercel.app/](https://spendoraai.vercel.app/)
 ---
-
+ 
 ## 📘 Project Overview
 
 **Spendora** is an intelligent, collaborative expense management platform that helps users understand, track, and optimize their financial lives. Spendora combines a powerful AI agent, a clean interface, and a scalable backend to streamline bookkeeping.
