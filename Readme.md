@@ -136,15 +136,19 @@ npm install
 npm run dev
 # Opens at http://localhost:5173
 ```
+Rename the .env.example file to .env, so the front end connects to the local backend.
+
+Also Rename the API_BASE variable under src\api\aiHandler.js to your local host port
 
 ### 3. Set Up the Backend
 
 ```bash
-cd backend
 pip install -r requirements.txt
 python app.py
 # Runs at http://localhost:5000
 ```
+
+Configure the .env file under backend folder and replace the credentials
 
 > 💡 Make sure your MongoDB URI is configured in a `.env` file in the backend folder as `MONGO_URI`.  
 > 💡 You will also need to include the following keys in your `.env` file in the backend folder to enable full backend functionality:
