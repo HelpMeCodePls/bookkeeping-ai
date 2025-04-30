@@ -1,56 +1,51 @@
 import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
-import { useLedger } from '../store/ledger'
 import { ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuthStore } from '../store/auth'
+import { useLedger } from '../store/ledger'
+import { fetchLedgers } from '../handlers/ledgerHandlers'
 
 export default function LedgerSelector() {
-  const { currentId, setId } = useLedger()
+  const { currentId, currentName, selectLedger } = useLedger()
   const token = useAuthStore((s) => s.token)
-  // 确保数据始终是数组格式
-  const { data: ledgersResponse = [] } = useQuery({
+  const [open, setOpen] = useState(false)
+  
+  const { data: ledgers = [] } = useQuery({
     queryKey: ['ledgers', token],
-    queryFn: async () => {
-      try {
-        const res = await axios.get('/ledgers', { params: { token } })
-        // 处理可能的响应格式
-        if (Array.isArray(res.data)) {
-          return res.data
-        } else if (Array.isArray(res.data?.data)) {
-          return res.data.data
-        } else if (Array.isArray(res.data?.ledgers)) {
-          return res.data.ledgers
-        }
-        return []
-      } catch (e) {
-        console.error('Failed to fetch ledgers', e)
-        return []
-      }
-    },
+    queryFn: fetchLedgers,
     enabled: !!token,
   })
 
-  // 确保 ledgers 是数组
-  const ledgers = Array.isArray(ledgersResponse) ? ledgersResponse : []
-  const current = ledgers.find(l => l._id === currentId) || { name: 'Ledger' }
-  const [open, setOpen] = useState(false)
-
+  // 初始化默认账本
+  useEffect(() => {
+    if (ledgers.length > 0 && !currentId) {
+      selectLedger(ledgers[0])
+    }
+  }, [ledgers, currentId, selectLedger])
 
   return (
     <div className="relative">
-      <button onClick={()=>setOpen(o=>!o)} className="flex items-center gap-2 font-semibold">
-        📂 {current.name}
+      <button 
+        onClick={() => ledgers.length > 0 && setOpen(o => !o)} 
+        className="flex items-center gap-2 font-semibold"
+        disabled={ledgers.length === 0}
+      >
+        📂 {currentName || (ledgers.length > 0 ? ledgers[0].name : 'Loading...')}
         <ChevronDown size={16}/>
       </button>
 
-      {open && (
-        <div className="absolute mt-2 w-48 bg-card dark:bg-gray-800 shadow-card rounded-xl z-20">
+      {open && ledgers.length > 0 && (
+        <div className="absolute mt-2 w-48 bg-white shadow-lg rounded-md z-20 border border-gray-200">
           {ledgers.map(l => (
             <div
               key={l._id}
-              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${l._id===currentId?'bg-brand/10':''}`}
-              onClick={()=>{ setId(l._id); setOpen(false) }}
+              className={`px-3 py-2 cursor-pointer hover:bg-gray-100 ${
+                l._id === currentId ? 'bg-blue-50 text-blue-600' : ''
+              }`}
+              onClick={() => {
+                selectLedger(l)
+                setOpen(false)
+              }}
             >
               {l.name}
             </div>

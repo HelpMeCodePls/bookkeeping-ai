@@ -15,6 +15,8 @@ import ChatbotPage from "./pages/ChatbotPage";
 import { useEffect, useState } from "react";
 import { api } from "./api/client";
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { useLedger } from "./store/ledger";
 
 
 export default function App() {
@@ -22,14 +24,29 @@ export default function App() {
   const setAuth = useAuthStore((s) => s.setAuth);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const setLedger = useLedger(s => s.setLedger);
+  const qc = useQueryClient();
 
   useEffect(() => {
     const storedToken = localStorage.getItem("jwt");
     if (storedToken) {
       api.get("/auth/profile", { params: { token: storedToken } })
-        .then((res) => {
+        .then(async (res) => {
           setAuth({ token: storedToken, user: res.data });
-          // 如果当前在登录页，跳转到 dashboard
+          
+          // 加载ledgers数据
+          try {
+            const ledgers = await api.get("/ledgers", { params: { token: storedToken } }).then(r => r.data);
+            if (ledgers.length) {
+              const first = ledgers[0];
+              const thisMonth = new Date().toISOString().slice(0,7);
+              qc.setQueryData(['ledgers', storedToken], ledgers);
+              setLedger({ id: first._id, name: first.name, month: thisMonth });
+            }
+          } catch (error) {
+            console.error("Failed to load ledgers:", error);
+          }
+
           if (window.location.pathname === "/login") {
             navigate("/dashboard");
           }
@@ -47,9 +64,13 @@ export default function App() {
         navigate("/login");
       }
     }
-  }, []); // 空依赖数组，只运行一次
+  }, []);
   
-  if (isLoading) return <div>Loading...</div>; 
+if (isLoading) return (
+  <div className="fixed inset-0 flex items-center justify-center bg-white/80">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
 
   return (
   <Routes>

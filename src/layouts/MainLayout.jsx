@@ -1,5 +1,9 @@
 // src/layouts/MainLayout.jsx
 import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { fetchLedgers } from "../handlers/ledgerHandlers"; 
+import { useLedger } from "../store/ledger";
+import dayjs from "dayjs";
 import {
   Home,
   List,
@@ -16,7 +20,7 @@ import {
 import { fetchUnreadCount } from "../handlers/notificationHandlers";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../store/auth";
-import ChatbotDrawer from "../components/ChatbotDrawer";
+// import ChatbotDrawer from "../components/ChatbotDrawer";
 import LedgerSelector from "../components/LedgerSelector";
 import MonthSelector from "../components/MonthSelector";
 import ConnectionIndicator from "../components/ConnectionIndicator";
@@ -83,6 +87,7 @@ export default function MainLayout() {
 
   const { token } = useAuthStore();
   const loc = useLocation();
+  const { currentId, currentName, setLedger } = useLedger();
 
   // useEffect(() => {
   //     if (token) {
@@ -127,6 +132,30 @@ export default function MainLayout() {
       refetchInterval: 60000,
       enabled: !!token,
     });
+
+
+    const { data: ledgers = [] } = useQuery({
+      queryKey: ['ledgers', token],
+      queryFn: fetchLedgers, // 使用你的fetchLedgers函数
+      enabled: !!token,
+      staleTime: Infinity
+    })
+  
+    // 关键修复：初始化默认账本
+    useEffect(() => {
+      if (ledgers.length > 0 && !currentId) {
+        setLedger({
+          id: ledgers[0]._id,
+          name: ledgers[0].name,
+          month: dayjs().format('YYYY-MM')
+        })
+      }
+    }, [ledgers, currentId, setLedger])
+  
+    // 3. 调试信息
+    useEffect(() => {
+      console.log('Current ledger state:', { currentId, currentName });
+    }, [currentId, currentName]);
 
   return (
     <div className="flex h-screen bg-[#F9FAFB]">
