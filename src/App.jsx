@@ -25,27 +25,29 @@ export default function App() {
 
   useEffect(() => {
     const storedToken = localStorage.getItem("jwt");
-    if (!token && storedToken) {
+    if (storedToken) {
       api.get("/auth/profile", { params: { token: storedToken } })
         .then((res) => {
           setAuth({ token: storedToken, user: res.data });
+          // 如果当前在登录页，跳转到 dashboard
+          if (window.location.pathname === "/login") {
+            navigate("/dashboard");
+          }
         })
         .catch(() => {
           localStorage.removeItem("jwt");
+          navigate("/login");
         })
         .finally(() => {
           setIsLoading(false);
         });
     } else {
       setIsLoading(false);
+      if (!window.location.pathname.includes("/login")) {
+        navigate("/login");
+      }
     }
-  }, [token]);
-
-  useEffect(() => {
-    if (!token) {
-      navigate('/'); // 或 navigate('/login')
-    }
-  }, [token]);
+  }, []); // 空依赖数组，只运行一次
   
   if (isLoading) return <div>Loading...</div>; 
 
