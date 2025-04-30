@@ -38,6 +38,9 @@ user_service = UserService()
 chart_plugin = ChartPlugin()
 thread: ChatHistoryAgentThread = ChatHistoryAgentThread()
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+    
 #==== front page：load frontend chat page ====
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")

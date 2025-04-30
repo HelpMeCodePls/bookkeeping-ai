@@ -1,8 +1,7 @@
-
 # 💼 Spendora – AI-Powered Bookkeeping Assistant  
 *A full-stack project for the Microsoft AI Agent Hackathon*  
-🌐 Live Site: [https://spendoraai.onrender.com](https://spendoraai.onrender.com)
-
+🌐 Live Site: [https://spendoraai.onrender.com](https://spendoraai.onrender.com)  
+📦 Backup Site: [https://spendoraai.vercel.app/](https://spendoraai.vercel.app/)
 ---
 
 ## 📘 Project Overview
@@ -11,7 +10,10 @@
 
 Built for the **Microsoft AI Agent Hackathon**, this project demonstrates the potential of multi-agent AI systems in automating daily tasks, enabling financial transparency, and fostering smarter decision-making.
 
+![login_img](https://github.com/user-attachments/assets/5682fe5e-9a9b-4c88-a3eb-d6391a9401ff)
+
 ---
+
 
 ## 🎯 Why Spendora?
 
@@ -130,20 +132,23 @@ cd spendora
 ### 2. Set Up the Frontend
 
 ```bash
-cd frontend
 npm install
 npm run dev
 # Opens at http://localhost:5173
 ```
+Rename the .env.example file to .env, so the front end connects to the local backend.
+
+Also Rename the API_BASE variable under src\api\aiHandler.js to your local host port
 
 ### 3. Set Up the Backend
 
 ```bash
-cd backend
 pip install -r requirements.txt
 python app.py
 # Runs at http://localhost:5000
 ```
+
+Configure the .env file under backend folder and replace the credentials
 
 > 💡 Make sure your MongoDB URI is configured in a `.env` file in the backend folder as `MONGO_URI`.  
 > 💡 You will also need to include the following keys in your `.env` file in the backend folder to enable full backend functionality:
@@ -153,24 +158,33 @@ python app.py
 > - `AZURE_OPENAI_ENDPOINT` – Endpoint URL for your Azure OpenAI service  
 > - `SPEECH_KEY` – Azure Speech-to-Text API key  
 > - `SERVICE_REGION` – Azure region for the speech service
+
 ---
 
 ## 📂 Project Structure
 
 ```
-├── frontend/                  # React application
+├── public/   
+├── src/                  # React application
 │   ├── components/            # UI Components
 │   ├── pages/                 # Views and routes
+│   ├── layouts/                 
 │   ├── services/              # API service functions
+│   ├── api/                   # API service functions
+│   ├── handlers/              # API service functions
+│   ├── hooks/
+│   ├── store/
+│   ├── utuils/              
 │   └── assets/                # Icons, logos, etc.
 │
+├── frontend_build/
+│
 ├── backend/                   # Flask backend
-│   ├── app.py                 # Flask app with API routes
 │   ├── functions.py           # Business logic and database services
 │   ├── Agents/                # AI agents powered by Semantic Kernel
 │   └── datatypes.py           # Enums and Pydantic models
 │   └── .env                   # Environment configuration
-│
+├── app.py                     # Flask app with API routes
 ├── .env                       # Environment configuration
 ├── requirements.txt           # Backend dependencies
 └── README.md                  # Project documentation
