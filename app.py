@@ -43,24 +43,15 @@ user_service = UserService()
 chart_plugin = ChartPlugin()
 thread: ChatHistoryAgentThread = ChatHistoryAgentThread()
 
-# ==== front page：load frontend chat page ====
-# @app.route("/", defaults={"path": ""})
-# @app.route("/<path:path>")
-# def serve_frontend(path):
-#     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-#         return send_from_directory(app.static_folder, path)
-#     else:
-#         return send_from_directory(app.static_folder, "index.html")
-
+==== front page：load frontend chat page ====
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_frontend(path):
-    full_path = os.path.join(app.static_folder, path)
-    if path != "" and os.path.exists(full_path) and not os.path.isdir(full_path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
     else:
-        # 前端路径（如 /chatbot、/dashboard）都返回 index.html 给 React 处理
         return send_from_directory(app.static_folder, "index.html")
+
 
 # ==== health check ====
 @app.route("/ping")
