@@ -12,14 +12,48 @@ import AlertsPage from "./pages/AlertsPage";
 import AnalysisPage from "./pages/AnalysisPage";
 import BudgetPage from "./pages/BudgetPage";
 import ChatbotPage from "./pages/ChatbotPage";
+import { useEffect, useState } from "react";
+import { api } from "./api/client";
+import { useNavigate } from 'react-router-dom';
+
 
 export default function App() {
   const token = useAuthStore((s) => s.token);
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
-  if (!token) return <LoginPage />;
+  useEffect(() => {
+    const storedToken = localStorage.getItem("jwt");
+    if (!token && storedToken) {
+      api.get("/auth/profile", { params: { token: storedToken } })
+        .then((res) => {
+          setAuth({ token: storedToken, user: res.data });
+        })
+        .catch(() => {
+          localStorage.removeItem("jwt");
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/'); // 或 navigate('/login')
+    }
+  }, [token]);
+  
+  if (isLoading) return <div>Loading...</div>; 
 
   return (
-    <Routes>
+  <Routes>
+    <Route path="/login" element={<LoginPage />} />
+    
+    {token && (
       <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/records" element={<RecordList />} />
@@ -31,11 +65,11 @@ export default function App() {
         <Route path="/analysis" element={<AnalysisPage />} />
         <Route path="/budget" element={<BudgetPage />} />
         <Route path="/chatbot" element={<ChatbotPage />} />
-        {/* 404 页面 */}
-        <Route path="/404" element={<div>404 Not Found</div>} />
-        {/* 重定向到 Dashboard */}
-        <Route path="*" element={<Navigate to="/chatbot" replace />} />
       </Route>
-    </Routes>
+    )}
+
+    <Route path="*" element={<Navigate to={token ? "/dashboard" : "/login"} replace />} />
+  </Routes>
+
   );
 }

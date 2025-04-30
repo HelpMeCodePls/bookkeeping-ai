@@ -848,3 +848,23 @@ def login():
         traceback.print_exc()
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
     
+
+@app.route("/auth/profile", methods=["GET"])
+def get_profile():
+    token = request.args.get("token")
+    if not token or not token.startswith("stub-jwt-"):
+        return jsonify({"error": "Unauthorized"}), 401
+
+    user_id = token.replace("stub-jwt-", "")
+    users = user_service.get_all_users()
+    user = next((u for u in users if u.get("id") == user_id), None)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify({
+        "id": user["id"],
+        "name": user["name"],
+        "email": user["email"],
+        "avatar": user.get("avatar", "👤")
+    }), 200
