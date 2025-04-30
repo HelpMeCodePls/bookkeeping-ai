@@ -1,9 +1,9 @@
-# 核心依赖
+# core dependency
 flask
 flask-cors
 gunicorn
 
-# MongoDB 数据库
+# MongoDB 
 pymongo
 
 # AI & Semantic Kernel
@@ -15,26 +15,26 @@ azure-cognitiveservices-speech
 # OpenAI API
 openai
 
-# 数据处理
+# data handling
 pandas
 
-# 环境变量支持
+# env arguments
 python-dotenv
 
-# 类型支持
+# types
 pydantic
 typing-extensions
 
-# 异步支持
+# async support
 aiohttp
 
-# 文本处理（OCR后期也会需要）
+# text handling
 fuzzywuzzy
 python-Levenshtein
 
-# 其他辅助库
+# other utils
 nest-asyncio
 jinja2
 
-# 渲染 JSON / 安全
+# JSON/safety
 defusedxml
