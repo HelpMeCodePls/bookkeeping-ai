@@ -10,7 +10,6 @@ from backend.datatypes import *
 from bson import ObjectId  # add by antonio: 🛠 for ObjectId support
 from typing import Optional # add by antonio: 🛠 for Optional type
 import os
-import cv2
 
 def similar_match(entry, reference_names, threshold=80):
     match, score = process.extractOne(entry, reference_names)
