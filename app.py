@@ -148,6 +148,7 @@ def voice_to_text():
         speech_key = os.getenv("SPEECH_KEY")
         service_region = os.getenv("SERVICE_REGION")
         speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+        speech_config.speech_recognition_language = "en-US"  # Set the language to English
         data = request.get_json()
         audio_base64 = data.get('audio')
         mime_type = data.get('mime')  # example: 'audio/webm'
