@@ -131,7 +131,6 @@ cd spendora
 ### 2. Set Up the Frontend
 
 ```bash
-cd frontend
 npm install
 npm run dev
 # Opens at http://localhost:5173
@@ -158,6 +157,12 @@ Configure the .env file under backend folder and replace the credentials
 > - `AZURE_OPENAI_ENDPOINT` – Endpoint URL for your Azure OpenAI service  
 > - `SPEECH_KEY` – Azure Speech-to-Text API key  
 > - `SERVICE_REGION` – Azure region for the speech service
+>
+> 💡 In addition to the backend .env, you will also need a .env file in the root directory (for the frontend) with the following key:
+>
+>VITE_API_BASE – Base URL for the backend API
+>    Example:
+>    VITE_API_BASE="https://spendoraai.onrender.com"
 ---
 
 ## 📂 Project Structure
