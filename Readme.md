@@ -18,12 +18,17 @@ Built for the **Microsoft AI Agent Hackathon**, this project demonstrates the po
 Our AI agent empowers users to gain deeper insights into their spending patterns—whether in their personal lives or at work. With intelligent budgeting, automated record generation, and real-time collaboration, Spendora enables confident and informed financial management.
 
 ---
+## 💡 Use Case Example:
+
+Imagine you're planning a trip with friends. One of you sets up a ledger named "China Trip", adds others as collaborators, and everyone contributes their expenses in real-time.
+With AI-assistance and a shared dashboard, Spendora helps keep everyone on the same page—literally.
+
+---
 
 ## 🖥️ Core Features
 
-### 🔐 Authentication & User Profiles
-- Login using email (token-based simulation).
-- View and manage user profiles.
+### 🔐 Authentication
+- Simulated login system: Users can choose from four pre-defined demo accounts to explore the app.
 - Retrieve user details and search users by name.
 
 ### 📁 Ledger Management
@@ -61,7 +66,7 @@ Our AI agent empowers users to gain deeper insights into their spending patterns
 - Transcribed input is used to interact with the AI agent.
 
 ### 🔔 Notification System
-- View all past and unread alerts.
+- View all past and unread alerts
 - Automatically receive alerts for new records or ledger activity.
 - Mark notifications as read.
 
