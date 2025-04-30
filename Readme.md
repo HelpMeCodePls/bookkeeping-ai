@@ -14,6 +14,7 @@ Built for the **Microsoft AI Agent Hackathon**, this project demonstrates the po
 
 ---
 
+
 ## 🎯 Why Spendora?
 
 Our AI agent empowers users to gain deeper insights into their spending patterns—whether in their personal lives or at work. With intelligent budgeting, automated record generation, and real-time collaboration, Spendora enables confident and informed financial management.
