@@ -1,41 +1,41 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 // import axios from 'axios'
 import { fetchCategories } from "../services/categoryService";
 import { api } from "../api/client";
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Check, ChevronDown, ChevronUp } from 'lucide-react'
-import { useLedger } from '../store/ledger'
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { useLedger } from "../store/ledger";
 
-export default function FilterDrawer({ 
-  open, 
-  onClose, 
-  filters, 
+export default function FilterDrawer({
+  open,
+  onClose,
+  filters,
   setFilters,
-  categories: propCategories 
+  categories: propCategories,
 }) {
-  // 使用传入的 categories 或从 API 获取
   const { data: fetchedCategories = [] } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ["categories"],
     // queryFn: () => axios.get('/categories').then(r=>r.data),
     queryFn: fetchCategories,
-    enabled: !propCategories // 如果没有传入 categories 才获取
+    enabled: !propCategories,
   });
-  
+
   const { currentId: ledgerId } = useLedger();
 
-   const { data: collaborators = [] } = useQuery({
-       queryKey: ['collaborators', ledgerId],
-      //  queryFn: () => axios.get(`/ledgers/${ledgerId}/collaborators`).then(r => r.data),
-      queryFn: () => api.get(`/ledgers/${ledgerId}/collaborators`).then((r) => r.data), 
-      enabled: open && !!ledgerId
-     });
+  const { data: collaborators = [] } = useQuery({
+    queryKey: ["collaborators", ledgerId],
+    //  queryFn: () => axios.get(`/ledgers/${ledgerId}/collaborators`).then(r => r.data),
+    queryFn: () =>
+      api.get(`/ledgers/${ledgerId}/collaborators`).then((r) => r.data),
+    enabled: open && !!ledgerId,
+  });
 
   const cats = propCategories || fetchedCategories;
-  const [expandedSection, setExpandedSection] = useState('categories');
-  
+  const [expandedSection, setExpandedSection] = useState("categories");
+
   const toggleCat = (key) => {
-    setFilters(prev => {
+    setFilters((prev) => {
       const set = new Set(prev.categories);
       set.has(key) ? set.delete(key) : set.add(key);
       return { ...prev, categories: Array.from(set) };
@@ -43,29 +43,29 @@ export default function FilterDrawer({
   };
 
   const toggleAllCategories = (selectAll) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      categories: selectAll ? cats.map(c => c.key) : []
+      categories: selectAll ? cats.map((c) => c.key) : [],
     }));
   };
 
   const toggleSection = (section) => {
-    setExpandedSection(prev => prev === section ? null : section);
+    setExpandedSection((prev) => (prev === section ? null : section));
   };
 
   return (
     <AnimatePresence>
       {open && (
         <motion.aside
-          initial={{ x: '100%' }}
+          initial={{ x: "100%" }}
           animate={{ x: 0 }}
-          exit={{ x: '100%' }}
-          transition={{ type: 'tween', duration: 0.25 }}
+          exit={{ x: "100%" }}
+          transition={{ type: "tween", duration: 0.25 }}
           className="fixed top-0 right-0 w-80 h-full bg-card dark:bg-gray-800 border-l flex flex-col z-50 shadow-xl"
         >
           <header className="p-4 flex justify-between items-center border-b dark:border-gray-700">
             <h3 className="font-semibold text-lg">Filters</h3>
-            <button 
+            <button
               onClick={onClose}
               className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
             >
@@ -78,7 +78,7 @@ export default function FilterDrawer({
             <div className="border-b dark:border-gray-700">
               <button
                 className="w-full p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700"
-                onClick={() => toggleSection('categories')}
+                onClick={() => toggleSection("categories")}
               >
                 <div className="flex items-center">
                   <span className="font-medium">Categories</span>
@@ -88,10 +88,14 @@ export default function FilterDrawer({
                     </span>
                   )}
                 </div>
-                {expandedSection === 'categories' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                {expandedSection === "categories" ? (
+                  <ChevronUp size={18} />
+                ) : (
+                  <ChevronDown size={18} />
+                )}
               </button>
-              
-              {expandedSection === 'categories' && (
+
+              {expandedSection === "categories" && (
                 <div className="px-4 pb-4 space-y-3">
                   <div className="flex justify-between mb-2">
                     <button
@@ -107,16 +111,18 @@ export default function FilterDrawer({
                       Clear
                     </button>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-2">
-                    {cats.map(c => (
+                    {cats.map((c) => (
                       <button
                         key={c.key}
                         onClick={() => toggleCat(c.key)}
                         className={`flex items-center p-2 rounded-md border text-sm transition-colors
-                          ${filters.categories.includes(c.key)
-                            ? 'bg-brand/10 border-brand text-brand'
-                            : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                          ${
+                            filters.categories.includes(c.key)
+                              ? "bg-brand/10 border-brand text-brand"
+                              : "border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                          }`}
                       >
                         {filters.categories.includes(c.key) && (
                           <Check size={16} className="mr-1" />
@@ -129,58 +135,64 @@ export default function FilterDrawer({
                 </div>
               )}
             </div>
-{/* Collaborators Section */}
-<div className="border-b dark:border-gray-700">
-  <button
-    className="w-full p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700"
-    onClick={() => toggleSection('collaborators')}
-  >
-    <span className="font-medium">Collaborators</span>
-    {expandedSection === 'collaborators' ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-  </button>
-  
-  {expandedSection === 'collaborators' && (
-    <div className="px-4 pb-4 space-y-2">
-      <div className="grid grid-cols-2 gap-2">
-        {collaborators.map(c => (
-          <button
-            key={c.userId}
-            onClick={() => setFilters(prev => ({
-              ...prev,
-              split: prev.split === c.userId ? '' : c.userId  
-            }))}
-            className={`flex items-center p-2 rounded-md border text-sm transition-colors
-              ${filters.collaborator === c.userId
-                ? 'bg-brand/10 border-brand text-brand'
-                : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-          >
-            <span className="mr-2">{c.avatar}</span>
-            <span className="truncate">{c.name || c.email}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  )}
-</div>
+            {/* Collaborators Section */}
+            <div className="border-b dark:border-gray-700">
+              <button
+                className="w-full p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700"
+                onClick={() => toggleSection("collaborators")}
+              >
+                <span className="font-medium">Collaborators</span>
+                {expandedSection === "collaborators" ? (
+                  <ChevronUp size={18} />
+                ) : (
+                  <ChevronDown size={18} />
+                )}
+              </button>
 
+              {expandedSection === "collaborators" && (
+                <div className="px-4 pb-4 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    {collaborators.map((c) => (
+                      <button
+                        key={c.userId}
+                        onClick={() =>
+                          setFilters((prev) => ({
+                            ...prev,
+                            split: prev.split === c.userId ? "" : c.userId,
+                          }))
+                        }
+                        className={`flex items-center p-2 rounded-md border text-sm transition-colors
+              ${
+                filters.collaborator === c.userId
+                  ? "bg-brand/10 border-brand text-brand"
+                  : "border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+              }`}
+                      >
+                        <span className="mr-2">{c.avatar}</span>
+                        <span className="truncate">{c.name || c.email}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <footer className="p-4 border-t dark:border-gray-700 flex justify-between">
-            <button 
+            <button
               className="btn-ghost"
-              onClick={() => setFilters({ categories: [], split: '', collaborator: '' })}
+              onClick={() =>
+                setFilters({ categories: [], split: "", collaborator: "" })
+              }
             >
               Reset All
             </button>
-            <button 
-              className="btn-primary"
-              onClick={onClose}
-            >
+            <button className="btn-primary" onClick={onClose}>
               Apply Filters
             </button>
           </footer>
         </motion.aside>
       )}
     </AnimatePresence>
-  )
+  );
 }

@@ -1,9 +1,6 @@
-// 当前采用轮询，注释掉了 WebSocket 的模拟
+import { setupWorker } from "msw/browser";
+import { handlers } from "./handlers";
 
-import { setupWorker } from 'msw/browser';
-import { handlers } from './handlers';
-
-// // 创建自定义事件总线
 // const eventBus = {
 //     listeners: new Map(),
 //     emit(event, data) {
@@ -17,10 +14,9 @@ import { handlers } from './handlers';
 //       this.listeners.get(event).push(callback)
 //     }
 //   }
-  
-const worker = setupWorker(...handlers)
 
-// // 创建全局事件系统
+const worker = setupWorker(...handlers);
+
 // const eventSystem = {
 //     listeners: new Map(),
 //     emit(event, data) {
@@ -35,7 +31,6 @@ const worker = setupWorker(...handlers)
 //     }
 //   }
 
-// // 导出给 handlers 使用
 // export const mockSocket = {
 //   emit: (event, data) => {
 //     console.log(`[MOCK] Emitting ${event}`, data)
@@ -43,16 +38,13 @@ const worker = setupWorker(...handlers)
 //   },
 //   on: (event, handler) => eventSystem.on(event, handler)
 // }
-  
 
-// DEV 环境启动，并让未匹配的请求直接透传
 if (import.meta.env.DEV) {
   worker.start({
-    onUnhandledRequest: 'bypass',
+    onUnhandledRequest: "bypass",
   });
 }
 
-// // 模拟 WebSocket 行为
 // export const mockWebSocket = {
 //     listeners: new Map(),
 //     connected: true,
@@ -65,8 +57,7 @@ if (import.meta.env.DEV) {
 //       console.log(`[MOCK WS] Emitting ${event}`, data)
 //       const handlers = this.listeners.get(event) || []
 //       handlers.forEach(handler => handler(data))
-      
-//       // 同时触发全局事件
+
 //       eventSystem.emit(event, data)
 //     },
 //     on(event, handler) {
@@ -80,7 +71,7 @@ if (import.meta.env.DEV) {
 //       this.connected = true
 //     }
 //   }
-// // 初始化测试监听器
+
 // mockWebSocket.on('test', (data) => {
 //     console.log('[MOCK] Received test:', data)
 //     mockWebSocket.emit('notification', {
@@ -90,11 +81,10 @@ if (import.meta.env.DEV) {
 //       time: new Date().toISOString()
 //     })
 //   })
-  
-// // 启动 worker
+
 // worker.start({
 //     onUnhandledRequest: 'bypass',
 //     quiet: true
 //   })
-  
-  export { worker } 
+
+export { worker };

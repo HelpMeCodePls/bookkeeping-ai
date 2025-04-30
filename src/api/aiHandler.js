@@ -15,9 +15,9 @@ export async function sendMessageToAI(message, userId) {
     });
 
     const data = await res.json();
-    return data.response || "[无响应]";
+    return data.response || "[no response]";
   } catch (error) {
-    return `[请求失败]：${error.message}`;
+    return `[failed request]：${error.message}`;
   }
 }
 
@@ -34,7 +34,7 @@ export const sendImageToOCR = async (base64Image) => {
       }),
     });
 
-    // 检查响应内容类型
+    // check if the response is JSON
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
       const text = await response.text();
@@ -57,12 +57,12 @@ export const sendImageToOCR = async (base64Image) => {
   }
 };
 
-/** 把录音 Blob 发送给 /voice，拿到识别文本 */
+/** Send audio blob to voice recognition API */
 export async function sendAudioToVoice(blob) {
-  // 把 blob -> base64，避免 multipart
+  // blob -> base64，avoid multipart
   const base64Audio = await new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(",")[1]); // 纯 base64
+    reader.onloadend = () => resolve(reader.result.split(",")[1]); // base64
     reader.readAsDataURL(blob);
   });
 
@@ -74,9 +74,9 @@ export async function sendAudioToVoice(blob) {
     });
 
     const { text } = await res.json();          // {text:"..."}
-    return text || "[未识别]";
+    return text || "[Invalid response]";
   } catch (err) {
     console.error("Voice API error", err);
-    return "[语音识别失败]";
+    return "[Failed request]"; 
   }
 }

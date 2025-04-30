@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 // import axios from "axios";
 import {
-    fetchRecords,
-    deleteRecord as apiDeleteRecord,
-  } from "../handlers/recordHandlers";
-  import { fetchCategories } from "../services/categoryService";
-  import { fetchUsers } from "../services/userService";
+  fetchRecords,
+  deleteRecord as apiDeleteRecord,
+} from "../handlers/recordHandlers";
+import { fetchCategories } from "../services/categoryService";
+import { fetchUsers } from "../services/userService";
 import { useState, useMemo, Fragment } from "react";
 import EditRecordModal from "../components/EditRecordModal";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -27,11 +27,11 @@ export default function RecordList() {
   const [filters, setFilters] = useState({
     categories: [],
     split: "",
-    collaborator: ""
+    collaborator: "",
   });
 
-  console.log("currentId", currentId);
-  // 添加用户查询
+  // console.log("currentId", currentId);
+
   const { data: users = [] } = useQuery({
     queryKey: ["users", token],
     // queryFn: () =>
@@ -42,7 +42,6 @@ export default function RecordList() {
 
   const findUser = (id) => users.find((u) => u.id === id) || {};
 
-  // // 获取记录数据（带筛选）
   // const { data: records = [] } = useQuery({
   //   queryKey: ["records", keyword, currentId, month, filters, token],
   //   queryFn: () =>
@@ -61,23 +60,22 @@ export default function RecordList() {
   //       })
   //       .then((r) => r.data),
 
-   const { data: records = [] } = useQuery({
-       queryKey: ["records", keyword, currentId, month, filters, token],
-        queryFn: () =>
-          fetchRecords({
-            ledgerId: currentId,
-            // month,
-            month: month || undefined,           // ← 仅在明确选择时带
-            categories: filters.categories,
-            split: filters.split || undefined,   
-            collaborator: filters.collaborator || undefined,
-            token: token,
-          }),
+  const { data: records = [] } = useQuery({
+    queryKey: ["records", keyword, currentId, month, filters, token],
+    queryFn: () =>
+      fetchRecords({
+        ledgerId: currentId,
+        // month,
+        month: month || undefined,
+        categories: filters.categories,
+        split: filters.split || undefined,
+        collaborator: filters.collaborator || undefined,
+        token: token,
+      }),
 
     enabled: !!currentId && !!token,
   });
 
-  // 获取分类数据
   const { data: categories = [] } = useQuery({
     queryKey: ["categories", token],
     // queryFn: () =>
@@ -86,19 +84,17 @@ export default function RecordList() {
     enabled: !!token,
   });
 
-  // 按日期分组记录
   const grouped = useMemo(
     () =>
       records.reduce((acc, r) => {
         // (acc[r.date] = acc[r.date] || []).push(r);
-        const day = (r.date || "").slice(0, 10);  // "2025-01-10"
+        const day = (r.date || "").slice(0, 10); // "2025-01-10"
         (acc[day] = acc[day] || []).push(r);
         return acc;
       }, {}),
     [records]
   );
 
-  // 当前选中的分类名称（用于显示筛选状态）
   const selectedCategoryNames = useMemo(() => {
     if (!filters.categories.length) return [];
     return filters.categories.map(
@@ -123,16 +119,15 @@ export default function RecordList() {
 
   return (
     <motion.div
-      className="p-6" // 根据页面需要调整
+      className="p-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 12 }} // 可选：如果有路由切换，可以加 exit
+      exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.25 }}
     >
       <div className="p-6">
         <h2 className="text-xl font-bold mb-4">Records</h2>
 
-        {/* 搜索 + 筛选 + 新增按钮 */}
         <div className="flex justify-between items-center mb-4">
           <input
             className="border px-2 py-1 w-56 rounded"
@@ -141,7 +136,6 @@ export default function RecordList() {
             onChange={(e) => setKeyword(e.target.value)}
           />
           <div className="flex items-center gap-3">
-            {/* 筛选状态提示 */}
             {selectedCategoryNames.length > 0 && (
               <div className="text-sm text-gray-600">
                 Filtered by: {selectedCategoryNames.join(", ")}
@@ -173,7 +167,6 @@ export default function RecordList() {
           </div>
         </div>
 
-        {/* 日期分组记录 */}
         {Object.entries(grouped)
           .sort(([d1], [d2]) => d2.localeCompare(d1))
           .map(([date, list]) => {
@@ -183,7 +176,6 @@ export default function RecordList() {
             );
             return (
               <div key={date} className="bg-white shadow rounded-xl p-4 mb-6">
-                {/* 日期 + 总支出 */}
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">
                     {dayjs(date).format("MMM DD, YYYY")}
@@ -194,7 +186,6 @@ export default function RecordList() {
                   </p>
                 </div>
 
-                {/* 记录列表 */}
                 <div className="flex flex-col gap-3">
                   {list.map((r) => {
                     const category = categories.find(
@@ -205,12 +196,10 @@ export default function RecordList() {
                         key={r.id}
                         className="flex items-center border p-3 rounded-lg hover:bg-gray-50 transition-colors"
                       >
-                        {/* 分类图标 */}
                         <div className="mr-3 text-2xl">
                           {category?.icon || "📁"}
                         </div>
 
-                        {/* 描述和分类 */}
                         <div className="flex-1">
                           <div className="font-medium">
                             {r.description || "(No Description)"}
@@ -225,7 +214,6 @@ export default function RecordList() {
                             )}
                           </div>
 
-                          {/* 在 RecordList 组件中修改 split 显示 */}
                           {r.split?.length > 0 && (
                             <div className="mt-2 flex flex-wrap gap-1">
                               {r.split.map((s, i) => {
@@ -246,7 +234,6 @@ export default function RecordList() {
                           )}
                         </div>
 
-                        {/* 金额和状态 */}
                         <div className="flex flex-col items-end mr-4 min-w-[100px]">
                           <div className="text-blue-600 font-bold text-lg">
                             ${Number(r.amount || 0).toFixed(2)}
@@ -261,7 +248,6 @@ export default function RecordList() {
                           )}
                         </div>
 
-                        {/* 操作按钮 */}
                         <div className="flex gap-3">
                           <button
                             onClick={() => setEditRec(r)}
@@ -312,18 +298,16 @@ export default function RecordList() {
             );
           })}
 
-        {/* 编辑弹窗 */}
         <EditRecordModal
           open={!!editRec}
           record={{
             ...editRec,
-            ledger_id: currentId, // 确保传递 ledger_id
+            ledger_id: currentId,
           }}
           isNew={editRec && !editRec.id}
           onClose={() => setEditRec(null)}
         />
 
-        {/* 删除确认弹窗 */}
         <ConfirmDialog
           open={!!deleteId}
           msg="Are you sure to delete this record?"
@@ -331,7 +315,6 @@ export default function RecordList() {
           onConfirm={() => deleteRec(deleteId)}
         />
 
-        {/* 筛选抽屉 */}
         <FilterDrawer
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}

@@ -1,62 +1,64 @@
-import { useState, useRef, useEffect } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useRef, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 // import axios from 'axios'
 import { fetchCategories, addCategory } from "../services/categoryService";
-import { motion, AnimatePresence } from 'framer-motion'
-import { Plus } from 'lucide-react'
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus } from "lucide-react";
 
 export default function CategoryPopover({ value, onChange }) {
-  const qc = useQueryClient()
+  const qc = useQueryClient();
   const { data: cats = [] } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ["categories"],
     // queryFn: () => axios.get('/categories').then((r) => r.data),
     queryFn: fetchCategories,
-  })
+  });
 
-  const [open, setOpen] = useState(false)
-  const [adding, setAdding] = useState(false)
-  const [newLabel, setNewLabel] = useState('')
-  const [newIcon, setNewIcon] = useState('')
-  const buttonRef = useRef(null)
-  const popoverRef = useRef(null)
-  const [position, setPosition] = useState({ top: 0, left: 0, direction: 'bottom' })
+  const [open, setOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [newLabel, setNewLabel] = useState("");
+  const [newIcon, setNewIcon] = useState("");
+  const buttonRef = useRef(null);
+  const popoverRef = useRef(null);
+  const [position, setPosition] = useState({
+    top: 0,
+    left: 0,
+    direction: "bottom",
+  });
 
   const addMut = useMutation({
     // mutationFn: () => axios.post('/categories', { label: newLabel, icon: newIcon || '🗂️' }),
     mutationFn: () => addCategory({ label: newLabel, icon: newIcon || "🗂️" }),
     onSuccess: () => {
-      qc.invalidateQueries(['categories']);
-      setAdding(false);   // 只关闭新增小表单
-      setNewLabel('');
-      setNewIcon('');
-      // ❌ 不要 setOpen(false)
+      qc.invalidateQueries(["categories"]);
+      setAdding(false);
+      setNewLabel("");
+      setNewIcon("");
     },
   });
-  
 
   useEffect(() => {
     if (open && buttonRef.current) {
-      const buttonRect = buttonRef.current.getBoundingClientRect()
-      const spaceBelow = window.innerHeight - buttonRect.bottom
-      const spaceAbove = buttonRect.top
-      
-      // 默认显示在下方，如果下方空间不足且上方空间更大，则显示在上方
-      const direction = spaceBelow < 300 && spaceAbove > spaceBelow ? 'top' : 'bottom'
-      
-      // 计算左侧位置，确保不超出视口
-      let left = buttonRect.left
-      const popoverWidth = 288 // 72 * 4rem
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
+
+      const direction =
+        spaceBelow < 300 && spaceAbove > spaceBelow ? "top" : "bottom";
+
+      let left = buttonRect.left;
+      const popoverWidth = 288; // 72 * 4rem
       if (left + popoverWidth > window.innerWidth) {
-        left = window.innerWidth - popoverWidth - 10
+        left = window.innerWidth - popoverWidth - 10;
       }
-      
+
       setPosition({
-        top: direction === 'bottom' ? buttonRect.bottom + 8 : buttonRect.top - 8,
+        top:
+          direction === "bottom" ? buttonRect.bottom + 8 : buttonRect.top - 8,
         left,
-        direction
-      })
+        direction,
+      });
     }
-  }, [open, adding]) // 当添加状态改变时也重新计算位置
+  }, [open, adding]);
 
   return (
     <div className="relative">
@@ -64,15 +66,14 @@ export default function CategoryPopover({ value, onChange }) {
         ref={buttonRef}
         type="button"
         className="input w-full flex items-center justify-between"
-        onClick={() => setOpen(o => !o)}
+        onClick={() => setOpen((o) => !o)}
       >
-        {value || 'Select category…'}
+        {value || "Select category…"}
       </button>
-  
+
       <AnimatePresence>
         {open && (
           <>
-            {/* 背景遮罩 */}
             <motion.div
               className="fixed inset-0 bg-black/10 z-20"
               onClick={() => setOpen(false)}
@@ -80,27 +81,37 @@ export default function CategoryPopover({ value, onChange }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             />
-  
-            {/* 弹窗内容 */}
+
             <motion.div
               ref={popoverRef}
-              initial={{ opacity: 0, scale: 0.95, y: position.direction === 'bottom' ? 10 : -10 }}
+              initial={{
+                opacity: 0,
+                scale: 0.95,
+                y: position.direction === "bottom" ? 10 : -10,
+              }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: position.direction === 'bottom' ? 10 : -10 }}
+              exit={{
+                opacity: 0,
+                scale: 0.95,
+                y: position.direction === "bottom" ? 10 : -10,
+              }}
               className="fixed z-30 bg-card dark:bg-gray-800 rounded-xl shadow-card w-72 overflow-y-auto"
               style={{
-                top: position.direction === 'bottom' ? position.top : 'auto',
-                bottom: position.direction === 'top' ? window.innerHeight - position.top : 'auto',
+                top: position.direction === "bottom" ? position.top : "auto",
+                bottom:
+                  position.direction === "top"
+                    ? window.innerHeight - position.top
+                    : "auto",
                 left: position.left,
-                maxHeight: position.direction === 'bottom' 
-                  ? `calc(100vh - ${position.top + 20}px)`
-                  : `calc(${position.top - 20}px)`
+                maxHeight:
+                  position.direction === "bottom"
+                    ? `calc(100vh - ${position.top + 20}px)`
+                    : `calc(${position.top - 20}px)`,
               }}
             >
               <div className="p-4 flex flex-col gap-4">
-                {/* 分类列表 */}
                 <div className="grid grid-cols-3 gap-2">
-                    {(cats || []).map(c => (
+                  {(cats || []).map((c) => (
                     <button
                       key={c.key}
                       type="button"
@@ -110,15 +121,14 @@ export default function CategoryPopover({ value, onChange }) {
                         setOpen(false);
                       }}
                       title={c.label}
-                      style={{ minHeight: '48px' }}
+                      style={{ minHeight: "48px" }}
                     >
                       <div className="text-xl">{c.icon}</div>
                       <div className="truncate">{c.label}</div>
                     </button>
                   ))}
                 </div>
-  
-                {/* + Add New or 新增表单 */}
+
                 {!adding ? (
                   <button
                     type="button"
@@ -142,10 +152,20 @@ export default function CategoryPopover({ value, onChange }) {
                       value={newIcon}
                       onChange={(e) => setNewIcon(e.target.value)}
                     />
-  
-                    {/* Emoji 快捷选择 */}
+
                     <div className="grid grid-cols-6 gap-1">
-                      {['🛒', '🎮', '🍔', '✈️', '🏠', '💼', '🎁', '📚', '🍻', '🎵'].map((emo) => (
+                      {[
+                        "🛒",
+                        "🎮",
+                        "🍔",
+                        "✈️",
+                        "🏠",
+                        "💼",
+                        "🎁",
+                        "📚",
+                        "🍻",
+                        "🎵",
+                      ].map((emo) => (
                         <button
                           key={emo}
                           type="button"
@@ -156,17 +176,21 @@ export default function CategoryPopover({ value, onChange }) {
                         </button>
                       ))}
                     </div>
-  
-                    <div className="flex justify-end gap-2">
-                      <button className="btn-ghost" onClick={() => setAdding(false)}>Cancel</button>
-                      <button
-  type="button"   // 🔥 加上这行，阻止它提交父表单
-  className="btn-primary"
-  onClick={() => addMut.mutate()}
->
-  Save
-</button>
 
+                    <div className="flex justify-end gap-2">
+                      <button
+                        className="btn-ghost"
+                        onClick={() => setAdding(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-primary"
+                        onClick={() => addMut.mutate()}
+                      >
+                        Save
+                      </button>
                     </div>
                   </div>
                 )}
@@ -176,5 +200,5 @@ export default function CategoryPopover({ value, onChange }) {
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }

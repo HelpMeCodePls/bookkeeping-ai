@@ -7,7 +7,7 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// 自动把 token 作为 query-param 带上
+// Add a request interceptor to include the token in the query parameters
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("jwt");
     if (token) {

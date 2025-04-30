@@ -1,7 +1,7 @@
 // src/pages/Dashboard.jsx
 import { useQuery } from "@tanstack/react-query";
 // import axios from "axios";
-import { api } from "../api/client"; 
+import { api } from "../api/client";
 import { fetchChartSummary } from "../services/chartService";
 import { motion } from "framer-motion";
 import { useLedger } from "../store/ledger";
@@ -10,15 +10,14 @@ import { useAuthStore } from "../store/auth";
 export default function Dashboard() {
   const { currentId: ledgerId, month: selectedMonth } = useLedger();
   const token = useAuthStore((s) => s.token);
-  // 使用 ledger 数据（含 budgets 和 spent）
+
   const { data: ledger } = useQuery({
     queryKey: ["ledgers", ledgerId],
     // queryFn: () => axios.get(`/ledgers/${ledgerId}`).then((r) => r.data),
-    queryFn: () => api.get(`/ledgers/${ledgerId}`).then((r) => r.data), 
+    queryFn: () => api.get(`/ledgers/${ledgerId}`).then((r) => r.data),
     enabled: !!ledgerId,
   });
 
-  // 获取所有记录用于分类支出计算
   // const { data: recordsResponse = [] } = useQuery({
   //   queryKey: ["records-dashboard", ledgerId, selectedMonth],
   //   queryFn: async () => {
@@ -26,7 +25,7 @@ export default function Dashboard() {
   //       const res = await axios.get(`/ledgers/${ledgerId}/records`, {
   //         params: { month: selectedMonth, token },
   //       });
-  //       // 处理可能的响应格式
+
   //       if (Array.isArray(res.data)) {
   //         return res.data;
   //       } else if (Array.isArray(res.data?.data)) {
@@ -43,39 +42,37 @@ export default function Dashboard() {
   //   enabled: !!ledgerId && !!token,
   // });
 
-    const { data: summary = { byCategory: {}, daily: [] } } = useQuery({
-        queryKey: ["charts-dashboard", ledgerId, selectedMonth],
-        queryFn: () =>
-          fetchChartSummary({ ledgerId, mode: "month", selectedDate: selectedMonth }),
-         enabled: !!ledgerId && !!token,
-       });
+  const { data: summary = { byCategory: {}, daily: [] } } = useQuery({
+    queryKey: ["charts-dashboard", ledgerId, selectedMonth],
+    queryFn: () =>
+      fetchChartSummary({
+        ledgerId,
+        mode: "month",
+        selectedDate: selectedMonth,
+      }),
+    enabled: !!ledgerId && !!token,
+  });
 
-  // 确保 records 是数组
   // const records = Array.isArray(recordsResponse) ? recordsResponse : [];
 
-  // 从 ledger 中获取预算和支出
   const currentMonthBudget =
     ledger?.budgets?.months?.[selectedMonth] ?? ledger?.budgets?.default ?? 0;
-  
-  // summary.daily 形如 [ { date: '2025-04-01', value: 123 }, … ]
-  const currentMonthSpent = summary.daily
-    .reduce((sum, [, v]) => sum + (Number(v) || 0), 0);
+
+  const currentMonthSpent = summary.daily.reduce(
+    (sum, [, v]) => sum + (Number(v) || 0),
+    0
+  );
 
   // console.log("currentMonthBudget", currentMonthBudget);
   // console.log("currentMonthSpent", currentMonthSpent);
 
   const rest = currentMonthBudget - currentMonthSpent;
 
-  // 计算分类支出
-  // const normalize = (str) => {
-  //   if (!str) return "";
-  //   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  // };
-
   const normalize = (s = "") =>
-      s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
-  
-  const categorySpending = Object.fromEntries(
+    s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
+
+  const categorySpending =
+    Object.fromEntries(
       Object.entries(summary.byCategory).map(([k, v]) => [normalize(k), v])
     ) || {};
 
@@ -102,9 +99,7 @@ export default function Dashboard() {
       animate={fadeUp.animate}
       transition={fadeUp.transition}
     >
-      {/* 顶部三栏卡片 */}
       <div className="grid grid-cols-3 gap-6">
-        {/* 总支出卡片 */}
         <motion.div
           className="bg-white shadow rounded-xl p-4"
           initial={fadeUp.initial}
@@ -117,7 +112,6 @@ export default function Dashboard() {
           </p>
         </motion.div>
 
-        {/* 剩余额度 */}
         <motion.div
           className="bg-white shadow rounded-xl p-4"
           initial={fadeUp.initial}
@@ -134,7 +128,6 @@ export default function Dashboard() {
           </p>
         </motion.div>
 
-        {/* 当月预算 */}
         <motion.div
           className="bg-white shadow rounded-xl p-4"
           initial={fadeUp.initial}
@@ -148,7 +141,6 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      {/* 总预算进度条 */}
       <motion.div
         className="bg-white shadow rounded-xl p-4"
         initial={fadeUp.initial}
@@ -178,7 +170,6 @@ export default function Dashboard() {
         )}
       </motion.div>
 
-      {/* 分类预算进度条 */}
       <motion.div
         className="bg-white shadow rounded-xl p-4 space-y-4"
         initial={fadeUp.initial}

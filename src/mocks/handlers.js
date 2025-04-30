@@ -1,6 +1,5 @@
 // src/mocks/handlers.js
 
-// 汇总所有功能模块的 handlers
 import { authHandlers } from './handlers/authHandlers';
 import { recordHandlers } from './handlers/recordHandlers';
 import { ledgerHandlers } from './handlers/ledgerHandlers';
@@ -12,7 +11,6 @@ import { chatbotHandlers } from './handlers/chatbotHandlers';
 import { chartsHandlers } from './handlers/chartsHandlers';
 import { userHandlers } from './handlers/userHandlers';
 
-// 导出一个总的 handlers 数组（供 browser.js 使用）
 export const handlers = [
   ...authHandlers,
   ...recordHandlers,
@@ -25,7 +23,7 @@ export const handlers = [
     ...chartsHandlers,
     ...userHandlers,
 ];
-// 注意：如果将来增加新模块，也在这里添加！
+
 
 
 // import { http, HttpResponse } from "msw";
@@ -34,10 +32,9 @@ export const handlers = [
 // // import { mockWebSocket } from "./browser"; // 引入 mockWebSocket
 
 
-// /* ===== demo 数据 ===== */
+
 // const demoLedgerId = "demoLedger";
 
-// /* ===== demo 数据 ===== */
 // const demoUserId = "user3";
 
 // let users = [
@@ -569,7 +566,7 @@ export const handlers = [
 //     },
 //   ];
 
-// // 更新 notes 数据
+
 // let notes = [
 //     {
 //       id: nanoid(),
@@ -611,13 +608,13 @@ export const handlers = [
 
 
 
-// /* ===== 辅助函数 ===== */
+
 // function calculateSpent(ledgerId) {
 //     const monthlySpent = {};
 //     records
 //       .filter(r => 
 //         r.ledger_id === ledgerId && 
-//         r.status === 'confirmed' // 确保只计算 confirmed 记录
+//         r.status === 'confirmed' 
 //       )
 //       .forEach(r => {
 //         const month = r.date.slice(0, 7); // YYYY-MM
@@ -626,19 +623,19 @@ export const handlers = [
 //     return monthlySpent;
 //   }
 
-// /* ===== handlers 开始 ===== */
+
 // export const handlers = [
 
-// // 一下是谷歌登录的 stub 代码，暂时不需要！
+
 //   /* ===== auth ===== */
 // //   http.post('/auth/google', async ({ request }) => {
-// //     const { id_token } = await request.json(); // 改成 id_token！！
+// //     const { id_token } = await request.json(); 
 
-// //     console.log('Google ID Token:', id_token); // 打印 id_token
+// //     console.log('Google ID Token:', id_token); 
 
-// //     const user = users[0]; // 使用第一个用户作为示例
-// //     // const { email } = await request.json()   // 假设前端按钮传不同 email
-// //     // const user = users.find(u => u.email === email) || users[0]
+// //     const user = users[0]; 
+// //     // const { email } = await request.json()  
+// //     // const user = users.find(u => u.email === email) 
 // //     return HttpResponse.json({
 // //         access_token: `stub-jwt-${user.id}`,  
 // //       user,
@@ -647,7 +644,7 @@ export const handlers = [
 
 
   
-//   // 保持原有登录接口不变
+
 //   http.post('/auth/login', async ({ request }) => {
 //     const { email } = await request.json()
 //     const user = users.find(u => u.email === email)
@@ -666,7 +663,7 @@ export const handlers = [
 //         name: user.name,
 //         email: user.email,
 //         avatar: user.avatar
-//         // 不返回敏感字段
+
 //       }
 //     })
 //   }),
@@ -699,7 +696,7 @@ export const handlers = [
 //   }),
 
 //   /* ===== records ===== */
-// // 在 handlers.js 中修改 GET /ledgers/:id/records 处理器
+
 // http.get('/ledgers/:id/records', ({ params, request }) => {
 //     const url = new URL(request.url);
 //     const month = url.searchParams.get('month');
@@ -721,7 +718,7 @@ export const handlers = [
 
 //   http.post("/ledgers/:id/records", async ({ params, request }) => {
 //     const body = await request.json();
-//     const currentUserId = body.user_id || demoUserId; // 使用当前用户 ID 或默认用户 ID
+//     const currentUserId = body.user_id || demoUserId;
 //     const newRec = { 
 //       ...body, 
 //       id: nanoid(), 
@@ -730,7 +727,7 @@ export const handlers = [
 //       updatedBy: currentUserId,
 //       createdAt: new Date().toISOString(),
 //       updatedAt: new Date().toISOString(),
-//           // 确保 split 金额正确
+
 //     split: (body.split || []).map(s => ({
 //         ...s,
 //         amount: Number(s.amount) || 0
@@ -739,17 +736,17 @@ export const handlers = [
 //     records.unshift(newRec); 
     
     
-//     // 更新相关账本的 spent 数据
+
 //     const ledger = ledgers.find(l => l._id === params.id);
 //     if (ledger) {
 //       const monthlySpent = calculateSpent(params.id);
 //       ledger.spent = monthlySpent;
 //     }
     
-//     // 添加新账单成功后，直接加通知
+
 // // notes.unshift({
 // //     id: nanoid(),
-// //     // user_id: demoUserId, [TODO 后期要改成通知所有有权限的人！]
+// //     // user_id: demoUserId,
 // //     // user_id: currentUserId,
 // //     type: 'record',
 // //     content: `New record "${newRec.description || 'Unnamed'}" added`,
@@ -768,7 +765,7 @@ export const handlers = [
 //       created_at: Date.now(),
 //       ledgerId: params.id,
 //       recordId: newRec.id,
-//       user_id: collaborator.userId  // 🔥 这里，通知是针对某个用户的
+//       user_id: collaborator.userId 
 //     });
 //   });
 
@@ -789,7 +786,7 @@ export const handlers = [
 //         : r
 //     );
     
-//     // 更新相关账本的 spent 数据
+
 //     const record = records.find(r => r.id === params.id);
 //     if (record) {
 //       const ledger = ledgers.find(l => l._id === record.ledger_id);
@@ -806,7 +803,7 @@ export const handlers = [
 //     const record = records.find(r => r.id === params.id);
 //     records = records.filter((r) => r.id !== params.id);
     
-//     // 更新相关账本的 spent 数据
+
 //     if (record) {
 //       const ledger = ledgers.find(l => l._id === record.ledger_id);
 //       if (ledger) {
@@ -828,7 +825,7 @@ export const handlers = [
 //     const ledger = ledgers.find(l => l._id === params.id);
 //     if (!ledger) return HttpResponse.error('Not found', { status: 404 });
     
-//     // 确保 spent 数据是最新的
+
 //     const monthlySpent = calculateSpent(params.id);
 //     ledger.spent = monthlySpent;
     
@@ -846,7 +843,7 @@ export const handlers = [
 //       return HttpResponse.error('Ledger not found', { status: 404 });
 //     }
   
-//     // 初始化 budgets 对象如果不存在
+
 //     ledger.budgets = ledger.budgets || {
 //       default: 0,
 //       months: {},
@@ -854,7 +851,7 @@ export const handlers = [
 //       categoryBudgets: {}
 //     };
     
-//     // 处理月预算
+
 //     if (!category) {
 //       if (setDefault) {
 //         ledger.budgets.default = Number(budget);
@@ -863,7 +860,7 @@ export const handlers = [
 //         ledger.budgets.months[month] = Number(budget);
 //       }
 //     }
-//     // 处理分类预算
+
 //     else {
 //       ledger.budgets.categoryBudgets = ledger.budgets.categoryBudgets || {};
 //       ledger.budgets.categoryBudgets[month] = ledger.budgets.categoryBudgets[month] || {};
@@ -923,7 +920,7 @@ export const handlers = [
 // //     return HttpResponse.json(newNote)
 // //   }),
   
-// //   // 标记通知已读
+
 // //   http.patch('/notifications/:id', ({ params }) => {
 // //     notes = notes.map(n => 
 // //       n.id === params.id ? { ...n, is_read: true } : n
@@ -931,7 +928,7 @@ export const handlers = [
 // //     return HttpResponse.json({ ok: true })
 // //   }),
 
-// // 获取所有通知，按时间倒序（最新在上）
+
 // http.get("/notifications", ({ request }) => {
 //     const url = new URL(request.url);
 //     const token = url.searchParams.get('token') || '';
@@ -948,7 +945,7 @@ export const handlers = [
 //   }),
   
   
-//   // 获取未读通知数量
+
 //   http.get("/notifications/unread_count", ({ request }) => {
 //     const url = new URL(request.url);
 //     const token = url.searchParams.get('token') || '';
@@ -963,16 +960,16 @@ export const handlers = [
 //   }),  
   
 
-//   // 新增一条通知
+
 //   http.post("/notifications", async ({ request }) => {
 //     const url = new URL(request.url);
 //     const token = url.searchParams.get('token');
-//     const myId = token?.replace('stub-jwt-', '') || demoUserId;  // 解析真实id！
+//     const myId = token?.replace('stub-jwt-', '') || demoUserId; 
 
 //     const body = await request.json();
 //     const newNote = {
 //       id: nanoid(),
-//         user_id: myId,  // 这里可以用 token 解析出来的 id
+//         user_id: myId, 
 //       ...body,
 //       is_read: false,
 //       created_at: Date.now(),
@@ -981,7 +978,7 @@ export const handlers = [
 //     return HttpResponse.json(newNote);
 //   }),
   
-//   // 标记通知为已读
+
 //   http.patch("/notifications/:id", ({ params }) => {
 //     notes = notes.map((n) =>
 //       n.id === params.id ? { ...n, is_read: true } : n
@@ -1048,20 +1045,19 @@ export const handlers = [
 //     return HttpResponse.json({ byCategory, daily });
 //   }),
   
-//     /* ===== 用户相关 ===== */
+
 //     http.get("/users", () => HttpResponse.json(users)),
 
 //     http.get("/users/me", () => 
 //       HttpResponse.json(users.find(u => u.id === demoUserId))
 //     ),
   
-//     /* ===== 协作相关 ===== */
-//     // 获取账本协作者列表
+
 //     http.get("/ledgers/:id/collaborators", ({ params }) => {
 //       const ledger = ledgers.find(l => l._id === params.id);
 //       if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
       
-//       // 合并协作者信息
+
 //       const collaborators = ledger.collaborators.map(c => {
 //         const user = users.find(u => u.id === c.userId);
 //         return {
@@ -1074,7 +1070,7 @@ export const handlers = [
 //       return HttpResponse.json(collaborators);
 //     }),
   
-//     // 添加协作者
+
 //     http.post("/ledgers/:id/collaborators", async ({ params, request }) => {
 //         const { email, permission = "EDITOR" } = await request.json();
 //         const ledger = ledgers.find(l => l._id === params.id);
@@ -1095,10 +1091,10 @@ export const handlers = [
 //         };
 //         ledger.collaborators.push(newCollaborator);
       
-//         // 直接创建一条新通知
+
 //         notes.unshift({
 //           id: nanoid(),
-//             user_id: user.id, // 对吗？
+//             user_id: user.id,
 //           type: 'collaboration',
 //           content: `You were added to ledger "${ledger.name}" as ${permission.toLowerCase()}`,
 //           is_read: false,
@@ -1109,12 +1105,12 @@ export const handlers = [
 //         return HttpResponse.json(newCollaborator);
 //       }),
   
-//     // 移除协作者
+
 //     http.delete("/ledgers/:id/collaborators/:userId", ({ params }) => {
 //       const ledger = ledgers.find(l => l._id === params.id);
 //       if (!ledger) return HttpResponse.error('Ledger not found', { status: 404 });
       
-//       // 不能移除所有者
+
 //       if (ledger.owner === params.userId) {
 //         return HttpResponse.error('Cannot remove owner', { status: 400 });
 //       }
@@ -1126,7 +1122,7 @@ export const handlers = [
 
 //       notes.unshift({
 //         id: nanoid(),
-//         user_id: params.userId, // 对吗？
+//         user_id: params.userId, 
 //         type: 'collaboration',
 //         content: `You were removed from ledger "${ledger.name}"`,
 //         is_read: false,
@@ -1137,7 +1133,7 @@ export const handlers = [
 //       return HttpResponse.json({ ok: true });
 //     }),
   
-//     // 更新协作者权限
+
 //     http.patch("/ledgers/:id/collaborators/:userId", async ({ params, request }) => {
 //       const { permission } = await request.json();
 //       const ledger = ledgers.find(l => l._id === params.id);
@@ -1150,8 +1146,7 @@ export const handlers = [
 //       return HttpResponse.json({ ok: true });
 //     }),
   
-//     // 获取用户权限
-// // 🛠️ handlers.js 追加
+
 // http.get('/ledgers/:id/permission', ({ params, request }) => {
 //   const token = new URL(request.url).searchParams.get('token') || '';
 //   const myId = token.replace('stub-jwt-', '') || demoUserId;
@@ -1191,7 +1186,7 @@ export const handlers = [
 //             })),
 //           }));
     
-//         // 👉这里加保险，不管怎样都返回数组
+
 //         return HttpResponse.json(Array.isArray(userLedgers) ? userLedgers : []);
 //       }),
 

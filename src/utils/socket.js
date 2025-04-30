@@ -1,5 +1,3 @@
-// 当前采用轮询，注释掉了 WebSocket 的模拟
-
 // import { io } from 'socket.io-client'
 // import { mockWebSocket } from '../mocks/browser'
 
@@ -21,14 +19,12 @@
 //     //     }
 //     //   }
 
-//           /* 1️⃣ 直接复用 mockWebSocket，让 on/emit 都可用 */
 //           this.socket = mockWebSocket
-//           /* 2️⃣ 把 socketService 内部事件触发到外部监听者 */
+
 //           mockWebSocket.on('connect', () => this.emit('connect'))
 //           mockWebSocket.on('disconnect', () => this.emit('disconnect'))
 //           mockWebSocket.on('notification', (d) => this.emit('notification', d))
-    
-//           /* 3️⃣ 主动触发一次 connect，让 UI 立刻变绿 */
+
 //           mockWebSocket.connect()
 //           this.emit('connect')
 //     return
@@ -58,7 +54,6 @@
 //       console.error('WebSocket error:', err)
 //     })
 //   }
-
 
 //   disconnect() {
 //       if (!this.socket) return
@@ -98,9 +93,9 @@
 
 //   sendTestMessage() {
 //     if (this.socket?.connected) {
-//       this.socket.emit('test', { 
+//       this.socket.emit('test', {
 //         message: 'This is a test message',
-//         time: new Date().toISOString() 
+//         time: new Date().toISOString()
 //       })
 //     } else {
 //       console.error('WebSocket not connected')

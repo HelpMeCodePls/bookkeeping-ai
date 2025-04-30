@@ -5,8 +5,15 @@ const getToken = () => localStorage.getItem("jwt") || "";
 
 /* ---------- Queries ---------- */
 // 1) GET /ledgers/:id/records
-export const fetchRecords = async ({ ledgerId, month, categories, split, collaborator, token }) => {
-    const { data } = await api.get(`/ledgers/${ledgerId}/records`, {
+export const fetchRecords = async ({
+  ledgerId,
+  month,
+  categories,
+  split,
+  collaborator,
+  token,
+}) => {
+  const { data } = await api.get(`/ledgers/${ledgerId}/records`, {
     params: {
       token: token || localStorage.getItem("jwt") || "",
       month: month || undefined,
@@ -15,8 +22,8 @@ export const fetchRecords = async ({ ledgerId, month, categories, split, collabo
       collaborator: collaborator || undefined,
     },
   });
-  console.log("ledgerId:", ledgerId);
-  console.log("[DEBUG] records length:", data.length);
+  // console.log("ledgerId:", ledgerId);
+  // console.log("[DEBUG] records length:", data.length);
   return data; // [{…}]
 };
 
@@ -31,9 +38,9 @@ export const fetchIncompleteRecords = async () => {
 export const createRecord = async (ledgerId, payload) => {
   const { data } = await api.post(`/ledgers/${ledgerId}/records`, {
     ...payload,
-    token: getToken(), // ⚠️ 后端目前仍从 body 取 token
+    token: getToken(), // backend will use this token to verify the user
   });
-  return data; // 全量 records
+  return data;
 };
 
 // 4) PUT /records/:id

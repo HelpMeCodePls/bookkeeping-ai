@@ -10,7 +10,6 @@
 }
 
 @layer components {
-  /* 按钮 */
   .btn-primary {
     @apply bg-brand text-white px-4 py-2 rounded-xl shadow-sm hover:bg-brand/90;
   }
@@ -19,7 +18,6 @@
            dark:border-brand/70 dark:text-brand/70 dark:hover:bg-brand/10;
   }
 
-  /* 📦 卡片 */
   .card {
     @apply bg-card dark:bg-gray-800 shadow-card rounded-xl p-5;
   }
@@ -31,7 +29,6 @@
            text-gray-900 dark:text-gray-50;
   }
 
-  /* 输入框 */
   .input {
     @apply border border-gray-300 rounded-xl px-3 py-2
            focus:outline-none focus:ring-1 focus:ring-brand
@@ -41,7 +38,6 @@
   }
 }
 
-/* 添加一些工具类 */
 .avatar-badge {
   display: inline-flex;
   align-items: center;
@@ -62,4 +58,3 @@
   font-size: 12px;
   gap: 4px;
 }
-

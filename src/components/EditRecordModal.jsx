@@ -1,10 +1,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 // import axios from "axios";
 import { fetchCollaborators } from "../handlers/collaboratorHandlers";
-import {
-    createRecord,
-    updateRecord,
-  } from "../handlers/recordHandlers";
+import { createRecord, updateRecord } from "../handlers/recordHandlers";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import CalculatorPopover from "../components/CalculatorPopover";
@@ -28,9 +25,9 @@ export default function EditRecordModal({
       ...(record ?? {}),
       split: record?.split || [],
       // date: record?.date || new Date().toISOString().split("T")[0],
-         date: record?.date
-           ? new Date(record.date).toISOString().slice(0, 10)  // ← yyyy-MM-dd
-           : new Date().toISOString().slice(0, 10),
+      date: record?.date
+        ? new Date(record.date).toISOString().slice(0, 10) // ← yyyy-MM-dd
+        : new Date().toISOString().slice(0, 10),
     },
   });
 
@@ -49,30 +46,25 @@ export default function EditRecordModal({
 
   const handleSave = async (data) => {
     try {
-      // 1. 自动处理 split ratio/amount
       if (data.split?.length > 0 && data.amount) {
-        // 确保 ratio 是数字且有效
         data.split = data.split.map((s) => ({
           ...s,
           ratio: Math.min(100, Math.max(0, Number(s.ratio || 0))),
         }));
 
-        // 计算每个 split 的金额 (直接按比例计算，不考虑总和)
         data.split = data.split.map((s) => ({
           user_id: s.userId,
           ratio: s.ratio,
-          amount: (data.amount * s.ratio) / 100, // 直接按比例计算
+          amount: (data.amount * s.ratio) / 100,
         }));
       }
 
-      // 2. 判断 status
       if (!data.amount || !data.date || !data.category) {
         data.status = "incomplete";
       } else {
         data.status = "confirmed";
       }
 
-      // 3. 设置创建者/更新者
       if (isNew) {
         data.createdBy = user?.id;
         data.updatedBy = user?.id;
@@ -80,12 +72,11 @@ export default function EditRecordModal({
         data.updatedBy = user?.id;
       }
 
-      // 4. 保存
       const payload = {
         ...data,
-        ledger_id: ledgerId, // 确保有 ledger_id
+        ledger_id: ledgerId,
         merchant: data.merchant || "unknown",
-        status:   data.status   || "incomplete",
+        status: data.status || "incomplete",
         split: data.split || [],
       };
 
@@ -101,7 +92,6 @@ export default function EditRecordModal({
         }
       }
 
-      // 5. 刷新
       qc.invalidateQueries(["records"]);
       // qc.invalidateQueries(["incomplete"]);
       qc.invalidateQueries(["incomplete", ledgerId]);
@@ -119,17 +109,19 @@ export default function EditRecordModal({
     setValue(`split.${index}.userId`, value);
     const ratio = watch(`split.${index}.ratio`);
     if (!ratio) {
-      setValue(`split.${index}.ratio`, 50); // 选人时，如果没设置过，默认 50%
+      setValue(`split.${index}.ratio`, 50);
     }
   };
 
   React.useEffect(() => {
     reset(record);
-      reset({
-          ...(record ?? {}),
-          split: record?.split?.length ? record.split : [],
-          date: record?.date ? new Date(record.date).toISOString().slice(0, 10) : ""
-        });
+    reset({
+      ...(record ?? {}),
+      split: record?.split?.length ? record.split : [],
+      date: record?.date
+        ? new Date(record.date).toISOString().slice(0, 10)
+        : "",
+    });
   }, [record, reset]);
 
   return (
@@ -152,7 +144,6 @@ export default function EditRecordModal({
             </h3>
 
             <form className="space-y-3" onSubmit={handleSubmit(handleSave)}>
-              {/* 金额 + 计算器 */}
               <div className="flex items-center gap-2">
                 <input
                   className="input flex-1"
@@ -162,27 +153,23 @@ export default function EditRecordModal({
                 <CalculatorPopover onConfirm={(v) => setValue("amount", v)} />
               </div>
 
-              {/* 日期 */}
               <input
                 className="input w-full"
                 type="date"
                 {...register("date")}
               />
 
-              {/* 分类 */}
               <CategoryPopover
                 value={watch("category")}
                 onChange={(v) => setValue("category", v)}
               />
 
-              {/* 描述 */}
               <input
                 className="input w-full"
                 placeholder="Description"
                 {...register("description")}
               />
 
-              {/* Split 分账 */}
               <div>
                 <label className="text-sm font-medium">Split</label>
                 <div className="space-y-2 mt-2">
@@ -232,7 +219,6 @@ export default function EditRecordModal({
                           </button>
                         </div>
 
-                        {/* Ratio 按钮 */}
                         {selectedUser && (
                           <div className="flex items-center gap-2">
                             <div className="flex-1 flex gap-1 flex-wrap">
@@ -280,7 +266,6 @@ export default function EditRecordModal({
                 </div>
               </div>
 
-              {/* 保存取消 */}
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" className="btn-ghost" onClick={onClose}>
                   Cancel

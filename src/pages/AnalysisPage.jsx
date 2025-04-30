@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 // import axios from "axios";
-import { api } from "../api/client"; 
+import { api } from "../api/client";
 import {
   PieChart,
   Pie,
@@ -43,15 +43,13 @@ export default function AnalysisPage() {
 
   const pageSize = 10;
 
-  // 获取 ledger 数据（包含 spent）
   const { data: ledger } = useQuery({
     queryKey: ["ledgers", ledgerId],
     // queryFn: () => axios.get(`/ledgers/${ledgerId}`).then((r) => r.data),
-    queryFn: () => api.get(`/ledgers/${ledgerId}`).then(r => r.data),
+    queryFn: () => api.get(`/ledgers/${ledgerId}`).then((r) => r.data),
     enabled: !!ledgerId,
   });
 
-  // 获取分析数据
   const {
     data = { byCategory: {}, daily: [], minDate: "", maxDate: "" },
     isLoading,
@@ -62,8 +60,9 @@ export default function AnalysisPage() {
     //     .get("/charts/summary", { params: { ledgerId, mode, selectedDate } })
     //     .then((r) => r.data),
     queryFn: () =>
-       api.get("/charts/summary", { params: { ledgerId, mode, selectedDate } })
-          .then(r => r.data),
+      api
+        .get("/charts/summary", { params: { ledgerId, mode, selectedDate } })
+        .then((r) => r.data),
     enabled: !!ledgerId,
   });
 
@@ -75,9 +74,9 @@ export default function AnalysisPage() {
   }, [mode, data.minDate, data.maxDate]);
 
   const pieData = useMemo(() => {
-      const byCat = data?.byCategory ?? {};
-      return Object.entries(byCat).map(([name, value]) => ({ name, value }))
-    }, [data]);
+    const byCat = data?.byCategory ?? {};
+    return Object.entries(byCat).map(([name, value]) => ({ name, value }));
+  }, [data]);
 
   const lineData = useMemo(() => {
     const dailyArr = Array.isArray(data?.daily) ? data.daily : [];
@@ -88,7 +87,6 @@ export default function AnalysisPage() {
 
   const top5 = [...pieData].sort((a, b) => b.value - a.value).slice(0, 5);
 
-  // 使用 ledger.spent 计算总支出
   // const totalSpending = useMemo(() => {
   //   if (!ledger?.spent) return 0;
   //   if (mode === "all") {
@@ -101,13 +99,12 @@ export default function AnalysisPage() {
   // }, [ledger?.spent, mode, selectedDate]);
 
   const totalSpending = useMemo(() => {
-      // 直接用刚拿到的 summary
-      if (mode === "all") {
-        return Object.values(data.byCategory).reduce((s, a) => s + a, 0);
-      }
-      // month / week / year 用 daily 数组最保险
-      return (data.daily ?? []).reduce((s, [ , v]) => s + Number(v || 0), 0);
-    }, [data, mode]);
+    if (mode === "all") {
+      return Object.values(data.byCategory).reduce((s, a) => s + a, 0);
+    }
+    // month / week / year
+    return (data.daily ?? []).reduce((s, [, v]) => s + Number(v || 0), 0);
+  }, [data, mode]);
 
   const avgDaily = lineData.length
     ? (totalSpending / lineData.length).toFixed(2)
@@ -185,14 +182,13 @@ export default function AnalysisPage() {
 
   return (
     <motion.div
-      className="p-6" // 根据页面需要调整
+      className="p-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 12 }} // 可选：如果有路由切换，可以加 exit
+      exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.25 }}
     >
       <div className="p-6 space-y-8">
-        {/* 顶部筛选区 */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Analysis</h2>
           <div className="flex gap-2">
@@ -230,7 +226,6 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        {/* 总览卡片 - 与 Dashboard 保持相同样式 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white shadow rounded-xl p-4 text-center">
             <h3 className="text-gray-500 text-sm">Total Spent</h3>
@@ -252,7 +247,6 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        {/* 折线图 */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-blue-600 font-semibold mb-4">Daily Trend</h3>
           {isLoading ? (
@@ -272,7 +266,6 @@ export default function AnalysisPage() {
           )}
         </div>
 
-        {/* 柱状图 */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-blue-600 font-semibold mb-4">
             Spending by Category
@@ -299,7 +292,6 @@ export default function AnalysisPage() {
           )}
         </div>
 
-        {/* 饼图 */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-blue-600 font-semibold mb-4">Spending Share</h3>
           {isLoading ? (
@@ -328,7 +320,6 @@ export default function AnalysisPage() {
           )}
         </div>
 
-        {/* Top 5 排行榜 */}
         {top5.length > 0 && (
           <div className="bg-white shadow p-4 rounded-lg">
             <h3 className="text-blue-600 font-semibold mb-4">

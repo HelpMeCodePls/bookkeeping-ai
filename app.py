@@ -17,7 +17,7 @@ def _serialize_record(rec: dict) -> dict:
     - _id ➜ id         （前端用 r.id）
     - datetime ➜ 'YYYY-MM-DD'
     """
-    rec = dict(rec)                # 把 Cursor 返回的 BSON 拷一份
+    rec = dict(rec)               
     rec["id"] = rec.pop("_id")
 
     d = rec.get("date")
@@ -29,8 +29,8 @@ def _serialize_record(rec: dict) -> dict:
 # ==== Flask initialization ====
 app = Flask(
     __name__,
-    static_folder="frontend_build/assets",        # 静态资源路径
-    static_url_path="/assets"                     # 改成 /assets 避免路径冲突
+    static_folder="frontend_build/assets",       
+    static_url_path="/assets"                    
 )
 CORS(app)
 

@@ -467,7 +467,7 @@ export let ledgers = [
       categoryDefaults: {},
       categoryBudgets: { "2025-04": { Food: 500, Transport: 300 } },
     },
-    spent: {}, //  用 calculateSpent() 动态生成
+    spent: {},
     collaborators: [
       {
         userId: "user3",
@@ -485,7 +485,7 @@ export let ledgers = [
   },
 ];
 
-// 后期接入数据库时，就不需要在这里动态计算了
+
 ledgers.forEach(ledger => {
     ledger.spent = calculateSpent(records, ledger._id);
   });

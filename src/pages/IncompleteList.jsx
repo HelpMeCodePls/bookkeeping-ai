@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 // import axios from "axios";
-import { api } from "../api/client"; 
+import { api } from "../api/client";
 import EditRecordModal from "../components/EditRecordModal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useLedger } from "../store/ledger";
@@ -17,16 +17,18 @@ export default function IncompleteList() {
   const { data: items = [] } = useQuery({
     queryKey: ["incomplete", currentId],
     // queryFn: () => axios.get("/records/incomplete").then((r) => r.data),
-      queryFn: () =>
-          api.get(`/ledgers/${currentId}/records`, {
-            params: { status: "incomplete" }   // ① 后端已经支持 status 过滤
-          }).then(r => r.data),
+    queryFn: () =>
+      api
+        .get(`/ledgers/${currentId}/records`, {
+          params: { status: "incomplete" },
+        })
+        .then((r) => r.data),
   });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
     // queryFn: () => axios.get("/categories").then((r) => r.data),
-    queryFn: () => api.get("/categories").then(r => r.data),
+    queryFn: () => api.get("/categories").then((r) => r.data),
   });
 
   const mark = async (data) => {
@@ -48,10 +50,10 @@ export default function IncompleteList() {
 
   return (
     <motion.div
-      className="p-6" // 根据页面需要调整
+      className="p-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 12 }} // 可选：如果有路由切换，可以加 exit
+      exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.25 }}
     >
       <div className="p-6">
@@ -74,10 +76,8 @@ export default function IncompleteList() {
                 key={r.id}
                 className="bg-white shadow rounded-xl p-4 flex items-center hover:bg-gray-50 transition-colors"
               >
-                {/* 左侧: 分类图标 */}
                 <div className="mr-3 text-2xl">{cat?.icon || "📁"}</div>
 
-                {/* 中间: 描述 + 分类 */}
                 <div className="flex-1">
                   <div className="font-medium">
                     {r.description || "(No Description)"}
@@ -87,9 +87,7 @@ export default function IncompleteList() {
                   </div>
                 </div>
 
-                {/* 右侧: 金额 + 状态 + 操作按钮 */}
                 <div className="flex items-center gap-4">
-                  {/* 金额和状态 */}
                   <div className="flex flex-col items-end mr-4 min-w-[100px]">
                     <div className="text-blue-600 font-bold text-lg">
                       ${Number(r.amount || 0).toFixed(2)}
@@ -99,7 +97,6 @@ export default function IncompleteList() {
                     </div>
                   </div>
 
-                  {/* 操作按钮 */}
                   <div className="flex gap-3">
                     <button
                       onClick={() => setTarget(r)}
@@ -148,7 +145,6 @@ export default function IncompleteList() {
           })}
         </div>
 
-        {/* 编辑弹窗 */}
         <EditRecordModal
           open={!!target}
           record={target}
@@ -156,7 +152,6 @@ export default function IncompleteList() {
           onSubmit={mark}
         />
 
-        {/* 删除确认弹窗 */}
         <ConfirmDialog
           open={!!deleteId}
           msg="Are you sure to delete this record?"

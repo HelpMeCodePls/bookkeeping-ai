@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLedger } from "../store/ledger";
 // import axios from "axios";
-import { api } from "../api/client"; 
+import { api } from "../api/client";
 import { fetchChartSummary } from "../services/chartService";
 import { fetchCategories } from "../services/categoryService";
 import { useState, useEffect } from "react";
@@ -16,20 +16,19 @@ export default function BudgetPage() {
   const [catEdits, setCatEdits] = useState({});
   const [showSaved, setShowSaved] = useState(false);
 
-  // 修改获取 ledger 的查询，确保包含 spent
   const { data: ledger } = useQuery({
     queryKey: ["ledgers", currentId],
     // queryFn: () =>
     //   axios.get(`/ledgers/${currentId}`).then((r) => ({
     //     ...r.data,
-    //     spent: r.data.spent || {}, // 确保 spent 总是对象
+    //     spent: r.data.spent || {},
     //   })),
     queryFn: () =>
       api.get(`/ledgers/${currentId}`).then((r) => ({
         ...r.data,
-        spent: r.data.spent || {}, // 确保 spent 总是对象
+        spent: r.data.spent || {},
       })),
-        
+
     enabled: !!currentId,
   });
 
@@ -39,7 +38,6 @@ export default function BudgetPage() {
     queryFn: fetchCategories,
   });
 
-  // 添加预算检查函数
   const checkBudget = async (month) => {
     try {
       // const { data: summary } = await axios.get("/charts/summary", {
@@ -49,13 +47,12 @@ export default function BudgetPage() {
       //     selectedDate: month,
       //   },
       // }
-          const summary = await fetchChartSummary({
-              ledgerId: currentId,
-              mode: "month",
-              selectedDate: month,
-            })
-            
-    
+      const summary = await fetchChartSummary({
+        ledgerId: currentId,
+        mode: "month",
+        selectedDate: month,
+      });
+
       const catBudgets = ledger.budgets?.categoryBudgets?.[month] || {};
       const defaultCatBudgets = ledger.budgets?.categoryDefaults || {};
 
@@ -86,15 +83,13 @@ export default function BudgetPage() {
   const save = useMutation({
     mutationFn: (payload) =>
       // axios.patch(`/ledgers/${currentId}/budgets`, payload),
-      api.patch(`/ledgers/${currentId}/budgets`, payload), 
+      api.patch(`/ledgers/${currentId}/budgets`, payload),
     onSuccess: (_, payload) => {
-      // 手动更新本地数据，避免重新获取
       queryClient.setQueryData(["ledgers", currentId], (oldData) => {
         if (!oldData) return oldData;
 
         const updatedData = { ...oldData };
 
-        // 更新月预算
         if (!payload.category) {
           updatedData.budgets = updatedData.budgets || {};
 
@@ -104,9 +99,7 @@ export default function BudgetPage() {
             updatedData.budgets.months = updatedData.budgets.months || {};
             updatedData.budgets.months[payload.month] = Number(payload.budget);
           }
-        }
-        // 更新分类预算
-        else {
+        } else {
           updatedData.budgets.categoryBudgets =
             updatedData.budgets.categoryBudgets || {};
           updatedData.budgets.categoryBudgets[payload.month] =
@@ -130,9 +123,8 @@ export default function BudgetPage() {
 
       setShowSaved(true);
       setTimeout(() => setShowSaved(false), 2000);
-      // 添加预算检查
+
       if (!payload.category) {
-        // 只在月预算变更时检查
         checkBudget(payload.month || selectedMonth);
       }
     },
@@ -191,10 +183,10 @@ export default function BudgetPage() {
 
   return (
     <motion.div
-      className="p-6" // 根据页面需要调整
+      className="p-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 12 }} // 可选：如果有路由切换，可以加 exit
+      exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.25 }}
     >
       <div className="p-6 space-y-8">
@@ -213,12 +205,10 @@ export default function BudgetPage() {
           </select>
         </div>
 
-        {/* 保存成功提示 */}
         {showSaved && (
           <div className="text-green-600 font-semibold">Saved!</div>
         )}
 
-        {/* 总结卡片 */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="p-4 rounded shadow bg-white text-center">
             <div className="text-gray-500 text-sm mb-1">Month Budget</div>
@@ -236,7 +226,6 @@ export default function BudgetPage() {
           </div>
         </div>
 
-        {/* 月预算编辑 */}
         <div className="bg-white p-6 rounded shadow mb-8">
           <h3 className="text-blue-600 font-semibold mb-4">Monthly Budget</h3>
           <div className="flex items-center gap-2">
@@ -259,7 +248,6 @@ export default function BudgetPage() {
           </div>
         </div>
 
-        {/* 分类预算编辑 */}
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-blue-600 font-semibold mb-4">Category Budgets</h3>
           <div className="grid grid-cols-2 gap-4">

@@ -6,7 +6,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { markNotificationRead } from "../handlers/notificationHandlers";
 
-
 dayjs.extend(relativeTime);
 
 export default function NotificationItem({ notification }) {
@@ -21,40 +20,33 @@ export default function NotificationItem({ notification }) {
 
   const markAsRead = useMutation({
     mutationFn: () => markNotificationRead(notification.id),
-  
-    // ① 乐观更新
+
     onMutate: async () => {
       await queryClient.cancelQueries(["notifications"]);
       const prev = queryClient.getQueryData(["notifications"]);
-  
-      // 把点击这条标为已读
+
       queryClient.setQueryData(["notifications"], (old = []) =>
-        old.map((n) =>
-          n.id === notification.id ? { ...n, is_read: true } : n
-        )
+        old.map((n) => (n.id === notification.id ? { ...n, is_read: true } : n))
       );
-      // 同时把未读数 -1
+
       queryClient.setQueryData(["notifications", "unread"], (c = 0) =>
         Math.max(0, c - 1)
       );
-  
-      // 返回旧数据以便出错时回滚
+
       return { prev };
     },
-  
-    // ② 请求失败时回滚
+
     onError: (_err, _vars, ctx) => {
       if (ctx?.prev) queryClient.setQueryData(["notifications"], ctx.prev);
       queryClient.invalidateQueries(["notifications", "unread"]);
     },
-  
-    // ③ 请求成功后确保服务端状态同步
+
     onSettled: () => {
       queryClient.invalidateQueries(["notifications"]);
       queryClient.invalidateQueries(["notifications", "unread"]);
     },
   });
-  
+
   const handleMarkAsRead = useCallback(() => {
     if (!notification.is_read) {
       markAsRead.mutate();

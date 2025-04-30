@@ -13,14 +13,8 @@ export default function ChatbotWidget() {
   const [open, setOpen] = useState(false);
   const userId = useAuthStore((s) => s.userId);
 
-  const {
-    msg,
-    setMsg,
-    history,
-    isLoading,
-    setLoading,
-    addMessage,
-  } = useChatStore();
+  const { msg, setMsg, history, isLoading, setLoading, addMessage } =
+    useChatStore();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -39,7 +33,10 @@ export default function ChatbotWidget() {
       const aiReply = await sendMessageToAI(text, userId);
       addMessage({ role: "bot", content: aiReply });
     } catch {
-      addMessage({ role: "bot", content: "Sorry, I encountered an error. Please try again later." });
+      addMessage({
+        role: "bot",
+        content: "Sorry, I encountered an error. Please try again later.",
+      });
     } finally {
       setLoading(false);
     }
@@ -55,25 +52,24 @@ export default function ChatbotWidget() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // 添加文件类型验证
-    if (!file.type.match('image.*')) {
-      addMessage({ 
-        role: 'bot', 
-        content: '❌ Please upload an image file (JPEG, PNG, etc.)' 
+    if (!file.type.match("image.*")) {
+      addMessage({
+        role: "bot",
+        content: "❌ Please upload an image file (JPEG, PNG, etc.)",
       });
       return;
     }
-    
+
     const reader = new FileReader();
     reader.onload = async () => {
-      const base64Image = reader.result.split(',')[1];
-      addMessage({ role: 'user', content: '[Uploaded a receipt for OCR]' });
+      const base64Image = reader.result.split(",")[1];
+      addMessage({ role: "user", content: "[Uploaded a receipt for OCR]" });
       setLoading(true);
       try {
         const result = await sendImageToOCR(base64Image);
-        addMessage({ role: 'bot', content: `🧾 OCR Result:\n${result}` });
+        addMessage({ role: "bot", content: `🧾 OCR Result:\n${result}` });
       } catch {
-        addMessage({ role: 'bot', content: 'OCR failed. Please try again.' });
+        addMessage({ role: "bot", content: "OCR failed. Please try again." });
       } finally {
         setLoading(false);
       }
@@ -94,13 +90,12 @@ export default function ChatbotWidget() {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="
               fixed bottom-20 right-4
-              w-[400px] h-[650px]                  /* 增加高度以适配更大的按钮 */
+              w-[400px] h-[650px]               
               bg-[#E0E7FF]/30 backdrop-blur-lg
               rounded-2xl shadow-xl
               flex flex-col overflow-hidden
             "
           >
-            {/* 内层内容容器 */}
             <div className="relative flex-1 flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-2 bg-[#F8FAFC]/90 text-[#1E293B] font-semibold">
@@ -132,7 +127,9 @@ export default function ChatbotWidget() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.2 }}
-                      className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                      className={`flex ${
+                        m.role === "user" ? "justify-end" : "justify-start"
+                      }`}
                     >
                       <div
                         className={`
@@ -150,7 +147,11 @@ export default function ChatbotWidget() {
                   ))}
                 </AnimatePresence>
                 {isLoading && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-gray-200 italic">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs text-gray-200 italic"
+                  >
                     Spendora Assistant is thinking...
                   </motion.div>
                 )}
@@ -181,7 +182,10 @@ export default function ChatbotWidget() {
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full w-0 h-0 border-l-4 border-r-4 border-b-0 border-t-4 border-solid border-l-transparent border-r-transparent border-t-gray-800" />
                   </div>
                 </div> */}
-                <button className="text-gray-500 hover:text-blue-500" onClick={() => alert("Voice not implemented")}>
+                <button
+                  className="text-gray-500 hover:text-blue-500"
+                  onClick={() => alert("Voice not implemented")}
+                >
                   <Mic size={18} />
                 </button>
                 <button
@@ -224,7 +228,13 @@ export default function ChatbotWidget() {
             onClick={() => setOpen(true)}
             className="fixed bottom-6 right-6 p-0 bg-transparent rounded-full shadow-lg"
           >
-            <video src="/animations/chatbot.webm" autoPlay muted loop className="h-20 w-20" />
+            <video
+              src="/animations/chatbot.webm"
+              autoPlay
+              muted
+              loop
+              className="h-20 w-20"
+            />
           </motion.button>
         )}
       </AnimatePresence>

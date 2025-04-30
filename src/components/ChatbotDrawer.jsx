@@ -10,7 +10,6 @@ export default function ChatbotDrawer() {
 
   const send = async () => {
     if (!msg.trim()) return;
-    // 追加用户消息
     setHistory((h) => [...h, { role: "user", content: msg }]);
     setMsg("");
     try {
@@ -23,7 +22,6 @@ export default function ChatbotDrawer() {
 
   return (
     <>
-      {/* 悬浮按钮 */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
@@ -33,7 +31,6 @@ export default function ChatbotDrawer() {
         </button>
       )}
 
-      {/* 抽屉 */}
       <AnimatePresence>
         {open && (
           <motion.aside
@@ -43,7 +40,6 @@ export default function ChatbotDrawer() {
             transition={{ type: "tween", duration: 0.25 }}
             className="fixed top-0 right-0 w-80 max-w-full h-full bg-card dark:bg-gray-800 border-l flex flex-col z-50"
           >
-            {/* Header */}
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="font-semibold">AI Assistant</h3>
               <button onClick={() => setOpen(false)}>
@@ -51,7 +47,6 @@ export default function ChatbotDrawer() {
               </button>
             </div>
 
-            {/* 消息历史 */}
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
               {history.map((m, i) => (
                 <div
@@ -67,7 +62,6 @@ export default function ChatbotDrawer() {
               ))}
             </div>
 
-            {/* 输入框 */}
             <div className="p-3 border-t flex gap-2">
               <input
                 className="flex-1 border border-gray-300 dark:border-gray-600 rounded-xl px-3 py-2

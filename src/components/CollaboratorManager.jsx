@@ -2,11 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { api } from "../api/client";
 import {
-    fetchCollaborators,
-    addCollaborator as apiAdd,
-    updateCollaboratorPermission as apiUpdatePerm,
-    deleteCollaborator as apiDelete,
-  } from "../handlers/collaboratorHandlers";
+  fetchCollaborators,
+  addCollaborator as apiAdd,
+  updateCollaboratorPermission as apiUpdatePerm,
+  deleteCollaborator as apiDelete,
+} from "../handlers/collaboratorHandlers";
 import { fetchUsers } from "../services/userService";
 import { useState } from "react";
 import ConfirmDialog from "./ConfirmDialog";
@@ -23,7 +23,6 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
   const [added, setAdded] = useState(false);
   const [error, setError] = useState("");
 
-  // 获取协作者列表
   const { data: collaborators = [] } = useQuery({
     // queryKey: ["collaborators", ledgerId, token],
     // queryFn: () =>
@@ -35,7 +34,6 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
     enabled: open && !!token,
   });
 
-  // 获取用户基本信息
   const { data: users = [] } = useQuery({
     queryKey: ["users", token],
     // queryFn: () =>
@@ -44,63 +42,59 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
     enabled: open && !!token,
   });
 
-  // 添加协作者
   const addCollaborator = useMutation({
     // mutationFn: (payload) =>
     //   axios.post(`/ledgers/${ledgerId}/collaborators`, payload, {
     //     params: { token },
     //   }),
-      // mutationFn: ({ email, permission }) => {
-      //     const u = users.find((x) => x.email === email);
-      //     if (!u) throw new Error("User not found");
-      //     return apiAdd(ledgerId, {
-      //       userId: u.id,          
-      //       email,
-      //       permission,
-      //     });
-      //    },
-      // onSuccess: async (_, variables) => {
-      // variables 就是 { email, permission }
-      // await axios.post(
-      //   "/notifications",
-      //   {
-      //     type: "collaboration",
-      //     content: `You added ${
-      //       variables.email
-      //     } as ${variables.permission.toLowerCase()}`,
-      //     ledgerId,
-      //     metadata: { permission: variables.permission },
-      //   },
-      //   { params: { token } }
-      // );
-      mutationFn: async ({ email, permission }) => {
-        const u = users.find((x) => x.email === email);
-        if (!u) throw new Error("User not found");
-   
-        // ① 调用后端新增协作者
-        await apiAdd(ledgerId, {
-          userId: u.id,
-          email,
-          permission,
-        });
-          // ② 发送通知 —— 用统一的 api 实例
-        await api.post("/notifications", {
-          user_id : u.id,                     // 后端需要的字段
-          ledger_id : ledgerId,
-          record_id : "",
-          is_read   : false,
-          message   : `You added ${email} as ${permission.toLowerCase()}`
-        });
+    // mutationFn: ({ email, permission }) => {
+    //     const u = users.find((x) => x.email === email);
+    //     if (!u) throw new Error("User not found");
+    //     return apiAdd(ledgerId, {
+    //       userId: u.id,
+    //       email,
+    //       permission,
+    //     });
+    //    },
+    // onSuccess: async (_, variables) => {
+    // variables  { email, permission }
+    // await axios.post(
+    //   "/notifications",
+    //   {
+    //     type: "collaboration",
+    //     content: `You added ${
+    //       variables.email
+    //     } as ${variables.permission.toLowerCase()}`,
+    //     ledgerId,
+    //     metadata: { permission: variables.permission },
+    //   },
+    //   { params: { token } }
+    // );
+    mutationFn: async ({ email, permission }) => {
+      const u = users.find((x) => x.email === email);
+      if (!u) throw new Error("User not found");
 
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries(["collaborators", ledgerId]);
-        queryClient.invalidateQueries(["notifications"]);
-        setEmail("");
-      },
-    });
+      await apiAdd(ledgerId, {
+        userId: u.id,
+        email,
+        permission,
+      });
 
-  // 移除协作者
+      await api.post("/notifications", {
+        user_id: u.id,
+        ledger_id: ledgerId,
+        record_id: "",
+        is_read: false,
+        message: `You added ${email} as ${permission.toLowerCase()}`,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["collaborators", ledgerId]);
+      queryClient.invalidateQueries(["notifications"]);
+      setEmail("");
+    },
+  });
+
   const removeCollaborator = useMutation({
     // mutationFn: (userId) =>
     //   axios.delete(`/ledgers/${ledgerId}/collaborators/${userId}`, {
@@ -113,7 +107,6 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
     },
   });
 
-  // 更新权限
   const updatePermission = useMutation({
     // mutationFn: ({ userId, permission }) =>
     //   axios.patch(
@@ -121,8 +114,8 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
     //     { permission },
     //     { params: { token } }
     //   ),
-        mutationFn: ({ userId, permission }) =>
-            apiUpdatePerm(ledgerId, userId, permission),
+    mutationFn: ({ userId, permission }) =>
+      apiUpdatePerm(ledgerId, userId, permission),
     onSuccess: () =>
       queryClient.invalidateQueries(["collaborators", ledgerId, token]),
   });
@@ -136,7 +129,7 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
       await addCollaborator.mutateAsync({ email, permission });
       setAdded(true);
       setEmail("");
-      setTimeout(() => setAdded(false), 1500); // 1.5秒后消失
+      setTimeout(() => setAdded(false), 1500);
     } catch (err) {
       console.error(err);
       setError("Failed to add collaborator.");
@@ -152,7 +145,6 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <h3 className="font-bold text-lg mb-4">Manage Collaborators</h3>
 
-        {/* 添加协作者表单 */}
         <form onSubmit={handleSubmit} className="flex gap-2 mb-6">
           <input
             type="email"
@@ -181,7 +173,6 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
           </button>
         </form>
 
-        {/* 协作者列表 */}
         <div className="space-y-3 max-h-64 overflow-y-auto">
           {collaborators.map((collab) => {
             const user = users.find((u) => u.id === collab.userId);
@@ -231,7 +222,6 @@ export default function CollaboratorManager({ ledgerId, open, onClose }) {
         </div>
       </div>
 
-      {/* 删除确认弹窗 */}
       <ConfirmDialog
         open={!!userToRemove}
         msg="Are you sure to remove this collaborator?"

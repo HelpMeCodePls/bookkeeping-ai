@@ -1,8 +1,3 @@
-/**
- * 这里是一些常用的工具函数 
- */
-
-
 export function calculateSpent(records, ledgerId) {
     const monthlySpent = {};
     records

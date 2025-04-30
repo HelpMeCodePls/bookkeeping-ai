@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 // import axios from "axios";
 import {
-    fetchLedgers,
-    fetchLedgerPermission,
-    createLedger,
+  fetchLedgers,
+  fetchLedgerPermission,
+  createLedger,
 } from "../handlers/ledgerHandlers";
 import { useState } from "react";
 import { useLedger } from "../store/ledger";
@@ -15,22 +15,21 @@ export default function LedgerManager() {
   const [openCM, setOpenCM] = useState(false);
 
   const { currentId, setId } = useLedger();
-  const selectLedger = useLedger(s => s.select); 
+  const selectLedger = useLedger((s) => s.select);
   const [name, setName] = useState("");
   const [showCollaboratorManager, setShowCollaboratorManager] = useState(null);
   const qc = useQueryClient();
   const token = useAuthStore((s) => s.token);
   const { data: ledgers = [] } = useQuery({
-    queryKey: ["ledgers", token], // queryKey也带token，不然不会刷新
+    queryKey: ["ledgers", token],
     // queryFn: () =>
     //   axios.get("/ledgers", { params: { token } }).then((r) => r.data ?? []),
     queryFn: fetchLedgers,
-    enabled: !!token, //  只有有token时才请求
+    enabled: !!token,
   });
 
-  // 获取用户权限
   const { data: permission } = useQuery({
-    queryKey: ["permission", currentId, token], //  queryKey也加token，防止token变化时数据不更新
+    queryKey: ["permission", currentId, token],
     // queryFn: () =>
     //   currentId && token
     //     ? axios
@@ -38,9 +37,9 @@ export default function LedgerManager() {
     //         .then((r) => r.data)
     //     : Promise.resolve({}),
     queryFn: () =>
-          currentId && currentId !== "demoLedger"
-            ? fetchLedgerPermission(currentId)
-            : Promise.resolve({}),
+      currentId && currentId !== "demoLedger"
+        ? fetchLedgerPermission(currentId)
+        : Promise.resolve({}),
     enabled: !!currentId && !!token,
     retry: 1,
   });
@@ -59,16 +58,15 @@ export default function LedgerManager() {
 
   return (
     <motion.div
-      className="p-6" // 根据页面需要调整
+      className="p-6"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 12 }} // 可选：如果有路由切换，可以加 exit
+      exit={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.25 }}
     >
       <div className="p-6 space-y-8">
         <h2 className="text-2xl font-bold mb-6">Ledger Manager</h2>
 
-        {/* Ledger 列表 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {ledgers.map((l) => (
             <div
@@ -78,7 +76,6 @@ export default function LedgerManager() {
               }`}
               // onClick={() => setId(l._id)}
               onClick={() => selectLedger(l)}
-              
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -103,7 +100,6 @@ export default function LedgerManager() {
           ))}
         </div>
 
-        {/* 新增账本 */}
         <div className="bg-white shadow rounded-lg p-4 mt-8">
           <h3 className="text-green-600 font-semibold mb-4">
             Create New Ledger
@@ -124,7 +120,6 @@ export default function LedgerManager() {
           </div>
         </div>
 
-        {/* 协作者管理弹窗 */}
         {showCollaboratorManager && (
           <CollaboratorManager
             ledgerId={showCollaboratorManager}
