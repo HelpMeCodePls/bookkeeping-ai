@@ -164,19 +164,27 @@ Configure the .env file under backend folder and replace the credentials
 ## 📂 Project Structure
 
 ```
-├── frontend/                  # React application
+├── public/   
+├── src/                  # React application
 │   ├── components/            # UI Components
 │   ├── pages/                 # Views and routes
+│   ├── layouts/                 
 │   ├── services/              # API service functions
+│   ├── api/                   # API service functions
+│   ├── handlers/              # API service functions
+│   ├── hooks/
+│   ├── store/
+│   ├── utuils/              
 │   └── assets/                # Icons, logos, etc.
 │
+├── frontend_build/
+│
 ├── backend/                   # Flask backend
-│   ├── app.py                 # Flask app with API routes
 │   ├── functions.py           # Business logic and database services
 │   ├── Agents/                # AI agents powered by Semantic Kernel
 │   └── datatypes.py           # Enums and Pydantic models
 │   └── .env                   # Environment configuration
-│
+├── app.py                     # Flask app with API routes
 ├── .env                       # Environment configuration
 ├── requirements.txt           # Backend dependencies
 └── README.md                  # Project documentation
