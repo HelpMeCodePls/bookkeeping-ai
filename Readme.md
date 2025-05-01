@@ -126,7 +126,7 @@ With AI-assistance and a shared dashboard, Spendora helps keep everyone on the s
 
 ```bash
 git clone https://github.com/HelpMeCodePls/bookkeeping-ai.git
-cd spendora
+cd bookkeeping-ai
 ```
 
 ### 2. Set Up the Frontend
