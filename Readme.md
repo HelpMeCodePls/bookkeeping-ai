@@ -140,24 +140,9 @@ Rename the .env.example file to .env, so the front end connects to the local bac
 
 Also Rename the API_BASE variable under src\api\aiHandler.js to your local host port
 
-### 3. Set Up the Backend
+### 3. The Backend
 
-```bash
-pip install -r requirements.txt
-python app.py
-# Runs at http://localhost:5000
-```
-
-Configure the .env file under backend folder and replace the credentials
-
-> 💡 Make sure your MongoDB URI is configured in a `.env` file in the backend folder as `MONGO_URI`.  
-> 💡 You will also need to include the following keys in your `.env` file in the backend folder to enable full backend functionality:
-> 
-> - `AZURE_OPENAI_API_KEY` – Azure OpenAI API key for Semantic Kernel agents  
-> - `AZURE_OPENAI_CHAT_DEPLOYMENT_NAME` – Deployment name for your Azure chat model  
-> - `AZURE_OPENAI_ENDPOINT` – Endpoint URL for your Azure OpenAI service  
-> - `SPEECH_KEY` – Azure Speech-to-Text API key  
-> - `SERVICE_REGION` – Azure region for the speech service
+The .env file is configured to be directed to cloud backend deployed on Render server. After webpage is running, it will be connected to the cloud server.
 
 ---
 
